@@ -66,8 +66,7 @@ export default function EventsMap({ events }: EventsMapProps) {
         // Import wird nicht direkt verwendet, da wir die Karte manuell erstellen
         await import('react-leaflet');
 
-        // Leaflet CSS importieren
-        await import('leaflet/dist/leaflet.css');
+        // Leaflet CSS wird über CDN geladen, kein Import nötig
 
         // Marker-Icons korrigieren
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
