@@ -33,6 +33,7 @@ export default function EventsPage() {
   const [eventType, setEventType] = useState('');
   const [location, setLocation] = useState('');
   const [showMap, setShowMap] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -55,8 +56,33 @@ export default function EventsPage() {
     fetchEvents();
   }, [fetchEvents]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
+
   const handleSearch = () => {
     fetchEvents();
+  };
+
+  const handleSearchInputChange = (value: string) => {
+    setSearchTerm(value);
+    
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    
+    // Set new timeout for debounced search
+    const timeout = setTimeout(() => {
+      fetchEvents();
+    }, 500); // 500ms delay
+    
+    setSearchTimeout(timeout);
   };
 
   const formatDate = (dateString: string) => {
@@ -104,46 +130,57 @@ export default function EventsPage() {
 
         {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="space-y-4">
+            {/* Hauptsuchfeld */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
-                placeholder="Suche nach Events..."
+                placeholder="Suche nach allem: Name, Beschreibung, Ort, ICAO, Organisator, E-Mail..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                onChange={(e) => handleSearchInputChange(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white text-lg"
               />
             </div>
 
-            <select
-              value={eventType}
-              onChange={(e) => setEventType(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
-            >
-              <option value="">Alle Event-Typen</option>
-              <option value="Flugtag">Flugtag</option>
-              <option value="Luftfahrt-Event">Luftfahrt-Event</option>
-              <option value="Workshop">Workshop</option>
-              <option value="Vereinsveranstaltung">Vereinsveranstaltung</option>
-              <option value="Sonstiges">Sonstiges</option>
-            </select>
+            {/* Filter */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <select
+                value={eventType}
+                onChange={(e) => setEventType(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+              >
+                <option value="">Alle Event-Typen</option>
+                <option value="Flugtag">Flugtag</option>
+                <option value="Luftfahrt-Event">Luftfahrt-Event</option>
+                <option value="Workshop">Workshop</option>
+                <option value="Vereinsveranstaltung">Vereinsveranstaltung</option>
+                <option value="Sonstiges">Sonstiges</option>
+              </select>
 
-            <input
-              type="text"
-              placeholder="Ort..."
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
-            />
+              <input
+                type="text"
+                placeholder="Spezifischer Ort..."
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+              />
 
-            <button
-              onClick={handleSearch}
-              className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Filter className="h-5 w-5" />
-              <span>Filtern</span>
-            </button>
+              <button
+                onClick={handleSearch}
+                className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Search className="h-5 w-5" />
+                <span>Suchen</span>
+              </button>
+            </div>
+
+            {/* Suchhilfe */}
+            <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+              <strong>Suchtipps:</strong> Sie können nach Namen, Beschreibungen, Orten, ICAO-Codes, Organisatoren, E-Mail-Adressen, Telefonnummern, Websites und Tags suchen.
+            </div>
           </div>
         </div>
 

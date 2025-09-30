@@ -32,7 +32,14 @@ export async function GET(request: NextRequest) {
         { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
         { location: { $regex: search, $options: 'i' } },
-        { icao: { $regex: search, $options: 'i' } }
+        { address: { $regex: search, $options: 'i' } },
+        { icao: { $regex: search, $options: 'i' } },
+        { eventType: { $regex: search, $options: 'i' } },
+        { organizer: { $regex: search, $options: 'i' } },
+        { contactEmail: { $regex: search, $options: 'i' } },
+        { contactPhone: { $regex: search, $options: 'i' } },
+        { website: { $regex: search, $options: 'i' } },
+        { tags: { $regex: search, $options: 'i' } }
       ];
     }
 
