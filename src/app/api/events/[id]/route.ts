@@ -78,7 +78,7 @@ export async function PUT(
       );
     }
 
-    if (event.createdBy.toString() !== user.userId && user.role !== 'admin') {
+    if (event.createdBy && event.createdBy.toString() !== user.userId && user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Keine Berechtigung zum Bearbeiten dieses Events' },
         { status: 403 }
@@ -129,7 +129,7 @@ export async function DELETE(
       );
     }
 
-    if (event.createdBy.toString() !== user.userId && user.role !== 'admin') {
+    if (event.createdBy && event.createdBy.toString() !== user.userId && user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Keine Berechtigung zum Löschen dieses Events' },
         { status: 403 }
