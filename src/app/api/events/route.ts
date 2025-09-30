@@ -10,19 +10,30 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const limit = parseInt(searchParams.get('limit') || '50');
     const eventType = searchParams.get('eventType');
     const location = searchParams.get('location');
+    const search = searchParams.get('search');
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: Record<string, any> = {};
 
-    if (eventType) {
+    if (eventType && eventType !== '') {
       query.eventType = eventType;
     }
 
-    if (location) {
+    if (location && location !== '') {
       query.location = { $regex: location, $options: 'i' };
+    }
+
+    if (search && search !== '') {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { location: { $regex: search, $options: 'i' } },
+        { icao: { $regex: search, $options: 'i' } }
+      ];
     }
 
     // Direkt mit der MongoDB Collection arbeiten

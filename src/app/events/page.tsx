@@ -39,6 +39,7 @@ export default function EventsPage() {
       const params = new URLSearchParams();
       if (eventType) params.append('eventType', eventType);
       if (location) params.append('location', location);
+      if (searchTerm) params.append('search', searchTerm);
       
       const response = await fetch(`/api/events?${params}`);
       const data = await response.json();
@@ -48,7 +49,7 @@ export default function EventsPage() {
     } finally {
       setLoading(false);
     }
-  }, [eventType, location]);
+  }, [eventType, location, searchTerm]);
 
   useEffect(() => {
     fetchEvents();
@@ -57,14 +58,6 @@ export default function EventsPage() {
   const handleSearch = () => {
     fetchEvents();
   };
-
-  const filteredEvents = events.filter(event =>
-    event._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (event.name && event.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (event.title && event.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (event.location && event.location.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
 
   const formatDate = (dateString: string) => {
     try {
@@ -155,7 +148,7 @@ export default function EventsPage() {
         </div>
 
         {/* Events Display */}
-        {filteredEvents.length === 0 ? (
+        {events.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Keine Events gefunden</h3>
@@ -165,12 +158,12 @@ export default function EventsPage() {
           /* Karten-Ansicht */
           <div className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Events auf der Karte</h2>
-            <EventsMap events={filteredEvents} />
+            <EventsMap events={events} />
           </div>
         ) : (
           /* Listen-Ansicht */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((event) => (
+            {events.map((event) => (
               <div key={event._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 {event.imageurl && (
                   <div className="h-48 w-full overflow-hidden">

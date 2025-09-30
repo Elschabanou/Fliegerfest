@@ -146,4 +146,9 @@ EventSchema.pre('save', function(next) {
   next();
 });
 
-export default mongoose.models.Event || mongoose.model<IEvent>('Event', EventSchema, 'events');
+// Lösche das alte Model aus dem Cache
+if (mongoose.models.Event) {
+  delete mongoose.models.Event;
+}
+
+export default mongoose.model<IEvent>('Event', EventSchema, 'events');

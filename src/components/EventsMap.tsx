@@ -1,29 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
 import { MapPin } from 'lucide-react';
-
-// Dynamisch importieren um SSR-Probleme zu vermeiden
-const MapContainer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.MapContainer),
-  { ssr: false }
-);
-
-const TileLayer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-
-const Marker = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Marker),
-  { ssr: false }
-);
-
-const Popup = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Popup),
-  { ssr: false }
-);
 
 interface Event {
   _id: string;
@@ -51,6 +29,7 @@ interface EventsMapProps {
 
 export default function EventsMap({ events }: EventsMapProps) {
   const [isClient, setIsClient] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -76,12 +55,88 @@ export default function EventsMap({ events }: EventsMapProps) {
     }
   };
 
+  // Dynamischer Import der Leaflet-Komponenten
+  useEffect(() => {
+    if (!isClient) return;
+
+    const loadMap = async () => {
+      try {
+        // Dynamisch Leaflet und React-Leaflet importieren
+        const L = await import('leaflet');
+        const { MapContainer, TileLayer, Marker, Popup } = await import('react-leaflet');
+
+        // Leaflet CSS importieren
+        await import('leaflet/dist/leaflet.css');
+
+        // Marker-Icons korrigieren
+        delete (L.Icon.Default.prototype as any)._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        });
+
+        // Karte rendern
+        const mapContainer = document.getElementById('map-container');
+        if (mapContainer && eventsWithCoords.length > 0) {
+          const centerLat = eventsWithCoords.reduce((sum, event) => sum + parseFloat(event.lat!), 0) / eventsWithCoords.length;
+          const centerLon = eventsWithCoords.reduce((sum, event) => sum + parseFloat(event.lon!), 0) / eventsWithCoords.length;
+
+          const map = L.map('map-container').setView([centerLat, centerLon], 8);
+
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }).addTo(map);
+
+          // Marker hinzufügen
+          eventsWithCoords.forEach((event) => {
+            const lat = parseFloat(event.lat!);
+            const lon = parseFloat(event.lon!);
+            
+            const marker = L.marker([lat, lon]).addTo(map);
+            
+            const popupContent = `
+              <div style="padding: 10px; max-width: 300px;">
+                <h3 style="margin: 0 0 8px 0; font-weight: bold; color: #333;">
+                  ${event.title || event.name || event._id}
+                </h3>
+                ${event.description ? `<p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">${event.description}</p>` : ''}
+                ${event.date ? `<p style="margin: 0 0 4px 0; color: #333; font-size: 13px;">📅 ${formatDate(event.date)}</p>` : ''}
+                ${event.icao ? `<p style="margin: 0 0 4px 0; color: #333; font-size: 13px;">🛩️ ICAO: ${event.icao}</p>` : ''}
+                ${event.eventType ? `<span style="display: inline-block; background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-top: 8px;">${event.eventType}</span>` : ''}
+                ${event.imageurl ? `<img src="${event.imageurl}" alt="${event.title || event.name}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 4px; margin-top: 8px;" onerror="this.style.display='none'">` : ''}
+              </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+          });
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden der Karte:', error);
+        setMapError('Fehler beim Laden der Karte');
+      }
+    };
+
+    loadMap();
+  }, [isClient, eventsWithCoords]);
+
   if (!isClient) {
     return (
       <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
         <div className="text-center">
           <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600">Karte wird geladen...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (mapError) {
+    return (
+      <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+        <div className="text-center">
+          <MapPin className="h-12 w-12 text-red-400 mx-auto mb-4" />
+          <p className="text-red-600">{mapError}</p>
         </div>
       </div>
     );
@@ -101,76 +156,9 @@ export default function EventsMap({ events }: EventsMapProps) {
     );
   }
 
-  // Berechne den Mittelpunkt der Karte
-  const centerLat = eventsWithCoords.reduce((sum, event) => sum + parseFloat(event.lat!), 0) / eventsWithCoords.length;
-  const centerLon = eventsWithCoords.reduce((sum, event) => sum + parseFloat(event.lon!), 0) / eventsWithCoords.length;
-
   return (
     <div className="h-96 w-full rounded-lg overflow-hidden border border-gray-200">
-      <MapContainer
-        center={[centerLat, centerLon]}
-        zoom={8}
-        style={{ height: '100%', width: '100%' }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        
-        {eventsWithCoords.map((event) => {
-          const lat = parseFloat(event.lat!);
-          const lon = parseFloat(event.lon!);
-          
-          return (
-            <Marker key={event._id} position={[lat, lon]}>
-              <Popup>
-                <div className="p-2">
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    {event.title || event.name || event._id}
-                  </h3>
-                  
-                  {event.description && (
-                    <p className="text-gray-600 text-sm mb-2">
-                      {event.description}
-                    </p>
-                  )}
-                  
-                  {event.date && (
-                    <p className="text-gray-700 text-sm mb-1">
-                      📅 {formatDate(event.date)}
-                    </p>
-                  )}
-                  
-                  {event.icao && (
-                    <p className="text-gray-700 text-sm mb-1">
-                      🛩️ ICAO: {event.icao}
-                    </p>
-                  )}
-                  
-                  {event.eventType && (
-                    <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                      {event.eventType}
-                    </span>
-                  )}
-                  
-                  {event.imageurl && (
-                    <div className="mt-2">
-                      <img
-                        src={event.imageurl}
-                        alt={event.title || event.name || event._id}
-                        className="w-full h-20 object-cover rounded"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </Popup>
-            </Marker>
-          );
-        })}
-      </MapContainer>
+      <div id="map-container" style={{ height: '100%', width: '100%' }}></div>
     </div>
   );
 }

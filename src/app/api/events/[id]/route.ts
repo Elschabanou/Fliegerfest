@@ -13,19 +13,24 @@ export async function GET(
 
     console.log('Suche Event mit ID:', id);
 
-    // Zuerst versuchen, das Event direkt zu finden
-    const event = await Event.findById(id)
-      .populate('createdBy', 'name email');
-
-    // Falls nicht gefunden, auch in der MongoDB Collection direkt suchen
-    if (!event) {
-      console.log('Event nicht über Mongoose gefunden, suche direkt in Collection...');
-      const mongoose = await import('mongoose');
-      if (mongoose.connection.db) {
-        const eventsCollection = mongoose.connection.db.collection('events');
-        const directEvent = await eventsCollection.findOne({ _id: new mongoose.Types.ObjectId(id) });
-        console.log('Direktes Suchergebnis:', directEvent);
+    // Versuche zuerst direkt mit MongoDB Collection
+    const mongoose = await import('mongoose');
+    let event = null;
+    
+    if (mongoose.connection.db) {
+      const eventsCollection = mongoose.connection.db.collection('events');
+      const directEvent = await eventsCollection.findOne({ _id: new mongoose.Types.ObjectId(id) });
+      console.log('Direktes Suchergebnis:', directEvent);
+      
+      if (directEvent) {
+        event = directEvent;
       }
+    }
+    
+    // Falls nicht gefunden, versuche mit Mongoose
+    if (!event) {
+      console.log('Versuche mit Mongoose...');
+      event = await Event.findById(id).populate('createdBy', 'name email');
     }
 
     if (!event) {

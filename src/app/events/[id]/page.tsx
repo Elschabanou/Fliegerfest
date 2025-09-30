@@ -148,7 +148,7 @@ export default function EventDetailPage() {
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-8 text-white">
             <div className="flex items-start justify-between">
               <div>
-                <span className="inline-block bg-white bg-opacity-20 text-white text-sm px-3 py-1 rounded-full mb-3">
+                <span className="inline-block bg-blue-600 text-white text-sm px-3 py-1 rounded-full mb-3">
                   {event.eventType || 'Sonstiges'}
                 </span>
                 <h1 className="text-3xl font-bold mb-2">{event.title || event.name}</h1>
