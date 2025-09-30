@@ -63,12 +63,14 @@ export default function EventsMap({ events }: EventsMapProps) {
       try {
         // Dynamisch Leaflet und React-Leaflet importieren
         const L = await import('leaflet');
-        const { MapContainer, TileLayer, Marker, Popup } = await import('react-leaflet');
+        // Import wird nicht direkt verwendet, da wir die Karte manuell erstellen
+        await import('react-leaflet');
 
         // Leaflet CSS importieren
         await import('leaflet/dist/leaflet.css');
 
         // Marker-Icons korrigieren
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         delete (L.Icon.Default.prototype as any)._getIconUrl;
         L.Icon.Default.mergeOptions({
           iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',

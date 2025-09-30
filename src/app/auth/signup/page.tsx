@@ -19,6 +19,7 @@ export default function SignUpPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { login: _login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
