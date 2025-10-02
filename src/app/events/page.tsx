@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Calendar, MapPin, Clock, Euro, Filter, Search, Map } from 'lucide-react';
+import { Calendar, MapPin, Clock, Euro, Filter, Search, Map, X } from 'lucide-react';
 import EventsMap from '@/components/EventsMap';
 // import { useAuth } from '@/components/AuthProvider';
 
@@ -34,6 +34,13 @@ export default function EventsPage() {
   const [location, setLocation] = useState('');
   const [showMap, setShowMap] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  
+  // Date and time filters
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [timeFrom, setTimeFrom] = useState('');
+  const [timeTo, setTimeTo] = useState('');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -41,6 +48,10 @@ export default function EventsPage() {
       if (eventType) params.append('eventType', eventType);
       if (location) params.append('location', location);
       if (searchTerm) params.append('search', searchTerm);
+      if (dateFrom) params.append('dateFrom', dateFrom);
+      if (dateTo) params.append('dateTo', dateTo);
+      if (timeFrom) params.append('timeFrom', timeFrom);
+      if (timeTo) params.append('timeTo', timeTo);
       
       const response = await fetch(`/api/events?${params}`);
       const data = await response.json();
@@ -50,7 +61,7 @@ export default function EventsPage() {
     } finally {
       setLoading(false);
     }
-  }, [eventType, location, searchTerm]);
+  }, [eventType, location, searchTerm, dateFrom, dateTo, timeFrom, timeTo]);
 
   useEffect(() => {
     fetchEvents();
@@ -84,6 +95,43 @@ export default function EventsPage() {
     
     setSearchTimeout(timeout);
   };
+
+  // Preset date filter functions
+  const setDateFilterToday = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setDateFrom(today);
+    setDateTo(today);
+  };
+
+  const setDateFilterThisWeek = () => {
+    const today = new Date();
+    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+    const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+    
+    setDateFrom(startOfWeek.toISOString().split('T')[0]);
+    setDateTo(endOfWeek.toISOString().split('T')[0]);
+  };
+
+  const setDateFilterThisMonth = () => {
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    
+    setDateFrom(startOfMonth.toISOString().split('T')[0]);
+    setDateTo(endOfMonth.toISOString().split('T')[0]);
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setEventType('');
+    setLocation('');
+    setDateFrom('');
+    setDateTo('');
+    setTimeFrom('');
+    setTimeTo('');
+  };
+
+  const hasActiveFilters = searchTerm || eventType || location || dateFrom || dateTo || timeFrom || timeTo;
 
   const formatDate = (dateString: string) => {
     try {
@@ -144,7 +192,7 @@ export default function EventsPage() {
               />
             </div>
 
-            {/* Filter */}
+            {/* Basic Filters */}
             <div className="grid md:grid-cols-3 gap-4">
               <select
                 value={eventType}
@@ -168,14 +216,127 @@ export default function EventsPage() {
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
               />
 
-              <button
-                onClick={handleSearch}
-                className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Search className="h-5 w-5" />
-                <span>Suchen</span>
-              </button>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className="flex items-center justify-center space-x-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  <Filter className="h-5 w-5" />
+                  <span>Zeit-Filter</span>
+                </button>
+                <button
+                  onClick={handleSearch}
+                  className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Search className="h-5 w-5" />
+                  <span>Suchen</span>
+                </button>
+              </div>
             </div>
+
+            {/* Advanced Time Filters */}
+            {showAdvancedFilters && (
+              <div className="border-t pt-4 space-y-4">
+                {/* Preset Filter Buttons */}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={setDateFilterToday}
+                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hover:bg-blue-200 transition-colors"
+                  >
+                    Heute
+                  </button>
+                  <button
+                    onClick={setDateFilterThisWeek}
+                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hover:bg-blue-200 transition-colors"
+                  >
+                    Diese Woche
+                  </button>
+                  <button
+                    onClick={setDateFilterThisMonth}
+                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hover:bg-blue-200 transition-colors"
+                  >
+                    Dieser Monat
+                  </button>
+                  {hasActiveFilters && (
+                    <button
+                      onClick={clearAllFilters}
+                      className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm hover:bg-red-200 transition-colors flex items-center space-x-1"
+                    >
+                      <X className="h-3 w-3" />
+                      <span>Alle Filter löschen</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Date Range Filters */}
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Calendar className="inline h-4 w-4 mr-1" />
+                      Von Datum
+                    </label>
+                    <input
+                      type="date"
+                      value={dateFrom}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Calendar className="inline h-4 w-4 mr-1" />
+                      Bis Datum
+                    </label>
+                    <input
+                      type="date"
+                      value={dateTo}
+                      onChange={(e) => setDateTo(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Clock className="inline h-4 w-4 mr-1" />
+                      Von Zeit
+                    </label>
+                    <input
+                      type="time"
+                      value={timeFrom}
+                      onChange={(e) => setTimeFrom(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Clock className="inline h-4 w-4 mr-1" />
+                      Bis Zeit
+                    </label>
+                    <input
+                      type="time"
+                      value={timeTo}
+                      onChange={(e) => setTimeTo(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Active Filters Display */}
+                {hasActiveFilters && (
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <h4 className="text-sm font-medium text-blue-900 mb-2">Aktive Filter:</h4>
+                    <div className="flex flex-wrap gap-2 text-sm">
+                      {eventType && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Typ: {eventType}</span>}
+                      {location && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Ort: {location}</span>}
+                      {searchTerm && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Suche: {searchTerm}</span>}
+                      {dateFrom && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Ab: {dateFrom}</span>}
+                      {dateTo && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Bis: {dateTo}</span>}
+                      {timeFrom && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Von: {timeFrom}</span>}
+                      {timeTo && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Bis: {timeTo}</span>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Suchhilfe */}
             <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">

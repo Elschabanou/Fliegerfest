@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, MapPin, Loader } from 'lucide-react';
+import { geocodeLocation, isGeocodingSuccess } from '@/lib/geocoding';
 
 export default function CreateEventPage() {
   const { user, loading: authLoading } = useAuth();
@@ -27,8 +28,13 @@ export default function CreateEventPage() {
     registrationRequired: false,
     entryFee: '',
     website: '',
-    tags: ''
+    tags: '',
+    lat: '',
+    lon: ''
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [geocoding, setGeocoding] = useState(false);
+  const [geocodingSuccess, setGeocodingSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -45,6 +51,42 @@ export default function CreateEventPage() {
     }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setImageFile(file);
+  };
+
+  const handleGeocode = async () => {
+    const locationQuery = formData.location || formData.address;
+    if (!locationQuery.trim()) {
+      setError('Bitte geben Sie einen Ort oder eine Adresse ein');
+      return;
+    }
+
+    setGeocoding(true);
+    setError('');
+    setGeocodingSuccess(null);
+
+    try {
+      const result = await geocodeLocation(locationQuery);
+      
+      if (isGeocodingSuccess(result)) {
+        setFormData(prev => ({
+          ...prev,
+          lat: result.lat,
+          lon: result.lon
+        }));
+        setGeocodingSuccess(`Koordinaten gefunden: ${result.display_name}`);
+      } else {
+        setError(result.error);
+      }
+    } catch (error) {
+      setError('Fehler beim Abrufen der Koordinaten');
+    } finally {
+      setGeocoding(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -56,21 +98,33 @@ export default function CreateEventPage() {
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
 
-      const eventData = {
-        ...formData,
-        maxParticipants: formData.maxParticipants ? parseInt(formData.maxParticipants) : undefined,
-        entryFee: parseFloat(formData.entryFee),
-        tags: tagsArray,
-        contactEmail: formData.contactEmail || user?.email
-      };
+      const form = new FormData();
+      form.append('title', formData.title);
+      form.append('description', formData.description);
+      form.append('location', formData.location);
+      form.append('address', formData.address);
+      form.append('date', formData.date);
+      form.append('startTime', formData.startTime);
+      form.append('endTime', formData.endTime);
+      form.append('eventType', formData.eventType);
+      form.append('organizer', formData.organizer);
+      form.append('contactEmail', formData.contactEmail || (user?.email ?? ''));
+      if (formData.contactPhone) form.append('contactPhone', formData.contactPhone);
+      if (formData.maxParticipants) form.append('maxParticipants', String(formData.maxParticipants));
+      form.append('registrationRequired', String(formData.registrationRequired));
+      if (formData.entryFee) form.append('entryFee', String(formData.entryFee));
+      if (formData.website) form.append('website', formData.website);
+      if (tagsArray.length) form.append('tags', tagsArray.join(','));
+      if (formData.lat) form.append('lat', formData.lat);
+      if (formData.lon) form.append('lon', formData.lon);
+      if (imageFile) form.append('image', imageFile);
 
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]}`,
         },
-        body: JSON.stringify(eventData),
+        body: form,
       });
 
       if (response.ok) {
@@ -132,6 +186,19 @@ export default function CreateEventPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
             <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
+                  Titelbild (optional)
+                </label>
+                <input
+                  type="file"
+                  id="image"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="w-full"
+                />
+              </div>
               <div className="md:col-span-2">
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
                   Event-Titel *
@@ -269,6 +336,67 @@ export default function CreateEventPage() {
                   placeholder="Straße, PLZ Ort"
                 />
               </div>
+            </div>
+
+            {/* Geocoding Section */}
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-blue-900">Koordinaten für Karte</h3>
+                <button
+                  type="button"
+                  onClick={handleGeocode}
+                  disabled={geocoding || (!formData.location && !formData.address)}
+                  className="flex items-center space-x-2 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {geocoding ? (
+                    <Loader className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <MapPin className="h-4 w-4" />
+                  )}
+                  <span>{geocoding ? 'Wird gesucht...' : 'Koordinaten finden'}</span>
+                </button>
+              </div>
+              
+              {geocodingSuccess && (
+                <div className="mb-3 p-2 bg-green-100 text-green-800 rounded text-sm">
+                  ✅ {geocodingSuccess}
+                </div>
+              )}
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="lat" className="block text-xs font-medium text-gray-600 mb-1">
+                    Breitengrad (Latitude)
+                  </label>
+                  <input
+                    type="text"
+                    id="lat"
+                    name="lat"
+                    value={formData.lat}
+                    onChange={handleChange}
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    placeholder="z.B. 47.6500279"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lon" className="block text-xs font-medium text-gray-600 mb-1">
+                    Längengrad (Longitude)
+                  </label>
+                  <input
+                    type="text"
+                    id="lon"
+                    name="lon"
+                    value={formData.lon}
+                    onChange={handleChange}
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    placeholder="z.B. 9.4800858"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-600 mt-2">
+                💡 Klicken Sie auf "Koordinaten finden" um automatisch die Koordinaten für Ihren Ort zu ermitteln. 
+                Diese werden benötigt, damit Ihr Event auf der Karte angezeigt wird.
+              </p>
             </div>
 
             {/* Date and Time */}
