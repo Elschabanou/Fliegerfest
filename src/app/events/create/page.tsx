@@ -80,7 +80,7 @@ export default function CreateEventPage() {
       } else {
         setError(result.error);
       }
-    } catch (error) {
+    } catch {
       setError('Fehler beim Abrufen der Koordinaten');
     } finally {
       setGeocoding(false);
@@ -394,7 +394,7 @@ export default function CreateEventPage() {
                 </div>
               </div>
               <p className="text-xs text-gray-600 mt-2">
-                💡 Klicken Sie auf "Koordinaten finden" um automatisch die Koordinaten für Ihren Ort zu ermitteln. 
+                💡 Klicken Sie auf &quot;Koordinaten finden&quot; um automatisch die Koordinaten für Ihren Ort zu ermitteln. 
                 Diese werden benötigt, damit Ihr Event auf der Karte angezeigt wird.
               </p>
             </div>
