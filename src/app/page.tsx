@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calendar, MapPin, Users, Clock } from 'lucide-react';
 
 export default function HomePage() {
@@ -8,6 +9,15 @@ export default function HomePage() {
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
+            <div className="flex justify-center mb-8">
+              <Image
+                src="/logo.png"
+                alt="Fliegerevents Logo"
+                width={120}
+                height={120}
+                className="h-24 w-24 md:h-32 md:w-32 object-contain"
+              />
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Fliegerevents
             </h1>

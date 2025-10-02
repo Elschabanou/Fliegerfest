@@ -9,6 +9,9 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Fliegerevents - Events für Privatflieger',
   description: 'Entdecken Sie Flugtage, Luftfahrt-Events und Workshops für Privatflieger',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

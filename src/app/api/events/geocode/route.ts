@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         if (eventsWithoutCoords.indexOf(event) < eventsWithoutCoords.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
-      } catch (error) {
+      } catch {
         results.push({
           eventId: event._id,
           title: event.title || event.name,
