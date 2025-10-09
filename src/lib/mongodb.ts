@@ -20,9 +20,12 @@ async function connectDB() {
   if (!cached?.promise) {
     const opts = {
       bufferCommands: false,
+      //dbName: 'Fliegerfest',
     };
 
     cached!.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      console.log('Mongoose connected', mongoose);
+      
       return mongoose;
     });
   }

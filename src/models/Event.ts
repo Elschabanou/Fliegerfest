@@ -1,3 +1,4 @@
+import connectDB from '@/lib/mongodb';
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IEvent extends Document {
@@ -151,4 +152,7 @@ if (mongoose.models.Event) {
   delete mongoose.models.Event;
 }
 
-export default mongoose.model<IEvent>('Event', EventSchema, 'events');
+const Event = mongoose.model<IEvent>('Event', EventSchema, 'events');
+
+
+export default Event;

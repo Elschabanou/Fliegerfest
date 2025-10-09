@@ -105,20 +105,18 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Direkt mit der MongoDB Collection arbeiten
-    const eventsCollection = mongoose.connection.db?.collection('events');
-    
-    if (!eventsCollection) {
-      throw new Error('MongoDB-Verbindung nicht verfügbar');
-    }
-    const events = await eventsCollection
-      .find(query)
-      .sort({ date: 1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .toArray();
+    // console.log(query);
 
-    const total = await eventsCollection.countDocuments(query);
+    // add me a mongo query to get the events
+
+    // Verwende das Mongoose Model
+    const events = await Event.find(query)
+      // .sort({ date: 1 })
+      // .limit(limit * 1)
+      // .skip((page - 1) * limit)
+      // .lean();
+
+    const total = await Event.countDocuments(query);
 
     return NextResponse.json({
       events,
