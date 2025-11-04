@@ -13,8 +13,8 @@ export default function ImpressumPage() {
               <div className="space-y-2">
                 <p><strong>Betreiber der Website:</strong></p>
                 <p>Felix Schabanou</p>
-                <p>Musterstraße 123</p>
-                <p>12345 Musterstadt</p>
+                <p>Uhlandstrasse 49</p>
+                <p>72119 Ammerbuch</p>
                 <p>Deutschland</p>
               </div>
             </section>
@@ -22,7 +22,7 @@ export default function ImpressumPage() {
             <section>
               <h2 className="text-xl font-semibold text-gray-900 mb-3">Kontakt</h2>
               <div className="space-y-2">
-                <p><strong>Telefon:</strong> +49 (0) 123 456789</p>
+                <p><strong>Telefon:</strong> +49 (0) 170 23266609</p>
                 <p><strong>E-Mail:</strong> kontakt@fliegerevents.de</p>
               </div>
             </section>
@@ -30,8 +30,8 @@ export default function ImpressumPage() {
             <section>
               <h2 className="text-xl font-semibold text-gray-900 mb-3">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
               <p>Felix Schabanou</p>
-              <p>Musterstraße 123</p>
-              <p>12345 Musterstadt</p>
+              <p>Uhlandstrasse 49</p>
+              <p>72119 Ammerbuch</p>
             </section>
 
             <section>

@@ -146,6 +146,19 @@ export default function EventsPage() {
     }
   };
 
+  const isPastEvent = (e: Event) => {
+    const base = e.dateTime || e.date;
+    if (!base) return false;
+    const eventDate = new Date(base);
+    if (isNaN(eventDate.getTime())) return false;
+    // Wenn keine Uhrzeit mitgegeben ist, vergleiche bis zum Ende des Tages
+    const hasExplicitTime = (e.dateTime && /T\d{2}:\d{2}/.test(e.dateTime)) || !!e.startTime || !!e.endTime;
+    if (!hasExplicitTime) {
+      eventDate.setHours(23, 59, 59, 999);
+    }
+    return eventDate.getTime() < Date.now();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -362,7 +375,7 @@ export default function EventsPage() {
           /* Listen-Ansicht */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
-              <div key={event._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div key={event._id} className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow ${isPastEvent(event) ? 'opacity-60 grayscale' : ''}`}>
                 {event.imageurl && (
                   <div className="h-48 w-full overflow-hidden">
                     <img
