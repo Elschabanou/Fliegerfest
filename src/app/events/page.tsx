@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Calendar, MapPin, Clock, Euro, Filter, Search, Map, X } from 'lucide-react';
+import { Calendar, MapPin, Clock, Euro, Filter, Search, X, LayoutGrid, Info } from 'lucide-react';
 import EventsMap from '@/components/EventsMap';
 // import { useAuth } from '@/components/AuthProvider';
 
@@ -36,7 +36,8 @@ export default function EventsPage() {
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
   
   // Date and time filters
-  const [dateFrom, setDateFrom] = useState('');
+  const today = new Date().toISOString().split('T')[0];
+  const [dateFrom, setDateFrom] = useState(today);
   const [dateTo, setDateTo] = useState('');
   const [timeFrom, setTimeFrom] = useState('');
   const [timeTo, setTimeTo] = useState('');
@@ -98,24 +99,26 @@ export default function EventsPage() {
 
   // Preset date filter functions
   const setDateFilterToday = () => {
-    const today = new Date().toISOString().split('T')[0];
-    setDateFrom(today);
-    setDateTo(today);
+    const todayValue = new Date().toISOString().split('T')[0];
+    setDateFrom(todayValue);
+    setDateTo(todayValue);
   };
 
   const setDateFilterThisWeek = () => {
-    const today = new Date();
-    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-    const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+    const todayDate = new Date();
+    const startOfWeek = new Date(todayDate);
+    startOfWeek.setDate(todayDate.getDate() - todayDate.getDay());
+    const endOfWeek = new Date(todayDate);
+    endOfWeek.setDate(todayDate.getDate() - todayDate.getDay() + 6);
     
     setDateFrom(startOfWeek.toISOString().split('T')[0]);
     setDateTo(endOfWeek.toISOString().split('T')[0]);
   };
 
   const setDateFilterThisMonth = () => {
-    const today = new Date();
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const todayDate = new Date();
+    const startOfMonth = new Date(todayDate.getFullYear(), todayDate.getMonth(), 1);
+    const endOfMonth = new Date(todayDate.getFullYear(), todayDate.getMonth() + 1, 0);
     
     setDateFrom(startOfMonth.toISOString().split('T')[0]);
     setDateTo(endOfMonth.toISOString().split('T')[0]);
@@ -125,13 +128,13 @@ export default function EventsPage() {
     setSearchTerm('');
     setEventType('');
     setLocation('');
-    setDateFrom('');
+    setDateFrom(today);
     setDateTo('');
     setTimeFrom('');
     setTimeTo('');
   };
 
-  const hasActiveFilters = searchTerm || eventType || location || dateFrom || dateTo || timeFrom || timeTo;
+  const hasActiveFilters = searchTerm || eventType || location || dateFrom !== today || dateTo || timeFrom || timeTo;
 
   const formatDate = (dateString: string) => {
     try {
@@ -174,19 +177,34 @@ export default function EventsPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Fliegerevents</h1>
-              <p className="text-gray-600">Entdecken Sie die besten Luftfahrt-Events und Flugtage</p>
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Fliegerevents</h1>
+                <p className="text-gray-600">Entdecken Sie die besten Luftfahrt-Events und Flugtage</p>
+              </div>
+              <div className="flex w-full sm:w-auto rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowMap(false)}
+                  className={`flex flex-1 items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
+                    !showMap ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                  <span>Liste</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowMap(true)}
+                  className={`flex flex-1 items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
+                    showMap ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <MapPin className="h-4 w-4" />
+                  <span>Karte</span>
+                </button>
+              </div>
             </div>
-            <button
-              onClick={() => setShowMap(!showMap)}
-              className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Map className="h-5 w-5" />
-              <span>{showMap ? 'Listen-Ansicht' : 'Karten-Ansicht'}</span>
-            </button>
-          </div>
         </div>
 
         {/* Search and Filters */}
@@ -201,8 +219,15 @@ export default function EventsPage() {
                 value={searchTerm}
                 onChange={(e) => handleSearchInputChange(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white text-lg"
+                className="w-full pl-10 pr-11 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white text-lg"
               />
+              <div className="group absolute inset-y-0 right-3 flex items-center">
+                <Info className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors cursor-help" />
+                <div className="pointer-events-none absolute top-8 right-0 w-64 rounded-md bg-white shadow-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 z-10">
+                  <strong className="text-gray-800 block mb-1">Suchtipps:</strong>
+                  Sie können nach Namen, Beschreibungen, Orten, ICAO-Codes, Organisatoren, E-Mail-Adressen, Telefonnummern, Websites und Tags suchen.
+                </div>
+              </div>
             </div>
 
             {/* Basic Filters */}
@@ -341,7 +366,9 @@ export default function EventsPage() {
                       {eventType && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Typ: {eventType}</span>}
                       {location && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Ort: {location}</span>}
                       {searchTerm && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Suche: {searchTerm}</span>}
-                      {dateFrom && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Ab: {dateFrom}</span>}
+                      {dateFrom && dateFrom !== today && (
+                        <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Ab: {dateFrom}</span>
+                      )}
                       {dateTo && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Bis: {dateTo}</span>}
                       {timeFrom && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Von: {timeFrom}</span>}
                       {timeTo && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Bis: {timeTo}</span>}
@@ -350,11 +377,6 @@ export default function EventsPage() {
                 )}
               </div>
             )}
-
-            {/* Suchhilfe */}
-            <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-              <strong>Suchtipps:</strong> Sie können nach Namen, Beschreibungen, Orten, ICAO-Codes, Organisatoren, E-Mail-Adressen, Telefonnummern, Websites und Tags suchen.
-            </div>
           </div>
         </div>
 
@@ -375,7 +397,7 @@ export default function EventsPage() {
           /* Listen-Ansicht */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
-              <div key={event._id} className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow ${isPastEvent(event) ? 'opacity-60 grayscale' : ''}`}>
+              <div key={event._id} className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col ${isPastEvent(event) ? 'opacity-60 grayscale' : ''}`}>
                 {event.imageurl && (
                   <div className="h-48 w-full overflow-hidden">
                     <img
@@ -388,7 +410,7 @@ export default function EventsPage() {
                     />
                   </div>
                 )}
-                <div className="p-6">
+                <div className="flex flex-col flex-1 p-6">
                   <div className="flex items-start justify-between mb-3">
                     <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                       {event.eventType || 'Sonstiges'}
@@ -436,11 +458,11 @@ export default function EventsPage() {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between">
+                  <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100">
                     <span className="text-sm text-gray-500">{event.organizer ? `von ${event.organizer}` : 'Event'}</span>
                     <Link
                       href={`/events/${event._id}`}
-                      className="text-blue-600 hover:text-blue-700 font-medium"
+                      className="text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
                     >
                       Details ansehen →
                     </Link>

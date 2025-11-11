@@ -12,7 +12,7 @@ export default function ImpressumPage() {
               <h2 className="text-xl font-semibold text-gray-900 mb-3">Angaben gemäß § 5 TMG</h2>
               <div className="space-y-2">
                 <p><strong>Betreiber der Website:</strong></p>
-                <p>Felix Schabanou</p>
+                <p>Felix Schabana</p>
                 <p>Uhlandstrasse 49</p>
                 <p>72119 Ammerbuch</p>
                 <p>Deutschland</p>
