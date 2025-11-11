@@ -274,18 +274,21 @@ export default function FindMyULPage() {
           <div className="bg-white rounded-lg shadow-md p-8">
             <h3 className="text-xl font-semibold mb-4">Ihre Antworten:</h3>
             <div className="space-y-4">
-              {questions.map((question, index) => (
-                <div key={question.id} className="border-b pb-4 last:border-b-0 last:pb-0">
-                  <h4 className="font-medium text-gray-900">
-                    {index + 1}. {question.title}
-                  </h4>
-                  <p className="text-gray-600 mt-1">
-                    {Array.isArray(answers[question.id])
-                      ? answers[question.id].join(', ')
-                      : answers[question.id] || 'Nicht beantwortet'}
-                  </p>
-                </div>
-              ))}
+              {questions.map((question, index) => {
+                const answerForQuestion = answers[question.id];
+                return (
+                  <div key={question.id} className="border-b pb-4 last:border-b-0 last:pb-0">
+                    <h4 className="font-medium text-gray-900">
+                      {index + 1}. {question.title}
+                    </h4>
+                    <p className="text-gray-600 mt-1">
+                      {Array.isArray(answerForQuestion)
+                        ? answerForQuestion.join(', ')
+                        : answerForQuestion ?? 'Nicht beantwortet'}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="mt-8 text-center">
