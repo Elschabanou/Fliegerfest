@@ -1,8 +1,13 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar, MapPin, Users, Clock } from 'lucide-react';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function HomePage() {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -41,12 +46,14 @@ export default function HomePage() {
               >
                 Events entdecken
               </Link>
-              <Link
-                href="/auth/signup"
-                className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors shadow-lg"
-              >
-                Kostenlos registrieren
-              </Link>
+              {!user && (
+                <Link
+                  href="/auth/signup"
+                  className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors shadow-lg"
+                >
+                  Kostenlos registrieren
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -117,12 +124,14 @@ export default function HomePage() {
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Registrieren Sie sich kostenlos und entdecken Sie die vielfältige Welt der Luftfahrt-Events
           </p>
-          <Link
-            href="/auth/signup"
-            className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors inline-block"
-          >
-            Jetzt registrieren
-          </Link>
+          {!user && (
+            <Link
+              href="/auth/signup"
+              className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors inline-block"
+            >
+              Jetzt registrieren
+            </Link>
+          )}
         </div>
       </div>
     </div>
