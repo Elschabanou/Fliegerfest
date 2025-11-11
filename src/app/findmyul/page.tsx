@@ -172,9 +172,11 @@ const questions: Question[] = [
   }
 ];
 
+type AnswerValue = string | string[];
+
 export default function FindMyULPage() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, any>>({});
+  const [answers, setAnswers] = useState<Record<number, AnswerValue | undefined>>({});
   const [completed, setCompleted] = useState(false);
 
   const HeroSection = () => (
@@ -212,7 +214,7 @@ export default function FindMyULPage() {
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
 
-  const handleAnswer = (questionId: number, answer: any) => {
+  const handleAnswer = (questionId: number, answer: AnswerValue) => {
     // Special handling for budget input (question 1) - format with thousand separators
     if (questionId === 1 && typeof answer === 'string') {
       answer = formatNumber(answer);

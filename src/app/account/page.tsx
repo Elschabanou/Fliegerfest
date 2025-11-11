@@ -1,10 +1,12 @@
 'use client';
 
 import { useAuth } from '@/components/AuthProvider';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Calendar, MapPin, Trash2, Edit } from 'lucide-react';
+import { User as UserIcon, Calendar, MapPin, Trash2, Edit } from 'lucide-react';
 import Link from 'next/link';
+
+type EventCreator = string | { $oid: string };
 
 interface Event {
   _id: string;
@@ -18,10 +20,10 @@ interface Event {
   organizer?: string;
   imageurl?: string;
   createdAt?: string;
-  createdBy?: any; // Can be ObjectId or populated user object
+  createdBy?: EventCreator;
 }
 
-interface User {
+interface AccountUser {
   _id: string;
   name: string;
   email: string;
@@ -33,19 +35,12 @@ interface User {
 export default function AccountPage() {
   const { user, token, logout } = useAuth();
   const [userEvents, setUserEvents] = useState<Event[]>([]);
-  const [userData, setUserData] = useState<User | null>(null);
+  const [userData, setUserData] = useState<AccountUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    if (token) {
-    fetchUserData();
-    fetchUserEvents();
-    }
-  }, [user, token]);
-
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       const response = await fetch('/api/user/profile', {
         headers: {
@@ -54,7 +49,7 @@ export default function AccountPage() {
       });
       console.log('User profile response status:', response.status);
       if (response.ok) {
-        const data = await response.json();
+        const data: AccountUser = await response.json();
         console.log('User data loaded:', data);
         setUserData(data);
       } else {
@@ -63,14 +58,14 @@ export default function AccountPage() {
     } catch (error) {
       console.error('Fehler beim Laden der User-Daten:', error);
     }
-  };
+  }, [token]);
 
   const handleLogout = () => {
     logout();
     router.push('/');
   };
 
-  const fetchUserEvents = async () => {
+  const fetchUserEvents = useCallback(async () => {
     try {
       const response = await fetch('/api/events', {
         headers: {
@@ -82,9 +77,13 @@ export default function AccountPage() {
       console.log('User ID:', user?.id);
 
       // Filter events created by this user
-      const filteredEvents = data.events.filter((event: Event) => {
-        const eventCreatedBy = event.createdBy?.$oid || event.createdBy || '';
-        const userId = user?.id || '';
+      const filteredEvents = (data.events as Event[]).filter((event) => {
+        const createdBy = event.createdBy;
+        const eventCreatedBy =
+          typeof createdBy === 'object' && createdBy !== null && '$oid' in createdBy
+            ? createdBy.$oid
+            : createdBy ?? '';
+        const userId = user?.id ?? '';
         const matches = eventCreatedBy.toString() === userId.toString();
         console.log(`Event ${event._id}: createdBy=${eventCreatedBy}, userId=${userId}, matches=${matches}`);
         return matches;
@@ -97,7 +96,15 @@ export default function AccountPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, user?.id]);
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+    void fetchUserData();
+    void fetchUserEvents();
+  }, [token, fetchUserData, fetchUserEvents]);
 
   const deleteEvent = async (eventId: string) => {
     if (!confirm('Sind Sie sicher, dass Sie dieses Event löschen möchten?')) {
@@ -165,7 +172,7 @@ export default function AccountPage() {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-center mb-4">
-                <User className="h-8 w-8 text-blue-600 mr-3" />
+                <UserIcon className="h-8 w-8 text-blue-600 mr-3" />
                 <h2 className="text-xl font-semibold text-gray-900">Persönliche Informationen</h2>
               </div>
 

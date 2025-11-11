@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const mongoose = require('mongoose');
 
 // MongoDB URI direkt setzen (aus .env.local)

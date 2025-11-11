@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const mongoose = require('mongoose');
 
 const DEFAULT_URI = 'mongodb+srv://fliegerevents:FliegereventsPW2024!@library.ljxjrqs.mongodb.net/Fliegerfest?retryWrites=true&w=majority';
