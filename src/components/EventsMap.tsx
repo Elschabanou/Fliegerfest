@@ -50,9 +50,21 @@ export default function EventsMap({ events }: EventsMapProps) {
   const [isGeocoding, setIsGeocoding] = useState<boolean>(false);
   const [geocodingError, setGeocodingError] = useState<string | null>(null);
   const [showLocationFound, setShowLocationFound] = useState<boolean>(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    const updateScreen = () => {
+      if (typeof window !== 'undefined') {
+        setIsSmallScreen(window.innerWidth < 640);
+      }
+    };
+    updateScreen();
+    window.addEventListener('resize', updateScreen);
+    return () => window.removeEventListener('resize', updateScreen);
   }, []);
 
 
@@ -237,22 +249,33 @@ export default function EventsMap({ events }: EventsMapProps) {
         
         const marker = L.marker([lat, lon]);
         marker.addTo(mapRef.current);
+        const popupMaxWidth = isSmallScreen ? 220 : 320;
+        const titleFontSize = isSmallScreen ? 14 : 16;
+        const textFontSize = isSmallScreen ? 12 : 14;
+        const badgeFontSize = isSmallScreen ? 10 : 12;
+        const imageHeight = isSmallScreen ? 60 : 80;
         
         const popupContent = `
-          <div style="padding: 12px; max-width: 300px; font-family: system-ui;">
-            <h3 style="margin: 0 0 8px 0; font-weight: bold; color: #333; font-size: 16px;">
+          <div style="padding: 10px; max-width: ${popupMaxWidth}px; font-family: system-ui;">
+            <h3 style="margin: 0 0 8px 0; font-weight: bold; color: #333; font-size: ${titleFontSize}px;">
               ${event.title || event.name || event._id}
             </h3>
-            ${event.description ? `<p style="margin: 0 0 8px 0; color: #666; font-size: 14px; line-height: 1.4;">${event.description}</p>` : ''}
-            ${event.date ? `<p style="margin: 0 0 4px 0; color: #333; font-size: 13px;">📅 ${formatDate(event.date)}</p>` : ''}
-            ${event.icao ? `<p style="margin: 0 0 4px 0; color: #333; font-size: 13px;">🛩️ ICAO: ${event.icao}</p>` : ''}
-            ${event.location ? `<p style="margin: 0 0 8px 0; color: #666; font-size: 13px;">📍 ${event.location}</p>` : ''}
-            ${event.eventType ? `<span style="display: inline-block; background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-top: 8px;">${event.eventType}</span>` : ''}
-            ${event.imageurl ? `<img src="${event.imageurl}" alt="${event.title || event.name}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 4px; margin-top: 8px;" onerror="this.style.display='none'">` : ''}
+            ${event.description ? `<p style="margin: 0 0 8px 0; color: #666; font-size: ${textFontSize}px; line-height: 1.4;">${event.description}</p>` : ''}
+            ${event.date ? `<p style="margin: 0 0 4px 0; color: #333; font-size: ${textFontSize - 1}px;">📅 ${formatDate(event.date)}</p>` : ''}
+            ${event.icao ? `<p style="margin: 0 0 4px 0; color: #333; font-size: ${textFontSize - 1}px;">🛩️ ICAO: ${event.icao}</p>` : ''}
+            ${event.location ? `<p style="margin: 0 0 8px 0; color: #666; font-size: ${textFontSize - 1}px;">📍 ${event.location}</p>` : ''}
+            ${event.eventType ? `<span style="display: inline-block; background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 12px; font-size: ${badgeFontSize}px; margin-top: 8px;">${event.eventType}</span>` : ''}
+            ${event.imageurl ? `<img src="${event.imageurl}" alt="${event.title || event.name}" style="width: 100%; height: ${imageHeight}px; object-fit: cover; border-radius: 4px; margin-top: 8px;" onerror="this.style.display='none'">` : ''}
           </div>
         `;
         
-        marker.bindPopup(popupContent);
+        marker.bindPopup(popupContent, {
+          className: 'event-popup',
+          maxWidth: popupMaxWidth,
+          autoPan: true,
+          autoPanPaddingTopLeft: [16, isSmallScreen ? 200 : 100],
+          autoPanPaddingBottomRight: [16, 40]
+        });
 
         // Marker-Deckkraft basierend auf Radius setzen
         try {
@@ -275,7 +298,7 @@ export default function EventsMap({ events }: EventsMapProps) {
     });
 
     isUpdatingMarkersRef.current = false;
-  }, [userLocation, customLocation, locationMode, events, radiusKm, isMapInitialized]);
+  }, [userLocation, customLocation, locationMode, events, radiusKm, isMapInitialized, isSmallScreen]);
 
   const handleSearchLocation = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -515,8 +538,8 @@ export default function EventsMap({ events }: EventsMapProps) {
   return (
     <div className="relative">
       {/* Standort / Suche */}
-      <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-3 w-72">
-        <div className="bg-white/90 backdrop-blur rounded-lg border border-gray-200 p-3 shadow-md">
+      <div className="absolute top-4 right-4 w-full max-w-[75%] sm:max-w-sm md:max-w-xs z-[1000] flex flex-col gap-3">
+        <div className="bg-white/95 backdrop-blur rounded-lg border border-gray-200 p-3 shadow-md">
           <div className="flex items-center gap-2 mb-2">
             <button
               onClick={() => { setLocationMode('device'); }}
@@ -543,7 +566,7 @@ export default function EventsMap({ events }: EventsMapProps) {
               onChange={(e) => setCustomQuery(e.target.value)}
               placeholder="Ort suchen (z.B. Tübingen)"
               ref={searchInputRef}
-              className={`flex-1 border rounded px-2 py-1 text-sm ${geocodingError ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500' : 'border-gray-200'}`}
+              className={`flex-1 border rounded px-2 py-1 text-sm bg-white text-gray-900 placeholder:text-gray-400 ${geocodingError ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500'}`}
             />
             <button type="submit" disabled={isGeocoding} className="px-3 py-1 text-sm rounded bg-blue-600 text-white disabled:opacity-50">Suche</button>
           </form>
@@ -566,12 +589,12 @@ export default function EventsMap({ events }: EventsMapProps) {
       </div>
 
       {/* Karte */}
-      <div className="h-[32rem] w-full rounded-lg overflow-hidden border border-gray-200">
+      <div className="h-[36rem] sm:h-[32rem] w-full rounded-none sm:rounded-lg overflow-hidden border border-gray-200">
         <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }}></div>
       </div>
 
       {/* Reichweiten-Regler */}
-      <div className="absolute bottom-4 right-4 z-[1000] bg-white/90 backdrop-blur rounded-lg border border-gray-200 p-3 shadow-md w-64">
+      <div className="absolute bottom-4 right-4 w-full max-w-[75%] sm:max-w-xs md:max-w-xs z-[1000] bg-white/95 backdrop-blur rounded-lg border border-gray-200 p-3 shadow-md">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-700">Reichweite</span>
           <span className="text-sm text-gray-600">{radiusKm} km</span>

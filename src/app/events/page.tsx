@@ -31,9 +31,9 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [eventType, setEventType] = useState('');
-  const [location, setLocation] = useState('');
   const [showMap, setShowMap] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [showSearchTips, setShowSearchTips] = useState(false);
   
   // Date and time filters
   const today = new Date().toISOString().split('T')[0];
@@ -47,7 +47,6 @@ export default function EventsPage() {
     try {
       const params = new URLSearchParams();
       if (eventType) params.append('eventType', eventType);
-      if (location) params.append('location', location);
       if (searchTerm) params.append('search', searchTerm);
       if (dateFrom) params.append('dateFrom', dateFrom);
       if (dateTo) params.append('dateTo', dateTo);
@@ -62,7 +61,7 @@ export default function EventsPage() {
     } finally {
       setLoading(false);
     }
-  }, [eventType, location, searchTerm, dateFrom, dateTo, timeFrom, timeTo]);
+  }, [eventType, searchTerm, dateFrom, dateTo, timeFrom, timeTo]);
 
   useEffect(() => {
     fetchEvents();
@@ -127,14 +126,13 @@ export default function EventsPage() {
   const clearAllFilters = () => {
     setSearchTerm('');
     setEventType('');
-    setLocation('');
     setDateFrom(today);
     setDateTo('');
     setTimeFrom('');
     setTimeTo('');
   };
 
-  const hasActiveFilters = searchTerm || eventType || location || dateFrom !== today || dateTo || timeFrom || timeTo;
+  const hasActiveFilters = searchTerm || eventType || dateFrom !== today || dateTo || timeFrom || timeTo;
 
   const formatDate = (dateString: string) => {
     try {
@@ -221,21 +219,32 @@ export default function EventsPage() {
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 className="w-full pl-10 pr-11 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white text-lg"
               />
-              <div className="group absolute inset-y-0 right-3 flex items-center">
-                <Info className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors cursor-help" />
-                <div className="pointer-events-none absolute top-8 right-0 w-64 rounded-md bg-white shadow-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 z-10">
-                  <strong className="text-gray-800 block mb-1">Suchtipps:</strong>
-                  Sie können nach Namen, Beschreibungen, Orten, ICAO-Codes, Organisatoren, E-Mail-Adressen, Telefonnummern, Websites und Tags suchen.
-                </div>
+              <div className="absolute inset-y-0 right-3 flex items-center">
+                <button
+                  type="button"
+                  aria-label="Suchtipps anzeigen"
+                  onClick={() => setShowSearchTips((prev) => !prev)}
+                  onMouseEnter={() => setShowSearchTips(true)}
+                  onMouseLeave={() => setShowSearchTips(false)}
+                  className="flex items-center justify-center"
+                >
+                  <Info className="h-5 w-5 text-gray-400 hover:text-blue-600 transition-colors" />
+                </button>
+                {showSearchTips && (
+                  <div className="absolute top-8 right-0 w-64 rounded-md bg-white shadow-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 transition-opacity duration-150 z-10">
+                    <strong className="text-gray-800 block mb-1">Suchtipps:</strong>
+                    Sie können nach Namen, Beschreibungen, Orten, ICAO-Codes, Organisatoren, E-Mail-Adressen, Telefonnummern, Websites und Tags suchen.
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Basic Filters */}
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 gap-4">
               <select
                 value={eventType}
                 onChange={(e) => setEventType(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white placeholder:text-gray-400 dark:bg-white"
               >
                 <option value="">Alle Event-Typen</option>
                 <option value="Flugtag">Flugtag</option>
@@ -244,17 +253,7 @@ export default function EventsPage() {
                 <option value="Vereinsveranstaltung">Vereinsveranstaltung</option>
                 <option value="Sonstiges">Sonstiges</option>
               </select>
-
-              <input
-                type="text"
-                placeholder="Spezifischer Ort..."
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
-              />
-
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 md:justify-end">
                 <button
                   onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                   className="flex items-center justify-center space-x-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
@@ -364,7 +363,6 @@ export default function EventsPage() {
                     <h4 className="text-sm font-medium text-blue-900 mb-2">Aktive Filter:</h4>
                     <div className="flex flex-wrap gap-2 text-sm">
                       {eventType && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Typ: {eventType}</span>}
-                      {location && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Ort: {location}</span>}
                       {searchTerm && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Suche: {searchTerm}</span>}
                       {dateFrom && dateFrom !== today && (
                         <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Ab: {dateFrom}</span>
@@ -389,8 +387,8 @@ export default function EventsPage() {
           </div>
         ) : showMap ? (
           /* Karten-Ansicht */
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Events auf der Karte</h2>
+          <div className="mb-8 -mx-4 sm:mx-0">
+            <h2 className="px-4 sm:px-0 text-2xl font-semibold text-gray-900 mb-4">Events auf der Karte</h2>
             <EventsMap events={events} />
           </div>
         ) : (
