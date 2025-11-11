@@ -377,10 +377,12 @@ export default function FindMyULPage() {
                       value={option}
                       checked={(answers[currentQuestion.id] || []).includes(option)}
                       onChange={(e) => {
-                        const currentAnswers = answers[currentQuestion.id] || [];
+                        const currentAnswers = Array.isArray(answers[currentQuestion.id])
+                          ? answers[currentQuestion.id]
+                          : ([] as string[]);
                         const newAnswers = e.target.checked
                           ? [...currentAnswers, option]
-                          : currentAnswers.filter((a: string) => a !== option);
+                          : currentAnswers.filter((a) => a !== option);
                         handleAnswer(currentQuestion.id, newAnswers);
                       }}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
