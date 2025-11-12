@@ -117,12 +117,20 @@ export async function GET(request: NextRequest) {
 
     const total = await Event.countDocuments(query);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       events,
       totalPages: Math.ceil(total / limit),
       currentPage: page,
       total,
     });
+
+    // Cache-Control Header für Browser-Caching
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=60, stale-while-revalidate=300'
+    );
+
+    return response;
   } catch (error) {
     console.error('Fehler beim Abrufen der Events:', error);
     return NextResponse.json(

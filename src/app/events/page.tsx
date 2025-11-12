@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calendar, MapPin, Clock, Euro, Filter, Search, X, LayoutGrid, Info, Share2 } from 'lucide-react';
-import EventsMap from '@/components/EventsMap';
+
+// Lazy load EventsMap - nur wenn benötigt
+const EventsMap = lazy(() => import('@/components/EventsMap').then(mod => ({ default: mod.default })));
 // import { useAuth } from '@/components/AuthProvider';
 
 interface Event {
@@ -422,7 +425,16 @@ export default function EventsPage() {
           /* Karten-Ansicht */
           <div className="mb-8 -mx-4 sm:mx-0">
             <h2 className="px-4 sm:px-0 text-2xl font-semibold text-gray-900 mb-4">Events auf der Karte</h2>
-            <EventsMap events={events} />
+            <Suspense fallback={
+              <div className="h-[32rem] bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-pulse" />
+                  <p className="text-gray-600">Karte wird geladen...</p>
+                </div>
+              </div>
+            }>
+              <EventsMap events={events} />
+            </Suspense>
           </div>
         ) : (
           /* Listen-Ansicht */
@@ -446,10 +458,13 @@ export default function EventsPage() {
                 
                 {event.imageurl && (
                   <div className="h-48 w-full overflow-hidden relative">
-                    <img
+                    <Image
                       src={event.imageurl}
-                      alt={event.title || event.name}
-                      className="h-full w-full object-cover hover:scale-105 transition-transform duration-300"
+                      alt={event.title || event.name || 'Event Bild'}
+                      fill
+                      className="object-cover hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      loading="lazy"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
