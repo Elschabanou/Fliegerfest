@@ -38,7 +38,7 @@ export default function CreateEventPage() {
   const [geocoding, setGeocoding] = useState(false);
   const [geocodingSuccess, setGeocodingSuccess] = useState<string | null>(null);
   const [showAnimation, setShowAnimation] = useState(false);
-  const [animationData, setAnimationData] = useState<unknown>(null);
+  const [animationData, setAnimationData] = useState<object | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -180,13 +180,17 @@ export default function CreateEventPage() {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 flex flex-col items-center">
-          {animationData && (
+          {animationData ? (
             <div className="w-64 h-64">
               <Lottie 
-                animationData={animationData as object} 
+                animationData={animationData} 
                 loop={false}
                 autoplay={true}
               />
+            </div>
+          ) : (
+            <div className="w-64 h-64 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
           )}
           <h2 className="text-2xl font-bold text-[#021234] mt-4">Event erfolgreich erstellt!</h2>

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { Calendar, MapPin, Clock, Euro, User, Mail, Phone, Globe, Edit, Trash2, ArrowLeft, Share2 } from 'lucide-react';
+import Image from 'next/image';
 
 interface Event {
   _id: string;
@@ -226,11 +227,12 @@ export default function EventDetailPage() {
             {/* Event Image */}
             {event.imageurl && (
               <div className="mb-8">
-                <div className="h-64 w-full overflow-hidden rounded-lg cursor-pointer" onClick={() => setShowImageModal(true)}>
-                  <img
+                <div className="h-64 w-full overflow-hidden rounded-lg cursor-pointer relative" onClick={() => setShowImageModal(true)}>
+                  <Image
                     src={event.imageurl}
                     alt={event.title || event.name}
-                    className="h-full w-full object-cover hover:scale-105 transition-transform duration-300"
+                    fill
+                    className="object-cover hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}
@@ -384,11 +386,11 @@ export default function EventDetailPage() {
 
         {/* Image Modal */}
         {showImageModal && event?.imageurl && (
-          <div 
+          <div
             className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
             onClick={() => setShowImageModal(false)}
           >
-            <div className="relative max-w-4xl max-h-full">
+            <div className="relative max-w-4xl max-h-full w-full h-full">
               <button
                 onClick={() => setShowImageModal(false)}
                 className="absolute top-4 right-4 text-white bg-black bg-opacity-50 hover:bg-opacity-75 rounded-full p-2 z-10"
@@ -397,10 +399,11 @@ export default function EventDetailPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <img
+              <Image
                 src={event.imageurl}
                 alt={event.title || event.name}
-                className="max-w-full max-h-full object-contain rounded-lg"
+                fill
+                className="object-contain rounded-lg"
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
