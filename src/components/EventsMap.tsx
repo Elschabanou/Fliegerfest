@@ -676,7 +676,7 @@ export default function EventsMap({ events }: EventsMapProps) {
               onChange={(e) => setCustomQuery(e.target.value)}
               placeholder="Ort suchen (z.B. Tübingen)"
               ref={searchInputRef}
-              className={`flex-1 border rounded px-2 py-1 text-sm bg-white text-gray-900 placeholder:text-gray-400 ${geocodingError ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500'}`}
+              className={`flex-1 border rounded px-2 py-1 text-sm bg-white text-[#021234] placeholder:text-gray-400 ${geocodingError ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500'}`}
             />
             <button type="submit" disabled={isGeocoding} className="px-3 py-1 text-sm rounded bg-blue-600 text-white disabled:opacity-50">Suche</button>
           </form>

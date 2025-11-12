@@ -152,7 +152,7 @@ export default function EventDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Event nicht gefunden</h1>
+          <h1 className="text-2xl font-bold text-[#021234] mb-4">Event nicht gefunden</h1>
           <button
             onClick={() => router.push('/events')}
             className="text-blue-600 hover:text-blue-700"
@@ -243,14 +243,14 @@ export default function EventDetailPage() {
               {/* Main Content */}
               <div className="lg:col-span-2">
                 <div className="mb-8">
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-4">Beschreibung</h2>
+                  <h2 className="text-2xl font-semibold text-[#021234] mb-4">Beschreibung</h2>
                   <p className="text-gray-700 leading-relaxed">{event.description || 'Keine Beschreibung verfügbar.'}</p>
                 </div>
 
                 {/* Event Details */}
                 <div className="grid md:grid-cols-2 gap-6 mb-8">
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-gray-900 mb-3">Event-Details</h3>
+                    <h3 className="font-semibold text-[#021234] mb-3">Event-Details</h3>
                     <div className="space-y-3">
                       <div className="flex items-center text-gray-700">
                         <Calendar className="h-5 w-5 mr-3 text-blue-600" />
@@ -283,7 +283,7 @@ export default function EventDetailPage() {
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-gray-900 mb-3">Standort</h3>
+                    <h3 className="font-semibold text-[#021234] mb-3">Standort</h3>
                     <div className="space-y-3">
                       <div className="flex items-center text-gray-700">
                         <MapPin className="h-5 w-5 mr-3 text-blue-600" />
@@ -302,7 +302,7 @@ export default function EventDetailPage() {
                 {/* Tags */}
                 {event.tags && event.tags.length > 0 && (
                   <div className="mb-8">
-                    <h3 className="font-semibold text-gray-900 mb-3">Tags</h3>
+                    <h3 className="font-semibold text-[#021234] mb-3">Tags</h3>
                     <div className="flex flex-wrap gap-2">
                       {event.tags.map((tag, index) => (
                         <span key={index} className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
@@ -317,13 +317,13 @@ export default function EventDetailPage() {
               {/* Sidebar */}
               <div className="lg:col-span-1">
                 <div className="bg-gray-50 p-6 rounded-lg">
-                  <h3 className="font-semibold text-gray-900 mb-4">Kontakt & Info</h3>
+                  <h3 className="font-semibold text-[#021234] mb-4">Kontakt & Info</h3>
                   
                   <div className="space-y-4">
                     {event.organizer && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Veranstalter</label>
-                        <p className="text-gray-900">{event.organizer}</p>
+                        <p className="text-[#021234]">{event.organizer}</p>
                       </div>
                     )}
 

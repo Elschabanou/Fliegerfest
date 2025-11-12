@@ -23,7 +23,7 @@ export default function Navbar() {
                 height={40}
                 className="h-10 w-10 object-contain"
               />
-              <span className="text-xl font-bold text-gray-900">Fliegerevents</span>
+              <span className="text-xl font-bold text-[#021234]">Fliegerevents</span>
             </Link>
           </div>
 

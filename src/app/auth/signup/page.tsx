@@ -87,7 +87,7 @@ export default function SignUpPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Registrierung erfolgreich!</h2>
+            <h2 className="text-2xl font-bold text-[#021234] mb-4">Registrierung erfolgreich!</h2>
             <p className="text-gray-600 mb-4">
               Ihr Konto wurde erfolgreich erstellt. Sie werden zur Anmeldeseite weitergeleitet...
             </p>
@@ -109,9 +109,9 @@ export default function SignUpPage() {
         <div className="text-center">
           <Link href="/" className="flex items-center justify-center space-x-2 mb-6">
             <Calendar className="h-10 w-10 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">Fliegerevents</span>
+            <span className="text-2xl font-bold text-[#021234]">Fliegerevents</span>
           </Link>
-          <h2 className="text-3xl font-bold text-gray-900">Konto erstellen</h2>
+          <h2 className="text-3xl font-bold text-[#021234]">Konto erstellen</h2>
           <p className="mt-2 text-gray-600">
             Oder{' '}
             <Link href="/auth/signin" className="text-blue-600 hover:text-blue-700 font-medium">
@@ -141,7 +141,7 @@ export default function SignUpPage() {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                   placeholder="Max Mustermann"
                 />
               </div>
@@ -158,7 +158,7 @@ export default function SignUpPage() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                   placeholder="max@example.de"
                 />
               </div>

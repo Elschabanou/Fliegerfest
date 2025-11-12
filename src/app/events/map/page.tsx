@@ -77,7 +77,7 @@ export default function EventsMapPage() {
           <div className="flex items-center space-x-3">
             <MapPin className="h-8 w-8 text-blue-600" />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Events auf der Karte</h1>
+              <h1 className="text-3xl font-bold text-[#021234]">Events auf der Karte</h1>
               <p className="text-gray-600">
                 {eventsWithCoords.length} von {events.length} Events mit Standortdaten
               </p>
@@ -108,7 +108,7 @@ export default function EventsMapPage() {
         {/* Event-Liste für Events ohne Koordinaten */}
         {events.length > eventsWithCoords.length && (
           <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <h2 className="text-xl font-semibold text-[#021234] mb-4">
               Events ohne Standortdaten ({events.length - eventsWithCoords.length})
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -120,7 +120,7 @@ export default function EventsMapPage() {
                 })
                 .map((event) => (
                   <div key={event._id} className="p-4 border border-gray-200 rounded-lg">
-                    <h3 className="font-medium text-gray-900 mb-2">
+                    <h3 className="font-medium text-[#021234] mb-2">
                       {event.title || event.name || event._id}
                     </h3>
                     <p className="text-sm text-gray-600 mb-2">

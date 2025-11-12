@@ -150,7 +150,7 @@ export default function AccountPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Nicht autorisiert</h1>
+            <h1 className="text-3xl font-bold text-[#021234] mb-4">Nicht autorisiert</h1>
             <p className="text-gray-600">Bitte melden Sie sich an, um Ihr Konto zu sehen.</p>
           </div>
         </div>
@@ -163,7 +163,7 @@ export default function AccountPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Mein Konto</h1>
+          <h1 className="text-3xl font-bold text-[#021234] mb-2">Mein Konto</h1>
           <p className="text-gray-600">Verwalten Sie Ihre persönlichen Informationen und Ihre Events</p>
         </div>
 
@@ -173,28 +173,28 @@ export default function AccountPage() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-center mb-4">
                 <UserIcon className="h-8 w-8 text-blue-600 mr-3" />
-                <h2 className="text-xl font-semibold text-gray-900">Persönliche Informationen</h2>
+                <h2 className="text-xl font-semibold text-[#021234]">Persönliche Informationen</h2>
               </div>
 
               <div className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Name</label>
-                  <p className="text-gray-900">{userData?.name || user?.name}</p>
+                  <p className="text-[#021234]">{userData?.name || user?.name}</p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">E-Mail</label>
-                  <p className="text-gray-900">{userData?.email || user?.email}</p>
+                  <p className="text-[#021234]">{userData?.email || user?.email}</p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Rolle</label>
-                  <p className="text-gray-900">{userData?.role || user?.role || 'user'}</p>
+                  <p className="text-[#021234]">{userData?.role || user?.role || 'user'}</p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Registriert seit</label>
-                  <p className="text-gray-900">
+                  <p className="text-[#021234]">
                     {userData?.createdAt ? formatDate(userData.createdAt) : 'Unbekannt'}
                   </p>
                 </div>
@@ -215,7 +215,7 @@ export default function AccountPage() {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
                   <Calendar className="h-8 w-8 text-green-600 mr-3" />
-                  <h2 className="text-xl font-semibold text-gray-900">Meine Events</h2>
+                  <h2 className="text-xl font-semibold text-[#021234]">Meine Events</h2>
                 </div>
                 <span className="text-sm text-gray-500">
                   {userEvents.length} Event{userEvents.length !== 1 ? 's' : ''}
@@ -230,7 +230,7 @@ export default function AccountPage() {
               ) : userEvents.length === 0 ? (
                 <div className="text-center py-8">
                   <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Keine Events gefunden</h3>
+                  <h3 className="text-lg font-medium text-[#021234] mb-2">Keine Events gefunden</h3>
                   <p className="text-gray-600 mb-4">Sie haben noch keine Events erstellt.</p>
                   <Link
                     href="/events/create"
@@ -246,7 +246,7 @@ export default function AccountPage() {
                       <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-start">
                         <div className="flex-1">
                           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-lg font-semibold text-[#021234]">
                               {event.title || event.name || 'Unbenanntes Event'}
                             </h3>
                             <span className={`inline-block px-2 py-1 text-xs rounded-full ${

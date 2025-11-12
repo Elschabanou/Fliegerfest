@@ -203,7 +203,7 @@ export default function EventsPage() {
         <div className="mb-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Fliegerevents</h1>
+                <h1 className="text-3xl font-bold text-[#021234] mb-2">Fliegerevents</h1>
                 <p className="text-gray-600">Entdecken Sie die besten Luftfahrt-Events und Flugtage</p>
               </div>
               <div className="flex w-full sm:w-auto rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -243,7 +243,7 @@ export default function EventsPage() {
                 value={searchTerm}
                 onChange={(e) => handleSearchInputChange(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full pl-10 pr-11 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white text-lg"
+                className="w-full pl-10 pr-11 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white text-lg"
               />
               <div className="absolute inset-y-0 right-3 flex items-center">
                 <button
@@ -270,7 +270,7 @@ export default function EventsPage() {
               <select
                 value={eventType}
                 onChange={(e) => setEventType(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white placeholder:text-gray-400 dark:bg-white"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white placeholder:text-gray-400 dark:bg-white"
               >
                 <option value="">Alle Event-Typen</option>
                 <option value="Flugtag">Flugtag</option>
@@ -343,7 +343,7 @@ export default function EventsPage() {
                       type="date"
                       value={dateFrom}
                       onChange={(e) => setDateFrom(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                     />
                   </div>
                   <div>
@@ -355,7 +355,7 @@ export default function EventsPage() {
                       type="date"
                       value={dateTo}
                       onChange={(e) => setDateTo(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                     />
                   </div>
                   <div>
@@ -367,7 +367,7 @@ export default function EventsPage() {
                       type="time"
                       value={timeFrom}
                       onChange={(e) => setTimeFrom(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                     />
                   </div>
                   <div>
@@ -379,7 +379,7 @@ export default function EventsPage() {
                       type="time"
                       value={timeTo}
                       onChange={(e) => setTimeTo(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                     />
                   </div>
                 </div>
@@ -411,7 +411,7 @@ export default function EventsPage() {
           <div className="space-y-6">
             {showMap ? (
               <div className="mb-8 -mx-4 sm:mx-0">
-                <h2 className="px-4 sm:px-0 text-2xl font-semibold text-gray-900 mb-4">Events auf der Karte</h2>
+                <h2 className="px-4 sm:px-0 text-2xl font-semibold text-[#021234] mb-4">Events auf der Karte</h2>
                 <div className="h-[32rem] bg-gray-100 rounded-lg flex items-center justify-center animate-pulse">
                   <div className="text-center">
                     <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -438,13 +438,13 @@ export default function EventsPage() {
         ) : events.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Keine Events gefunden</h3>
+            <h3 className="text-lg font-medium text-[#021234] mb-2">Keine Events gefunden</h3>
             <p className="text-gray-600">Versuchen Sie andere Suchkriterien oder erstellen Sie ein neues Event.</p>
           </div>
         ) : showMap ? (
           /* Karten-Ansicht */
           <div className="mb-8 -mx-4 sm:mx-0">
-            <h2 className="px-4 sm:px-0 text-2xl font-semibold text-gray-900 mb-4">Events auf der Karte</h2>
+            <h2 className="px-4 sm:px-0 text-2xl font-semibold text-[#021234] mb-4">Events auf der Karte</h2>
             <Suspense fallback={
               <div className="h-[32rem] bg-gray-100 rounded-lg flex items-center justify-center">
                 <div className="text-center">
@@ -508,7 +508,7 @@ export default function EventsPage() {
                     )}
                   </div>
 
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{event.title || event.name || event._id}</h3>
+                  <h3 className="text-xl font-semibold text-[#021234] mb-2">{event.title || event.name || event._id}</h3>
                   <p className="text-gray-600 mb-4 line-clamp-3">{event.description || 'Keine Beschreibung verfügbar.'}</p>
 
                   <div className="space-y-2 mb-4">

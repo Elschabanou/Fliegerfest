@@ -5,6 +5,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, MapPin, Loader } from 'lucide-react';
 import { geocodeLocation, isGeocodingSuccess } from '@/lib/geocoding';
+import Lottie from 'lottie-react';
 
 export default function CreateEventPage() {
   const { user, loading: authLoading } = useAuth();
@@ -36,6 +37,8 @@ export default function CreateEventPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [geocoding, setGeocoding] = useState(false);
   const [geocodingSuccess, setGeocodingSuccess] = useState<string | null>(null);
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [animationData, setAnimationData] = useState<any>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -43,6 +46,14 @@ export default function CreateEventPage() {
       router.push('/auth/signin');
     }
   }, [user, authLoading, router]);
+
+  // Lade Animation-Daten
+  useEffect(() => {
+    fetch('/Message Sent Successfully _ Plane.json')
+      .then(res => res.json())
+      .then(data => setAnimationData(data))
+      .catch(err => console.error('Fehler beim Laden der Animation:', err));
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -134,10 +145,13 @@ export default function CreateEventPage() {
       if (response.ok) {
         const event = await response.json();
         console.log('Event erstellt, ID:', event._id);
-        // Kurze Verzögerung um sicherzustellen, dass das Event vollständig gespeichert ist
+        // Animation anzeigen
+        setShowAnimation(true);
+        setLoading(false);
+        // Nach der Animation (ca. 2.5 Sekunden) zur Event-Seite weiterleiten
         setTimeout(() => {
-          router.push(`/events/${event._id}`);
-        }, 100);
+          router.push('/events');
+        }, 2500);
       } else {
         const errorData = await response.json();
         console.log('Fehler beim Erstellen:', errorData);
@@ -161,8 +175,25 @@ export default function CreateEventPage() {
     );
   }
 
-  if (status === 'unauthenticated') {
-    return null;
+  // Animation Overlay
+  if (showAnimation) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 flex flex-col items-center">
+          {animationData && (
+            <div className="w-64 h-64">
+              <Lottie 
+                animationData={animationData} 
+                loop={false}
+                autoplay={true}
+              />
+            </div>
+          )}
+          <h2 className="text-2xl font-bold text-[#021234] mt-4">Event erfolgreich erstellt!</h2>
+          <p className="text-gray-600 mt-2">Sie werden zur Event-Seite weitergeleitet...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -176,7 +207,7 @@ export default function CreateEventPage() {
             <ArrowLeft className="h-5 w-5" />
             <span>Zurück zu den Events</span>
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Neues Event erstellen</h1>
+          <h1 className="text-3xl font-bold text-[#021234]">Neues Event erstellen</h1>
           <p className="text-gray-600 mt-2">Teilen Sie Ihr Fliegerevent mit der Community</p>
         </div>
 
@@ -214,7 +245,7 @@ export default function CreateEventPage() {
                   required
                   value={formData.title}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                   placeholder="z.B. Flugtag am Flugplatz XYZ"
                 />
               </div>
@@ -229,7 +260,7 @@ export default function CreateEventPage() {
                   required
                   value={formData.eventType}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                 >
                   <option value="">Bitte wählen...</option>
                   <option value="Flugtag">Flugtag</option>
@@ -254,7 +285,7 @@ export default function CreateEventPage() {
                   required
                   value={formData.entryFee}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                   placeholder="0.00"
                 />
               </div>
@@ -270,7 +301,7 @@ export default function CreateEventPage() {
                   required
                   value={formData.organizer}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                   placeholder="Ihr Name oder Verein"
                 />
               </div>
@@ -286,7 +317,7 @@ export default function CreateEventPage() {
                   min="1"
                   value={formData.maxParticipants}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                   placeholder="z.B. 50"
                 />
               </div>
@@ -303,7 +334,7 @@ export default function CreateEventPage() {
                 required
                 value={formData.description}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                 placeholder="Beschreiben Sie Ihr Event..."
               />
             </div>
@@ -321,7 +352,7 @@ export default function CreateEventPage() {
                   required
                   value={formData.location}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                   placeholder="z.B. Flugplatz Mainz-Finthen"
                 />
               </div>
@@ -337,7 +368,7 @@ export default function CreateEventPage() {
                   required
                   value={formData.address}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                   placeholder="Straße, PLZ Ort"
                 />
               </div>
@@ -379,7 +410,7 @@ export default function CreateEventPage() {
                     name="lat"
                     value={formData.lat}
                     onChange={handleChange}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                     placeholder="z.B. 47.6500279"
                   />
                 </div>
@@ -393,7 +424,7 @@ export default function CreateEventPage() {
                     name="lon"
                     value={formData.lon}
                     onChange={handleChange}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                     placeholder="z.B. 9.4800858"
                   />
                 </div>
@@ -417,7 +448,7 @@ export default function CreateEventPage() {
                   required
                   value={formData.date}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                 />
               </div>
 
@@ -448,7 +479,7 @@ export default function CreateEventPage() {
                       required={!formData.allDay}
                       value={formData.startTime}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                     />
                   </div>
 
@@ -463,7 +494,7 @@ export default function CreateEventPage() {
                       required={!formData.allDay}
                       value={formData.endTime}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                     />
                   </div>
                 </div>
@@ -483,7 +514,7 @@ export default function CreateEventPage() {
                   required
                   value={formData.contactEmail}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                   placeholder="kontakt@example.de"
                 />
               </div>
@@ -498,7 +529,7 @@ export default function CreateEventPage() {
                   name="contactPhone"
                   value={formData.contactPhone}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                   placeholder="+49 123 456789"
                 />
               </div>
@@ -514,7 +545,7 @@ export default function CreateEventPage() {
                 name="website"
                 value={formData.website}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                 placeholder="https://www.example.de"
               />
             </div>
@@ -529,7 +560,7 @@ export default function CreateEventPage() {
                 name="tags"
                 value={formData.tags}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                 placeholder="Segelflug, Ultraleicht, Oldtimer (durch Komma getrennt)"
               />
             </div>

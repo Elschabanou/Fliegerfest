@@ -50,9 +50,9 @@ export default function SignInPage() {
         <div className="text-center">
           <Link href="/" className="flex items-center justify-center space-x-2 mb-6">
             <Calendar className="h-10 w-10 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">Fliegerevents</span>
+            <span className="text-2xl font-bold text-[#021234]">Fliegerevents</span>
           </Link>
-          <h2 className="text-3xl font-bold text-gray-900">Anmelden</h2>
+          <h2 className="text-3xl font-bold text-[#021234]">Anmelden</h2>
           <p className="mt-2 text-gray-600">
             Oder{' '}
             <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-medium">
@@ -82,7 +82,7 @@ export default function SignInPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                   placeholder="ihre@email.de"
                 />
               </div>
@@ -100,7 +100,7 @@ export default function SignInPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                     placeholder="Ihr Passwort"
                   />
                   <button
