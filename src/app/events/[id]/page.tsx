@@ -194,7 +194,7 @@ export default function EventDetailPage() {
                   <Share2 className="h-5 w-5" />
                   {shareSuccess && (
                     <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
-                      {navigator.share ? 'Geteilt!' : 'Link kopiert!'}
+                      {typeof navigator.share !== 'undefined' ? 'Geteilt!' : 'Link kopiert!'}
                     </span>
                   )}
                 </button>

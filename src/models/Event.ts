@@ -1,4 +1,3 @@
-import connectDB from '@/lib/mongodb';
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IEvent extends Document {

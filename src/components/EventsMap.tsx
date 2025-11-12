@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { geocodeLocation, isGeocodingSuccess } from '@/lib/geocoding';
 import { MapPin } from 'lucide-react';
 
@@ -423,7 +423,7 @@ export default function EventsMap({ events }: EventsMapProps) {
       } else {
         setGeocodingError(result.error || 'Ort nicht gefunden');
       }
-    } catch (err) {
+    } catch {
       setGeocodingError('Fehler bei der Ortssuche');
     } finally {
       setIsGeocoding(false);
@@ -581,6 +581,7 @@ export default function EventsMap({ events }: EventsMapProps) {
         isUpdatingMarkersRef.current = false;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isClient]);
 
   // Marker-Update wenn sich Events oder Standort ändern
@@ -588,6 +589,7 @@ export default function EventsMap({ events }: EventsMapProps) {
     if (isMapInitialized && !isUpdatingMarkersRef.current) {
       updateMarkers();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMapInitialized, userLocation, customLocation, locationMode, events, radiusKm]);
 
   // Beim Umschalten den jeweils aktiven Standort in die Kartenmitte setzen
@@ -611,6 +613,7 @@ export default function EventsMap({ events }: EventsMapProps) {
     if (locationMode === 'device' && !userLocation && !isLoadingLocation) {
       getUserLocation();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locationMode]);
 
   // Erfolgsmeldung auto-ausblenden

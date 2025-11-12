@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Event from '@/models/Event';
-import mongoose from 'mongoose';
 
 export async function GET(request: NextRequest) {
   try {
