@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Calendar, MapPin, Clock, Euro, Filter, Search, X, LayoutGrid, Info } from 'lucide-react';
+import { Calendar, MapPin, Clock, Euro, Filter, Search, X, LayoutGrid, Info, Share2 } from 'lucide-react';
 import EventsMap from '@/components/EventsMap';
 // import { useAuth } from '@/components/AuthProvider';
 
@@ -42,6 +42,7 @@ export default function EventsPage() {
   const [timeFrom, setTimeFrom] = useState('');
   const [timeTo, setTimeTo] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [shareSuccessId, setShareSuccessId] = useState<string | null>(null);
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -78,6 +79,38 @@ export default function EventsPage() {
 
   const handleSearch = () => {
     fetchEvents();
+  };
+
+  const handleShare = async (event: Event, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const eventUrl = `${window.location.origin}/events/${event._id}`;
+    const eventTitle = event.title || event.name || 'Event';
+    const shareData = {
+      title: eventTitle,
+      text: `${eventTitle} - ${event.description?.substring(0, 100) || 'Fliegerevent'}`,
+      url: eventUrl,
+    };
+
+    try {
+      // Versuche native Web Share API (funktioniert auf mobilen Geräten und einigen Browsern)
+      if (navigator.share) {
+        await navigator.share(shareData);
+        setShareSuccessId(event._id);
+        setTimeout(() => setShareSuccessId(null), 3000);
+      } else {
+        // Fallback: Link in Zwischenablage kopieren
+        await navigator.clipboard.writeText(eventUrl);
+        setShareSuccessId(event._id);
+        setTimeout(() => setShareSuccessId(null), 3000);
+      }
+    } catch (error) {
+      // Fehler beim Teilen (z.B. Benutzer hat abgebrochen) - ignorieren
+      if ((error as Error).name !== 'AbortError') {
+        console.error('Fehler beim Teilen:', error);
+      }
+    }
   };
 
   const handleSearchInputChange = (value: string) => {
@@ -395,9 +428,24 @@ export default function EventsPage() {
           /* Listen-Ansicht */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
-              <div key={event._id} className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col ${isPastEvent(event) ? 'opacity-60 grayscale' : ''}`}>
+              <div key={event._id} className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col relative ${isPastEvent(event) ? 'opacity-60 grayscale' : ''}`}>
+                {/* Share Button - Positioniert über der gesamten Karte */}
+                <button
+                  onClick={(e) => handleShare(event, e)}
+                  className="absolute top-3 right-3 bg-white text-gray-700 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors shadow-lg z-50"
+                  title="Event teilen"
+                  style={{ zIndex: 50 }}
+                >
+                  <Share2 className="h-5 w-5" />
+                  {shareSuccessId === event._id && (
+                    <span className="absolute -top-10 right-0 bg-gray-900 text-white text-xs px-3 py-1.5 rounded whitespace-nowrap shadow-lg z-50">
+                      {typeof navigator.share !== 'undefined' ? 'Geteilt!' : 'Link kopiert!'}
+                    </span>
+                  )}
+                </button>
+                
                 {event.imageurl && (
-                  <div className="h-48 w-full overflow-hidden">
+                  <div className="h-48 w-full overflow-hidden relative">
                     <img
                       src={event.imageurl}
                       alt={event.title || event.name}
@@ -406,6 +454,10 @@ export default function EventsPage() {
                         e.currentTarget.style.display = 'none';
                       }}
                     />
+                  </div>
+                )}
+                {!event.imageurl && (
+                  <div className="h-48 w-full bg-gray-100 relative">
                   </div>
                 )}
                 <div className="flex flex-col flex-1 p-6">

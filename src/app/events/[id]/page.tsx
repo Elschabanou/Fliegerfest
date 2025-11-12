@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
-import { Calendar, MapPin, Clock, Euro, User, Mail, Phone, Globe, Edit, Trash2, ArrowLeft } from 'lucide-react';
+import { Calendar, MapPin, Clock, Euro, User, Mail, Phone, Globe, Edit, Trash2, ArrowLeft, Share2 } from 'lucide-react';
 
 interface Event {
   _id: string;
@@ -42,6 +42,7 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
 
   const fetchEvent = useCallback(async () => {
     try {
@@ -106,6 +107,35 @@ export default function EventDetailPage() {
     user.id === event.createdBy._id || user.role === 'admin'
   );
 
+  const handleShare = async () => {
+    const eventUrl = `${window.location.origin}/events/${id}`;
+    const eventTitle = event?.title || event?.name || 'Event';
+    const shareData = {
+      title: eventTitle,
+      text: `${eventTitle} - ${event?.description?.substring(0, 100) || 'Fliegerevent'}`,
+      url: eventUrl,
+    };
+
+    try {
+      // Versuche native Web Share API (funktioniert auf mobilen Geräten und einigen Browsern)
+      if (navigator.share) {
+        await navigator.share(shareData);
+        setShareSuccess(true);
+        setTimeout(() => setShareSuccess(false), 3000);
+      } else {
+        // Fallback: Link in Zwischenablage kopieren
+        await navigator.clipboard.writeText(eventUrl);
+        setShareSuccess(true);
+        setTimeout(() => setShareSuccess(false), 3000);
+      }
+    } catch (error) {
+      // Fehler beim Teilen (z.B. Benutzer hat abgebrochen) - ignorieren
+      if ((error as Error).name !== 'AbortError') {
+        console.error('Fehler beim Teilen:', error);
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -149,28 +179,44 @@ export default function EventDetailPage() {
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-8 text-white">
             <div className="flex items-start justify-between">
               <div>
-                <span className="inline-block bg-blue-600 text-white text-sm px-3 py-1 rounded-full mb-3">
+                <span className="inline-block bg-white text-blue-700 text-sm font-semibold px-3 py-1 rounded-full mb-3 shadow-md">
                   {event.eventType || 'Sonstiges'}
                 </span>
                 <h1 className="text-3xl font-bold mb-2">{event.title || event.name}</h1>
                 <p className="text-blue-100">{event.organizer || 'Event'}</p>
               </div>
-              {canEdit && (
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => router.push(`/events/${id}/edit`)}
-                    className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-lg transition-colors"
-                  >
-                    <Edit className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </div>
-              )}
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleShare}
+                  className="bg-white text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition-colors relative shadow-md"
+                  title="Event teilen"
+                >
+                  <Share2 className="h-5 w-5" />
+                  {shareSuccess && (
+                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
+                      {navigator.share ? 'Geteilt!' : 'Link kopiert!'}
+                    </span>
+                  )}
+                </button>
+                {canEdit && (
+                  <>
+                    <button
+                      onClick={() => router.push(`/events/${id}/edit`)}
+                      className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-lg transition-colors"
+                      title="Event bearbeiten"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"
+                      title="Event löschen"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 

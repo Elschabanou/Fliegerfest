@@ -201,9 +201,35 @@ export default function EventsMap({ events }: EventsMapProps) {
       try {
         const userIcon = L.divIcon({
           className: 'user-location-marker',
-          html: '<div style="background-color: #3b82f6; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4);"></div>',
-          iconSize: [16, 16],
-          iconAnchor: [8, 8]
+          html: `
+            <div style="
+              position: relative;
+              width: 32px;
+              height: 32px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              <div style="
+                width: 20px;
+                height: 20px;
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                border-radius: 50%;
+                border: 3px solid white;
+                box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5), 0 0 0 4px rgba(59, 130, 246, 0.2);
+                animation: pulse 2s infinite;
+              "></div>
+              <style>
+                @keyframes pulse {
+                  0%, 100% { transform: scale(1); opacity: 1; }
+                  50% { transform: scale(1.1); opacity: 0.8; }
+                }
+              </style>
+            </div>
+          `,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+          popupAnchor: [0, -16]
         });
         
         const userMarker = L.marker([userLocation.lat, userLocation.lon], { icon: userIcon });
@@ -220,9 +246,28 @@ export default function EventsMap({ events }: EventsMapProps) {
       try {
         const customIcon = L.divIcon({
           className: 'custom-location-marker',
-          html: '<div style="background-color: #8b5cf6; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4);"></div>',
-          iconSize: [16, 16],
-          iconAnchor: [8, 8]
+          html: `
+            <div style="
+              position: relative;
+              width: 32px;
+              height: 32px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              <div style="
+                width: 20px;
+                height: 20px;
+                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                border-radius: 50%;
+                border: 3px solid white;
+                box-shadow: 0 2px 8px rgba(139, 92, 246, 0.5), 0 0 0 4px rgba(139, 92, 246, 0.2);
+              "></div>
+            </div>
+          `,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+          popupAnchor: [0, -16]
         });
         const customMarker = L.marker([customLocation.lat, customLocation.lon], { icon: customIcon });
         customMarker.addTo(mapRef.current);
@@ -247,7 +292,32 @@ export default function EventsMap({ events }: EventsMapProps) {
         
         if (isNaN(lat) || isNaN(lon)) return;
         
-        const marker = L.marker([lat, lon]);
+        // Moderner Event-Marker mit SVG Pin-Icon
+        const eventIcon = L.divIcon({
+          className: 'event-marker',
+          html: `
+            <div style="
+              position: relative;
+              width: 40px;
+              height: 48px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            ">
+              <svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 0C12.268 0 6 6.268 6 14c0 10.5 14 34 14 34s14-23.5 14-34C34 6.268 27.732 0 20 0z" fill="#ef4444" stroke="white" stroke-width="2"/>
+                <circle cx="20" cy="14" r="6" fill="white"/>
+                <circle cx="20" cy="14" r="3" fill="#ef4444"/>
+              </svg>
+            </div>
+          `,
+          iconSize: [40, 48],
+          iconAnchor: [20, 48],
+          popupAnchor: [0, -48]
+        });
+        
+        const marker = L.marker([lat, lon], { icon: eventIcon });
         marker.addTo(mapRef.current);
         const popupMaxWidth = isSmallScreen ? 220 : 320;
         const titleFontSize = isSmallScreen ? 14 : 16;
@@ -255,18 +325,28 @@ export default function EventsMap({ events }: EventsMapProps) {
         const badgeFontSize = isSmallScreen ? 10 : 12;
         const imageHeight = isSmallScreen ? 60 : 80;
         
+        // Beschreibung kürzen für Popup
+        const description = event.description ? 
+          (event.description.length > 100 ? event.description.substring(0, 100) + '...' : event.description) 
+          : '';
+        
         const popupContent = `
-          <div style="padding: 10px; max-width: ${popupMaxWidth}px; font-family: system-ui;">
-            <h3 style="margin: 0 0 8px 0; font-weight: bold; color: #333; font-size: ${titleFontSize}px;">
-              ${event.title || event.name || event._id}
-            </h3>
-            ${event.description ? `<p style="margin: 0 0 8px 0; color: #666; font-size: ${textFontSize}px; line-height: 1.4;">${event.description}</p>` : ''}
-            ${event.date ? `<p style="margin: 0 0 4px 0; color: #333; font-size: ${textFontSize - 1}px;">📅 ${formatDate(event.date)}</p>` : ''}
-            ${event.icao ? `<p style="margin: 0 0 4px 0; color: #333; font-size: ${textFontSize - 1}px;">🛩️ ICAO: ${event.icao}</p>` : ''}
-            ${event.location ? `<p style="margin: 0 0 8px 0; color: #666; font-size: ${textFontSize - 1}px;">📍 ${event.location}</p>` : ''}
-            ${event.eventType ? `<span style="display: inline-block; background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 12px; font-size: ${badgeFontSize}px; margin-top: 8px;">${event.eventType}</span>` : ''}
-            ${event.imageurl ? `<img src="${event.imageurl}" alt="${event.title || event.name}" style="width: 100%; height: ${imageHeight}px; object-fit: cover; border-radius: 4px; margin-top: 8px;" onerror="this.style.display='none'">` : ''}
-          </div>
+          <a href="/events/${event._id}" style="text-decoration: none; color: inherit; display: block; cursor: pointer;" onclick="window.location.href='/events/${event._id}'; return false;">
+            <div style="padding: 10px; max-width: ${popupMaxWidth}px; font-family: system-ui; transition: background-color 0.2s;" onmouseover="this.parentElement.style.backgroundColor='#f3f4f6'" onmouseout="this.parentElement.style.backgroundColor='transparent'">
+              <h3 style="margin: 0 0 8px 0; font-weight: bold; color: #333; font-size: ${titleFontSize}px;">
+                ${event.title || event.name || event._id}
+              </h3>
+              ${description ? `<p style="margin: 0 0 8px 0; color: #666; font-size: ${textFontSize}px; line-height: 1.4;">${description}</p>` : ''}
+              ${event.date ? `<p style="margin: 0 0 4px 0; color: #333; font-size: ${textFontSize - 1}px;">📅 ${formatDate(event.date)}</p>` : ''}
+              ${event.icao ? `<p style="margin: 0 0 4px 0; color: #333; font-size: ${textFontSize - 1}px;">🛩️ ICAO: ${event.icao}</p>` : ''}
+              ${event.location ? `<p style="margin: 0 0 8px 0; color: #666; font-size: ${textFontSize - 1}px;">📍 ${event.location}</p>` : ''}
+              ${event.eventType ? `<span style="display: inline-block; background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 12px; font-size: ${badgeFontSize}px; margin-top: 8px;">${event.eventType}</span>` : ''}
+              ${event.imageurl ? `<img src="${event.imageurl}" alt="${event.title || event.name}" style="width: 100%; height: ${imageHeight}px; object-fit: cover; border-radius: 4px; margin-top: 8px;" onerror="this.style.display='none'">` : ''}
+              <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb; text-align: center;">
+                <span style="color: #3b82f6; font-size: ${textFontSize}px; font-weight: 600;">Details ansehen →</span>
+              </div>
+            </div>
+          </a>
         `;
         
         marker.bindPopup(popupContent, {
@@ -275,6 +355,21 @@ export default function EventsMap({ events }: EventsMapProps) {
           autoPan: true,
           autoPanPaddingTopLeft: [16, isSmallScreen ? 200 : 100],
           autoPanPaddingBottomRight: [16, 40]
+        });
+        
+        // Event-Listener für Klick auf Popup hinzufügen
+        marker.on('popupopen', () => {
+          const popupElement = marker.getPopup()?.getElement();
+          if (popupElement) {
+            const linkElement = popupElement.querySelector('a');
+            if (linkElement) {
+              linkElement.addEventListener('click', (e: MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = `/events/${event._id}`;
+              });
+            }
+          }
         });
 
         // Marker-Deckkraft basierend auf Radius setzen
@@ -406,11 +501,23 @@ export default function EventsMap({ events }: EventsMapProps) {
 
           mapRef.current = map;
           
-          // TileLayer hinzufügen
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19
-          }).addTo(map);
+          // MapTiler OMT Layer hinzufügen
+          const maptilerApiKey = process.env.NEXT_PUBLIC_MAPTILER_API_KEY || '';
+          if (maptilerApiKey) {
+            L.tileLayer(`https://api.maptiler.com/maps/openmaptiles/{z}/{x}/{y}.png?key=${maptilerApiKey}`, {
+              attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              maxZoom: 20,
+              tileSize: 512,
+              zoomOffset: -1
+            }).addTo(map);
+          } else {
+            // Fallback zu OpenStreetMap wenn kein API-Key vorhanden
+            console.warn('MapTiler API-Key nicht gefunden. Verwende OpenStreetMap als Fallback.');
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              maxZoom: 19
+            }).addTo(map);
+          }
 
           // Warten bis Karte vollständig geladen ist
           map.whenReady(() => {
