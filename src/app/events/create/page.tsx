@@ -38,7 +38,7 @@ export default function CreateEventPage() {
   const [geocoding, setGeocoding] = useState(false);
   const [geocodingSuccess, setGeocodingSuccess] = useState<string | null>(null);
   const [showAnimation, setShowAnimation] = useState(false);
-  const [animationData, setAnimationData] = useState<any>(null);
+  const [animationData, setAnimationData] = useState<unknown>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -183,7 +183,7 @@ export default function CreateEventPage() {
           {animationData && (
             <div className="w-64 h-64">
               <Lottie 
-                animationData={animationData} 
+                animationData={animationData as object} 
                 loop={false}
                 autoplay={true}
               />

@@ -12,8 +12,6 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60,
   },
-  // Optimize font loading
-  optimizeFonts: true,
 };
 
 export default nextConfig;
