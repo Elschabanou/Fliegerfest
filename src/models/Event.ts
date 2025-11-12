@@ -14,6 +14,7 @@ export interface IEvent extends Document {
   address?: string;
   startTime?: string;
   endTime?: string;
+  allDay?: boolean;
   eventType?: 'Flugtag' | 'Luftfahrt-Event' | 'Fly-In' | 'Workshop' | 'Vereinsveranstaltung' | 'Sonstiges';
   organizer?: string;
   contactEmail?: string;
@@ -82,6 +83,10 @@ const EventSchema = new Schema<IEvent>({
   endTime: {
     type: String,
     trim: true
+  },
+  allDay: {
+    type: Boolean,
+    default: false
   },
   eventType: {
     type: String,

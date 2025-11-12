@@ -20,6 +20,7 @@ export default function CreateEventPage() {
     date: '',
     startTime: '',
     endTime: '',
+    allDay: false,
     eventType: '',
     organizer: '',
     contactEmail: '',
@@ -104,8 +105,11 @@ export default function CreateEventPage() {
       form.append('location', formData.location);
       form.append('address', formData.address);
       form.append('date', formData.date);
-      form.append('startTime', formData.startTime);
-      form.append('endTime', formData.endTime);
+      if (!formData.allDay) {
+        form.append('startTime', formData.startTime);
+        form.append('endTime', formData.endTime);
+      }
+      form.append('allDay', String(formData.allDay));
       form.append('eventType', formData.eventType);
       form.append('organizer', formData.organizer);
       form.append('contactEmail', formData.contactEmail || (user?.email ?? ''));
@@ -401,7 +405,7 @@ export default function CreateEventPage() {
             </div>
 
             {/* Date and Time */}
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="space-y-4">
               <div>
                 <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
                   Datum *
@@ -417,35 +421,53 @@ export default function CreateEventPage() {
                 />
               </div>
 
-              <div>
-                <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
-                  Startzeit *
-                </label>
+              <div className="flex items-center">
                 <input
-                  type="time"
-                  id="startTime"
-                  name="startTime"
-                  required
-                  value={formData.startTime}
+                  type="checkbox"
+                  id="allDay"
+                  name="allDay"
+                  checked={formData.allDay}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
+                <label htmlFor="allDay" className="ml-2 block text-sm font-medium text-gray-700">
+                  Ganztägige Veranstaltung
+                </label>
               </div>
 
-              <div>
-                <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
-                  Endzeit *
-                </label>
-                <input
-                  type="time"
-                  id="endTime"
-                  name="endTime"
-                  required
-                  value={formData.endTime}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
-                />
-              </div>
+              {!formData.allDay && (
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
+                      Startzeit *
+                    </label>
+                    <input
+                      type="time"
+                      id="startTime"
+                      name="startTime"
+                      required={!formData.allDay}
+                      value={formData.startTime}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
+                      Endzeit *
+                    </label>
+                    <input
+                      type="time"
+                      id="endTime"
+                      name="endTime"
+                      required={!formData.allDay}
+                      value={formData.endTime}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Contact Information */}

@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
         if (key === 'image') return; // Datei separat behandeln
         if (typeof value === 'string') {
           // parse booleans and numbers where applicable
-          if (key === 'registrationRequired') {
+          if (key === 'registrationRequired' || key === 'allDay') {
             eventData[key] = value === 'true' || value === 'on';
           } else if (key === 'maxParticipants') {
             const n = parseInt(value);

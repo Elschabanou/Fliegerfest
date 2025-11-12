@@ -19,6 +19,7 @@ interface Event {
   date: string;
   startTime?: string;
   endTime?: string;
+  allDay?: boolean;
   eventType?: string;
   organizer?: string;
   contactEmail?: string;
@@ -255,7 +256,12 @@ export default function EventDetailPage() {
                         <Calendar className="h-5 w-5 mr-3 text-blue-600" />
                         <span>{formatDate(event.date)}</span>
                       </div>
-                      {event.startTime && event.endTime && (
+                      {event.allDay ? (
+                        <div className="flex items-center text-gray-700">
+                          <Clock className="h-5 w-5 mr-3 text-blue-600" />
+                          <span>Ganztägig</span>
+                        </div>
+                      ) : event.startTime && event.endTime && (
                         <div className="flex items-center text-gray-700">
                           <Clock className="h-5 w-5 mr-3 text-blue-600" />
                           <span>{event.startTime} - {event.endTime}</span>
