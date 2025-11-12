@@ -14,7 +14,7 @@ export interface IEvent extends Document {
   address?: string;
   startTime?: string;
   endTime?: string;
-  eventType?: 'Flugtag' | 'Luftfahrt-Event' | 'Workshop' | 'Vereinsveranstaltung' | 'Sonstiges';
+  eventType?: 'Flugtag' | 'Luftfahrt-Event' | 'Fly-In' | 'Workshop' | 'Vereinsveranstaltung' | 'Sonstiges';
   organizer?: string;
   contactEmail?: string;
   contactPhone?: string;
@@ -85,7 +85,7 @@ const EventSchema = new Schema<IEvent>({
   },
   eventType: {
     type: String,
-    enum: ['Flugtag', 'Luftfahrt-Event', 'Workshop', 'Vereinsveranstaltung', 'Sonstiges'],
+    enum: ['Flugtag', 'Luftfahrt-Event', 'Fly-In', 'Workshop', 'Vereinsveranstaltung', 'Sonstiges'],
     default: 'Sonstiges'
   },
   organizer: {

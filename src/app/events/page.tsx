@@ -285,6 +285,7 @@ export default function EventsPage() {
                 <option value="">Alle Event-Typen</option>
                 <option value="Flugtag">Flugtag</option>
                 <option value="Luftfahrt-Event">Luftfahrt-Event</option>
+                <option value="Fly-In">Fly-In</option>
                 <option value="Workshop">Workshop</option>
                 <option value="Vereinsveranstaltung">Vereinsveranstaltung</option>
                 <option value="Sonstiges">Sonstiges</option>
