@@ -93,7 +93,7 @@ export default function DatenschutzPage() {
                     <p className="text-sm">72119 Ammerbuch</p>
                     <p className="text-sm">Deutschland</p>
                     <p className="text-sm">Telefon: +49 (0) 170 23266609</p>
-                    <p className="text-sm">E-Mail: kontakt@fliegerevents.de</p>
+                    <p className="text-sm">E-Mail:felix@schabana.de</p>
                   </div>
                 </div>
 
