@@ -23,7 +23,7 @@ export default function ImpressumPage() {
               <h2 className="text-xl font-semibold text-[#021234] mb-3">Kontakt</h2>
               <div className="space-y-2">
                 <p><strong>Telefon:</strong> +49 (0) 170 23266609</p>
-                <p><strong>E-Mail:</strong> kontakt@fliegerevents.de</p>
+                <p><strong>E-Mail:</strong> felix@schabana.de</p>
               </div>
             </section>
 
