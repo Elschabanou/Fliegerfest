@@ -88,9 +88,9 @@ export default function DatenschutzPage() {
                   <h3 className="text-lg font-medium text-[#021234] mb-2">Hinweis zur verantwortlichen Stelle</h3>
                   <p className="text-sm">Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:</p>
                   <div className="bg-gray-100 p-4 rounded mt-2">
-                    <p className="text-sm">Felix Schabanou</p>
-                    <p className="text-sm">Musterstraße 123</p>
-                    <p className="text-sm">12345 Musterstadt</p>
+                    <p className="text-sm">Felix Schabana</p>
+                    <p className="text-sm">Uhlandstrasse 49</p>
+                    <p className="text-sm">72119 Ammerbuch</p>
                     <p className="text-sm">Deutschland</p>
                     <p className="text-sm">Telefon: +49 (0) 123 456789</p>
                     <p className="text-sm">E-Mail: kontakt@fliegerevents.de</p>

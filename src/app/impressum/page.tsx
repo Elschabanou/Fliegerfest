@@ -29,7 +29,7 @@ export default function ImpressumPage() {
 
             <section>
               <h2 className="text-xl font-semibold text-[#021234] mb-3">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
-              <p>Felix Schabanou</p>
+              <p>Felix Schabana</p>
               <p>Uhlandstrasse 49</p>
               <p>72119 Ammerbuch</p>
             </section>
