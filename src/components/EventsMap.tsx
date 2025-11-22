@@ -26,9 +26,10 @@ interface Event {
 
 interface EventsMapProps {
   events: Event[];
+  selectedEventType?: string;
 }
 
-export default function EventsMap({ events }: EventsMapProps) {
+export default function EventsMap({ events, selectedEventType = '' }: EventsMapProps) {
   const [isClient, setIsClient] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{lat: number, lon: number} | null>(null);
@@ -278,8 +279,13 @@ export default function EventsMap({ events }: EventsMapProps) {
       }
     }
 
-    // Event-Marker hinzufügen - verwende aktuelle events direkt
-    const currentEventsWithCoords = events.filter(event => {
+    // Filter events by selected event type
+    const filteredEvents = selectedEventType 
+      ? events.filter(event => event.eventType === selectedEventType)
+      : events;
+
+    // Event-Marker hinzufügen - verwende gefilterte events
+    const currentEventsWithCoords = filteredEvents.filter(event => {
       const lat = parseFloat(event.lat || '');
       const lon = parseFloat(event.lon || '');
       return !isNaN(lat) && !isNaN(lon) && lat !== 0 && lon !== 0;
@@ -393,7 +399,7 @@ export default function EventsMap({ events }: EventsMapProps) {
     });
 
     isUpdatingMarkersRef.current = false;
-  }, [userLocation, customLocation, locationMode, events, radiusKm, isMapInitialized, isSmallScreen]);
+  }, [userLocation, customLocation, locationMode, events, radiusKm, isMapInitialized, isSmallScreen, selectedEventType]);
 
   const handleSearchLocation = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -467,8 +473,11 @@ export default function EventsMap({ events }: EventsMapProps) {
         // Karte erstellen
         const mapContainer = mapContainerRef.current;
         if (mapContainer && mapContainer.offsetParent !== null) {
-          // Bestimme Kartenzentrum
-          const eventsWithCoords = events.filter(event => {
+          // Bestimme Kartenzentrum - verwende gefilterte Events
+          const filteredEventsForCenter = selectedEventType 
+            ? events.filter(event => event.eventType === selectedEventType)
+            : events;
+          const eventsWithCoords = filteredEventsForCenter.filter(event => {
             const lat = parseFloat(event.lat || '');
             const lon = parseFloat(event.lon || '');
             return !isNaN(lat) && !isNaN(lon) && lat !== 0 && lon !== 0;
@@ -481,6 +490,7 @@ export default function EventsMap({ events }: EventsMapProps) {
             centerLon = eventsWithCoords.reduce((sum, event) => sum + parseFloat(event.lon!), 0) / eventsWithCoords.length;
             zoom = 8;
           } else {
+            // Standard-Zentrum (Deutschland) wenn keine Events vorhanden
             centerLat = 51.1657; // Deutschland-Mitte
             centerLon = 10.4515;
             zoom = 6;
@@ -590,7 +600,7 @@ export default function EventsMap({ events }: EventsMapProps) {
       updateMarkers();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMapInitialized, userLocation, customLocation, locationMode, events, radiusKm]);
+  }, [isMapInitialized, userLocation, customLocation, locationMode, events, radiusKm, selectedEventType]);
 
   // Beim Umschalten den jeweils aktiven Standort in die Kartenmitte setzen
   useEffect(() => {
@@ -699,7 +709,7 @@ export default function EventsMap({ events }: EventsMapProps) {
       </div>
 
       {/* Karte */}
-      <div className="h-[36rem] sm:h-[32rem] w-full rounded-none sm:rounded-lg overflow-hidden border border-gray-200">
+      <div className="h-[calc(100vh-180px)] sm:h-[32rem] w-full rounded-none sm:rounded-lg overflow-hidden border border-gray-200">
         <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }}></div>
       </div>
 
@@ -718,7 +728,7 @@ export default function EventsMap({ events }: EventsMapProps) {
           onChange={(e) => setRadiusKm(Number(e.target.value))}
           className="w-full"
         />
-        <div className="mt-1 text-xs text-gray-500">Events außerhalb des Radius werden ausgegraut.</div>
+        <div className="mt-1 text-xs text-gray-500 hidden md:block">Events außerhalb des Radius werden ausgegraut.</div>
       </div>
     </div>
   );

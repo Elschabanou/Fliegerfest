@@ -1,17 +1,22 @@
+'use client';
+
 import React from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Footer() {
+  const t = useTranslations('footer');
+  
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-gray-900 text-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo und Beschreibung */}
           <div className="col-span-1 md:col-span-2">
-            <h3 className="text-xl font-bold mb-4">FliegerEvents</h3>
+            <h3 className="text-xl font-bold mb-4">{t('title')}</h3>
             <p className="text-gray-300 mb-4">
-              Ihre Plattform für Luftfahrt-Events, Flugtage und Workshops. 
-              Entdecken Sie spannende Veranstaltungen in der Luftfahrtwelt.
+              {t('description')}
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-300 hover:text-white transition-colors">
@@ -37,31 +42,31 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Navigation</h4>
+            <h4 className="text-lg font-semibold mb-4">{t('navigation')}</h4>
             <ul className="space-y-2">
               <li>
                 <Link href="/" className="text-gray-300 hover:text-white transition-colors">
-                  Startseite
+                  {t('home')}
                 </Link>
               </li>
               <li>
                 <Link href="/events" className="text-gray-300 hover:text-white transition-colors">
-                  Events
+                  {t('events')}
                 </Link>
               </li>
               <li>
                 <Link href="/events/map" className="text-gray-300 hover:text-white transition-colors">
-                  Karte
+                  {t('map')}
                 </Link>
               </li>
               <li>
                 <Link href="/events/create" className="text-gray-300 hover:text-white transition-colors">
-                  Event erstellen
+                  {t('createEvent')}
                 </Link>
               </li>
               <li>
                 <Link href="/account" className="text-gray-300 hover:text-white transition-colors">
-                  Mein Konto
+                  {t('account')}
                 </Link>
               </li>
             </ul>
@@ -69,26 +74,31 @@ export default function Footer() {
 
           {/* Rechtliches */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Rechtliches</h4>
+            <h4 className="text-lg font-semibold mb-4">{t('legal')}</h4>
             <ul className="space-y-2">
               <li>
+                <Link href="/ueber-uns" className="text-gray-300 hover:text-white transition-colors">
+                  {t('about')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/impressum" className="text-gray-300 hover:text-white transition-colors">
-                  Impressum
+                  {t('imprint')}
                 </Link>
               </li>
               <li>
                 <Link href="/datenschutz" className="text-gray-300 hover:text-white transition-colors">
-                  Datenschutz
+                  {t('privacy')}
                 </Link>
               </li>
               <li>
                 <a href="#" className="text-gray-300 hover:text-white transition-colors">
-                  AGB
+                  {t('terms')}
                 </a>
               </li>
               <li>
                 <a href="#" className="text-gray-300 hover:text-white transition-colors">
-                  Cookie-Richtlinie
+                  {t('cookies')}
                 </a>
               </li>
             </ul>
@@ -97,10 +107,14 @@ export default function Footer() {
 
         {/* Unterer Bereich */}
         <div className="border-t border-gray-800 mt-8 pt-8">
-          <div className="flex justify-center">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-300 text-sm">
-              © {new Date().getFullYear()} FliegerEvents. Alle Rechte vorbehalten.
+              {t('copyright', { year: new Date().getFullYear() })}
             </p>
+            <div className="flex items-center gap-2 relative">
+              <span className="text-gray-300 text-sm">{t('language')}:</span>
+              <LanguageSwitcher direction="up" />
+            </div>
           </div>
         </div>
       </div>

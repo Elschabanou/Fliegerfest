@@ -1,0 +1,407 @@
+{
+  "nav": {
+    "events": "Events finden",
+    "about": "Über uns",
+    "createEvent": "Event erstellen",
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "account": "Mein Konto",
+    "logout": "Abmelden"
+  },
+  "footer": {
+    "title": "FliegerEvents",
+    "description": "Ihre Plattform für Luftfahrt-Events, Flugtage und Workshops. Entdecken Sie spannende Veranstaltungen in der Luftfahrtwelt.",
+    "navigation": "Navigation",
+    "legal": "Rechtliches",
+    "home": "Startseite",
+    "events": "Events",
+    "map": "Karte",
+    "createEvent": "Event erstellen",
+    "account": "Mein Konto",
+    "about": "Über uns",
+    "imprint": "Impressum",
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "cookies": "Cookie-Richtlinie",
+    "copyright": "© {year} FliegerEvents. Alle Rechte vorbehalten.",
+    "language": "Sprache"
+  },
+  "home": {
+    "hero": {
+      "title": "Verpasse keine Flugtage mehr!",
+      "subtitle": "Entdecken Sie die besten Flugtage, Luftfahrt-Events und Workshops in Ihrer Nähe"
+    },
+    "quickActions": {
+      "flyIn": {
+        "title": "Fly-In / Flugtag",
+        "description": "Events entdecken"
+      },
+      "map": {
+        "title": "Karte",
+        "description": "Events auf der Karte"
+      },
+      "fair": {
+        "title": "Messe",
+        "description": "Luftfahrt-Messen"
+      },
+      "workshop": {
+        "title": "Workshops",
+        "description": "Workshops finden"
+      },
+      "other": {
+        "title": "Sonstiges",
+        "description": "z.B. Reisen oder Ausflüge"
+      },
+      "create": {
+        "title": "Event erstellen",
+        "description": "Neues Event anlegen"
+      }
+    },
+    "featuredEvents": {
+      "title": "Vorgeschlagene Events",
+      "seeAll": "Alle sehen",
+      "allDay": "Ganztägig",
+      "icao": "ICAO: {icao}"
+    },
+    "cta": {
+      "title": "An Ihrem Flugplatz ist auch ein Event?",
+      "subtitle": "Registrieren Sie sich kostenlos und erstellen Sie Ihre eigenes Event",
+      "button": "Jetzt registrieren"
+    }
+  },
+  "events": {
+    "list": "Liste",
+    "map": "Karte",
+    "searchPlaceholder": "Suche nach allem: Name, Beschreibung, Ort, ICAO, Organisator, E-Mail...",
+    "searchTips": "Suchtipps:",
+    "searchTipsText": "Sie können nach Namen, Beschreibungen, Orten, ICAO-Codes, Organisatoren, E-Mail-Adressen, Telefonnummern, Websites und Tags suchen.",
+    "allEventTypes": "Alle Event-Typen",
+    "eventTypes": {
+      "Flugtag": "Flugtag",
+      "Messe": "Messe",
+      "Fly-In": "Fly-In",
+      "Workshop": "Workshop",
+      "Vereinsveranstaltung": "Vereinsveranstaltung",
+      "Sonstiges": "Sonstiges"
+    },
+    "timeFilter": "Zeit-Filter",
+    "search": "Suchen",
+    "today": "Heute",
+    "thisWeek": "Diese Woche",
+    "thisMonth": "Dieser Monat",
+    "clearAllFilters": "Alle Filter löschen",
+    "fromDate": "Von Datum",
+    "toDate": "Bis Datum",
+    "fromTime": "Von Zeit",
+    "toTime": "Bis Zeit",
+    "activeFilters": "Aktive Filter:",
+    "type": "Typ",
+    "searchTerm": "Suche",
+    "from": "Ab",
+    "to": "Bis",
+    "eventsOnMap": "Events auf der Karte",
+    "loadingEvents": "Events werden geladen...",
+    "loadingMap": "Karte wird geladen...",
+    "noEventsFound": "Keine Events gefunden",
+    "noEventsText": "Versuchen Sie andere Suchkriterien oder erstellen Sie ein neues Event.",
+    "allDay": "Ganztägig",
+    "noDescription": "Keine Beschreibung verfügbar.",
+    "by": "von",
+    "viewDetails": "Details ansehen →",
+    "share": "Event teilen",
+    "shared": "Geteilt!",
+    "linkCopied": "Link kopiert!",
+    "icao": "ICAO: {icao}",
+    "eventType": "Event-Typ"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Anmelden",
+      "subtitle": "Oder",
+      "createAccount": "erstellen Sie ein neues Konto",
+      "email": "E-Mail-Adresse",
+      "emailPlaceholder": "ihre@email.de",
+      "password": "Passwort",
+      "passwordPlaceholder": "Ihr Passwort",
+      "submit": "Anmelden",
+      "submitting": "Wird angemeldet...",
+      "backToHome": "Zurück zur Startseite"
+    },
+    "signUp": {
+      "title": "Konto erstellen",
+      "subtitle": "Oder",
+      "signIn": "melden Sie sich mit Ihrem bestehenden Konto an",
+      "name": "Vollständiger Name",
+      "namePlaceholder": "Max Mustermann",
+      "email": "E-Mail-Adresse",
+      "emailPlaceholder": "max@example.de",
+      "password": "Passwort",
+      "passwordPlaceholder": "Mindestens 6 Zeichen",
+      "confirmPassword": "Passwort bestätigen",
+      "confirmPasswordPlaceholder": "Passwort wiederholen",
+      "submit": "Konto erstellen",
+      "submitting": "Wird erstellt...",
+      "success": "Registrierung erfolgreich!",
+      "successMessage": "Ihr Konto wurde erfolgreich erstellt. Sie werden zur Anmeldeseite weitergeleitet...",
+      "signInNow": "Jetzt anmelden",
+      "backToHome": "Zurück zur Startseite",
+      "passwordMismatch": "Passwörter stimmen nicht überein",
+      "passwordTooShort": "Passwort muss mindestens 6 Zeichen haben"
+    }
+  },
+  "about": {
+    "title": "Über Fliegerevents",
+    "subtitle": "Ihre zentrale Anlaufstelle für alle Luftfahrt-Events und Flugtage in Deutschland",
+    "description": "Wir verbinden die Luftfahrt-Community und machen es einfach, spannende Events zu entdecken, zu organisieren und zu teilen. Ob Flugtag, Fly-In, Workshop oder Vereinsveranstaltung – bei uns finden Sie alles, was die Luftfahrt zu bieten hat.",
+    "discoverEvents": "Events entdecken",
+    "mission": {
+      "title": "Unsere Mission",
+      "subtitle": "Die Luftfahrt-Community zu stärken und den Zugang zu spannenden Events zu erleichtern",
+      "passion": {
+        "title": "Leidenschaft",
+        "description": "Wir teilen die Leidenschaft für die Luftfahrt und möchten diese mit anderen teilen"
+      },
+      "community": {
+        "title": "Community",
+        "description": "Wir bringen Privatflieger zusammen und fördern den Austausch in der Community"
+      },
+      "accessibility": {
+        "title": "Zugänglichkeit",
+        "description": "Wir machen es einfach, Events zu finden, zu organisieren und zu besuchen"
+      }
+    },
+    "why": {
+      "title": "Warum Fliegerevents?",
+      "subtitle": "Entdecken Sie die Vorteile unserer Plattform",
+      "findEvents": {
+        "title": "Events finden",
+        "description": "Entdecken Sie Flugtage, Workshops und Luftfahrt-Events in Ihrer Nähe mit unserer intelligenten Suchfunktion"
+      },
+      "locationBased": {
+        "title": "Standort-basiert",
+        "description": "Finden Sie Events in Ihrer Region oder an Ihrem bevorzugten Flugplatz mit unserer interaktiven Karte"
+      },
+      "community": {
+        "title": "Community",
+        "description": "Treffen Sie andere Privatflieger, tauschen Sie sich aus und teilen Sie Ihre Leidenschaft für die Luftfahrt"
+      },
+      "upToDate": {
+        "title": "Immer aktuell",
+        "description": "Bleiben Sie über die neuesten Events und Termine informiert – unsere Plattform wird täglich aktualisiert"
+      }
+    },
+    "whatWeOffer": {
+      "title": "Was wir bieten",
+      "eventList": {
+        "title": "Umfassende Event-Liste",
+        "description": "Durchsuchen Sie Hunderte von Events nach Typ, Datum, Ort oder anderen Kriterien. Von Flugtagen über Fly-Ins bis hin zu Workshops – wir haben alles."
+      },
+      "createEvents": {
+        "title": "Eigene Events erstellen",
+        "description": "Organisieren Sie Ihr eigenes Event und teilen Sie es mit der Community. Einfach, schnell und kostenlos."
+      },
+      "interactiveMap": {
+        "title": "Interaktive Karte",
+        "description": "Visualisieren Sie Events auf einer interaktiven Karte und finden Sie Veranstaltungen in Ihrer Nähe auf einen Blick."
+      },
+      "communityNetwork": {
+        "title": "Community-Netzwerk",
+        "description": "Vernetzen Sie sich mit anderen Piloten, Vereinen und Organisationen. Teilen Sie Ihre Erfahrungen und lernen Sie voneinander."
+      }
+    },
+    "cta": {
+      "title": "Bereit, loszulegen?",
+      "subtitle": "Entdecken Sie spannende Events oder erstellen Sie Ihr eigenes",
+      "discoverEvents": "Events entdecken",
+      "createEvent": "Event erstellen"
+    }
+  },
+  "create": {
+    "title": "Event erstellen",
+    "back": "Zurück",
+    "backToEvents": "Zurück zu den Events",
+    "subtitle": "Teilen Sie Ihr Fliegerevent mit der Community",
+    "titleLabel": "Event-Titel",
+    "titlePlaceholder": "z.B. Flugtag am Flugplatz XYZ",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "Beschreiben Sie Ihr Event...",
+    "location": "Ort/Flugplatz",
+    "locationPlaceholder": "z.B. Flugplatz Mainz-Finthen",
+    "address": "Vollständige Adresse",
+    "addressPlaceholder": "Straße, PLZ Ort",
+    "geocode": "Koordinaten finden",
+    "geocoding": "Wird gesucht...",
+    "geocodeSuccess": "Koordinaten gefunden: {name}",
+    "geocodeTitle": "Koordinaten für Karte",
+    "latitude": "Breitengrad (Latitude)",
+    "longitude": "Längengrad (Longitude)",
+    "latitudePlaceholder": "z.B. 47.6500279",
+    "longitudePlaceholder": "z.B. 9.4800858",
+    "geocodeHint": "💡 Klicken Sie auf \"Koordinaten finden\" um automatisch die Koordinaten für Ihren Ort zu ermitteln. Diese werden benötigt, damit Ihr Event auf der Karte angezeigt wird.",
+    "date": "Datum",
+    "startTime": "Startzeit",
+    "endTime": "Endzeit",
+    "allDay": "Ganztägige Veranstaltung",
+    "eventType": "Event-Typ",
+    "eventTypeSelect": "Bitte wählen...",
+    "organizer": "Veranstalter",
+    "organizerPlaceholder": "Ihr Name oder Verein",
+    "contactEmail": "Kontakt-E-Mail",
+    "contactEmailPlaceholder": "kontakt@example.de",
+    "contactPhone": "Kontakt-Telefon (optional)",
+    "contactPhonePlaceholder": "+49 123 456789",
+    "maxParticipants": "Max. Teilnehmer (optional)",
+    "maxParticipantsPlaceholder": "z.B. 50",
+    "registrationRequired": "Anmeldung erforderlich",
+    "entryFee": "Eintrittspreis (€)",
+    "entryFeePlaceholder": "0.00",
+    "website": "Website (optional)",
+    "websitePlaceholder": "https://www.example.de",
+    "tags": "Tags (optional)",
+    "tagsPlaceholder": "Segelflug, Ultraleicht, Oldtimer (durch Komma getrennt)",
+    "image": "Titelbild (optional)",
+    "submit": "Event erstellen",
+    "submitting": "Wird erstellt...",
+    "locationRequired": "Bitte geben Sie einen Ort oder eine Adresse ein",
+    "geocodeError": "Fehler beim Abrufen der Koordinaten",
+    "success": "Event erfolgreich erstellt!",
+    "successMessage": "Sie werden zur Event-Seite weitergeleitet...",
+    "loading": "Wird geladen..."
+  },
+  "eventDetails": {
+    "loading": "Event wird geladen...",
+    "notFound": "Event nicht gefunden",
+    "backToEvents": "Zurück zu den Events",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "deleteConfirm": "Sind Sie sicher, dass Sie dieses Event löschen möchten?",
+    "deleteError": "Fehler beim Löschen des Events",
+    "share": "Teilen",
+    "shared": "Geteilt!",
+    "linkCopied": "Link kopiert!",
+    "allDay": "Ganztägig",
+    "entryFee": "Eintrittspreis",
+    "free": "Kostenlos",
+    "organizer": "Veranstalter",
+    "contact": "Kontakt",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "website": "Website",
+    "maxParticipants": "Max. Teilnehmer",
+    "registrationRequired": "Anmeldung erforderlich",
+    "tags": "Tags",
+    "createdBy": "Erstellt von",
+    "location": "Ort",
+    "address": "Adresse",
+    "icao": "ICAO",
+    "coordinates": "Koordinaten",
+    "latitude": "Breitengrad",
+    "longitude": "Längengrad",
+    "description": "Beschreibung",
+    "eventDetails": "Event-Details",
+    "visitWebsite": "Website besuchen",
+    "contactOrganizer": "Bitte kontaktieren Sie den Veranstalter."
+  },
+  "account": {
+    "title": "Mein Konto",
+    "userInfo": "Benutzerinformationen",
+    "name": "Name",
+    "email": "E-Mail",
+    "role": "Rolle",
+    "memberSince": "Mitglied seit",
+    "myEvents": "Meine Events",
+    "noEvents": "Sie haben noch keine Events erstellt.",
+    "createEvent": "Event erstellen",
+    "loading": "Wird geladen...",
+    "delete": "Löschen",
+    "deleteConfirm": "Sind Sie sicher, dass Sie dieses Event löschen möchten?",
+    "deleteError": "Fehler beim Löschen des Events",
+    "edit": "Bearbeiten",
+    "logout": "Abmelden",
+    "unauthorized": "Nicht autorisiert",
+    "pleaseSignIn": "Bitte melden Sie sich an, um Ihr Konto zu sehen.",
+    "subtitle": "Verwalten Sie Ihre persönlichen Informationen und Ihre Events",
+    "noEventsTitle": "Keine Events gefunden",
+    "view": "Ansehen",
+    "deleting": "Löschen..."
+  },
+  "impressum": {
+    "title": "Impressum",
+    "operator": "Betreiber der Website:",
+    "contact": "Kontakt",
+    "phone": "Telefon",
+    "email": "E-Mail",
+    "description": "Beschreibung",
+    "responsible": "Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV",
+    "disclaimer": "Haftungsausschluss",
+    "contentLiability": "Haftung für Inhalte",
+    "contentLiabilityText": "Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht unter der Verpflichtung, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.",
+    "linkLiability": "Haftung für Links",
+    "linkLiabilityText": "Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.",
+    "copyright": "Urheberrecht",
+    "copyrightText": "Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.",
+    "disputeResolution": "Streitschlichtung",
+    "disputeResolutionText1": "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:",
+    "disputeResolutionText2": "Unsere E-Mail-Adresse finden Sie oben im Impressum.",
+    "disputeResolutionText3": "Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen."
+  },
+  "datenschutz": {
+    "title": "Datenschutzerklärung",
+    "overview": "Datenschutz auf einen Blick",
+    "general": "Allgemeine Hinweise",
+    "generalText": "Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese Website besuchen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können. Ausführliche Informationen zum Thema Datenschutz entnehmen Sie unserer unter diesem Text aufgeführten Datenschutzerklärung.",
+    "dataCollection": "Datenerfassung auf dieser Website",
+    "whoResponsible": "Wer ist verantwortlich für die Datenerfassung auf dieser Website?",
+    "whoResponsibleText": "Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen Kontaktdaten können Sie dem Abschnitt „Hinweis zur Verantwortlichen Stelle\" in dieser Datenschutzerklärung entnehmen.",
+    "howCollect": "Wie erfassen wir Ihre Daten?",
+    "howCollectText1": "Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese mitteilen. Hierbei kann es sich z. B. um Daten handeln, die Sie in ein Kontaktformular eingeben.",
+    "howCollectText2": "Andere Daten werden automatisch oder nach Ihrer Einwilligung beim Besuch der Website durch unsere IT-Systeme erfasst. Das sind vor allem technische Daten (z. B. Internetbrowser, Betriebssystem oder Uhrzeit des Seitenaufrufs). Die Erfassung dieser Daten erfolgt automatisch, sobald Sie diese Website betreten.",
+    "whyUse": "Wofür nutzen wir Ihre Daten?",
+    "whyUseText": "Ein Teil der Daten wird erhoben, um eine fehlerfreie Bereitstellung der Website zu gewährleisten. Andere Daten können zur Analyse Ihres Nutzerverhaltens verwendet werden.",
+    "yourRights": "Welche Rechte haben Sie bezüglich Ihrer Daten?",
+    "yourRightsText": "Sie haben jederzeit das Recht, unentgeltlich Auskunft über Herkunft, Empfänger und Zweck Ihrer gespeicherten personenbezogenen Daten zu erhalten. Sie haben außerdem ein Recht, die Berichtigung oder Löschung dieser Daten zu verlangen. Wenn Sie eine Einwilligung zur Datenverarbeitung erteilt haben, können Sie diese Einwilligung jederzeit für die Zukunft widerrufen.",
+    "hosting": "Hosting",
+    "hostingText": "Wir hosten die Inhalte unserer Website bei folgendem Anbieter:",
+    "hostingProvider": "Vercel Inc.",
+    "hostingAddress": "340 S Lemon Ave #4133",
+    "hostingCity": "Walnut, CA 91789",
+    "hostingCountry": "USA",
+    "hostingPrivacy": "Datenschutzerklärung von Vercel",
+    "generalInfo": "Allgemeine Hinweise und Pflichtinformationen",
+    "privacy": "Datenschutz",
+    "privacyText": "Die Betreiber dieser Seiten nehmen den Schutz Ihrer persönlichen Daten sehr ernst. Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend den gesetzlichen Datenschutzvorschriften sowie dieser Datenschutzerklärung.",
+    "responsibleParty": "Hinweis zur verantwortlichen Stelle",
+    "responsiblePartyText": "Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:",
+    "storageDuration": "Speicherdauer",
+    "storageDurationText": "Soweit innerhalb dieser Datenschutzerklärung keine speziellere Speicherdauer genannt wurde, verbleiben Ihre personenbezogenen Daten bei uns, bis der Zweck für die Datenverarbeitung entfällt. Wenn Sie ein berechtigtes Löschersuchen geltend machen oder eine Einwilligung zur Datenverarbeitung widerrufen, werden Ihre Daten gelöscht, sofern wir keine anderen rechtlich zulässigen Gründe für die Speicherung Ihrer personenbezogenen Daten haben.",
+    "serverLogs": "Server-Log-Dateien",
+    "serverLogsText": "Der Provider der Seiten erhebt und speichert automatisch Informationen in so genannten Server-Log-Dateien, die Ihr Browser automatisch an uns übermittelt. Dies sind:",
+    "serverLogsItems": {
+      "browser": "Browsertyp und Browserversion",
+      "os": "verwendetes Betriebssystem",
+      "referrer": "Referrer URL",
+      "hostname": "Hostname des zugreifenden Rechners",
+      "time": "Uhrzeit der Serveranfrage",
+      "ip": "IP-Adresse"
+    },
+    "contactForm": "Kontaktformular",
+    "contactFormText": "Wenn Sie uns per Kontaktformular Anfragen zukommen lassen, werden Ihre Angaben aus dem Anfrageformular inklusive der von Ihnen dort angegebenen Kontaktdaten zwecks Bearbeitung der Anfrage und für den Fall von Anschlussfragen bei uns gespeichert. Diese Daten geben wir nicht ohne Ihre Einwilligung weiter.",
+    "newsletter": "Newsletter",
+    "newsletterText": "Wenn Sie den auf der Website angebotenen Newsletter beziehen möchten, benötigen wir von Ihnen eine E-Mail-Adresse sowie Informationen, welche uns die Überprüfung gestatten, dass Sie der Inhaber der angegebenen E-Mail-Adresse sind und mit dem Empfang des Newsletters einverstanden sind.",
+    "plugins": "Plugins und Tools",
+    "googleFonts": "Google Fonts (lokales Hosting)",
+    "googleFontsText": "Diese Seite nutzt zur einheitlichen Darstellung von Schriftarten so genannte Google Fonts, die von Google bereitgestellt werden. Die Google Fonts sind lokal installiert. Eine Verbindung zu Servern von Google findet dabei nicht statt.",
+    "erecht24": "eRecht24 Safe Sharing",
+    "erecht24Text": "Diese Datenschutzerklärung wurde mit dem Datenschutzerklärungs-Generator der eRecht24 erstellt."
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Ein Fehler ist aufgetreten",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "back": "Zurück"
+  }
+}
+

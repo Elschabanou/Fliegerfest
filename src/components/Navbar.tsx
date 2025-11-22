@@ -1,14 +1,18 @@
 'use client';
 
 import { useAuth } from './AuthProvider';
-import Link from 'next/link';
+import { Link, usePathname } from '@/i18n/routing';
 import Image from 'next/image';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Menu, X, User, LogOut, Plus } from 'lucide-react';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const t = useTranslations('nav');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <nav className="bg-white shadow-lg">
@@ -29,9 +33,23 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/events" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-              Events
+            <Link 
+              href="/events" 
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                pathname === '/events' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+              }`}
+            >
+              {t('events')}
             </Link>
+            <Link 
+              href="/ueber-uns" 
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                pathname === '/ueber-uns' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+              }`}
+            >
+              {t('about')}
+            </Link>
+
             
             {user && (
               <Link
@@ -39,14 +57,19 @@ export default function Navbar() {
                 className="flex items-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
               >
                 <Plus className="h-4 w-4" />
-                <span>Event erstellen</span>
+                <span>{t('createEvent')}</span>
               </Link>
             )}
 
             {user ? (
               <div className="flex items-center space-x-4">
-                <Link href="/account" className="flex items-center space-x-2 text-sm text-gray-700 hover:text-blue-600">
-                  <User className="h-5 w-5 text-gray-500" />
+                <Link 
+                  href="/account" 
+                  className={`flex items-center space-x-2 text-sm transition-colors ${
+                    pathname === '/account' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                  }`}
+                >
+                  <User className={`h-5 w-5 ${pathname === '/account' ? 'text-blue-600' : 'text-gray-500'}`} />
                   <span>{user.name}</span>
                   </Link>
               </div>
@@ -54,22 +77,26 @@ export default function Navbar() {
               <div className="flex items-center space-x-4">
                 <Link
                   href="/auth/signin"
-                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    pathname === '/auth/signin' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                  }`}
                 >
-                  Anmelden
+                  {t('signIn')}
                 </Link>
                 <Link
                   href="/auth/signup"
                   className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
                 >
-                  Registrieren
+                  {t('signUp')}
                 </Link>
               </div>
             )}
+            <LanguageSwitcher />
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-2">
+            <LanguageSwitcher />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-700 hover:text-blue-600"
@@ -85,10 +112,12 @@ export default function Navbar() {
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
               <Link
                 href="/events"
-                className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  pathname === '/events' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                Events
+                {t('events')}
               </Link>
               
               {user && (
@@ -97,7 +126,7 @@ export default function Navbar() {
                   className="bg-blue-600 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Event erstellen
+                  {t('createEvent')}
                 </Link>
               )}
 
@@ -106,11 +135,13 @@ export default function Navbar() {
                   <Link
                     href="/account"
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
+                    className={`flex items-center px-3 py-2 rounded-md hover:bg-gray-100 transition-colors ${
+                      pathname === '/account' ? 'bg-blue-50' : ''
+                    }`}
                   >
-                    <User className="h-5 w-5 text-gray-500" />
+                    <User className={`h-5 w-5 ${pathname === '/account' ? 'text-blue-600' : 'text-gray-500'}`} />
                     <div className="ml-3">
-                      <div className="text-base font-medium text-gray-800">{user.name}</div>
+                      <div className={`text-base font-medium ${pathname === '/account' ? 'text-blue-600' : 'text-gray-800'}`}>{user.name}</div>
                       <div className="text-sm font-medium text-gray-500">{user.email}</div>
                     </div>
                   </Link>
@@ -123,7 +154,7 @@ export default function Navbar() {
                       className="flex items-center space-x-2 text-gray-700 hover:text-red-600 w-full text-left px-3 py-2 rounded-md text-base font-medium"
                     >
                       <LogOut className="h-4 w-4" />
-                      <span>Abmelden</span>
+                      <span>{t('logout')}</span>
                     </button>
                   </div>
                 </div>
@@ -131,17 +162,19 @@ export default function Navbar() {
                 <div className="pt-4 pb-3 border-t border-gray-200">
                   <Link
                     href="/auth/signin"
-                    className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
+                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                      pathname === '/auth/signin' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                    }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Anmelden
+                    {t('signIn')}
                   </Link>
                   <Link
                     href="/auth/signup"
                     className="bg-blue-600 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 mt-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Registrieren
+                    {t('signUp')}
                   </Link>
                 </div>
               )}

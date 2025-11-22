@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import Image from 'next/image';
-import { Calendar, MapPin, Users, Clock, Plane, Plus, ArrowRight, Building2, GraduationCap, Briefcase } from 'lucide-react';
+import { Calendar, MapPin, Plane, Plus, ArrowRight, Building2, GraduationCap, Briefcase } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
+import { useLocale } from 'next-intl';
 
 interface Event {
   _id: string;
@@ -25,6 +27,8 @@ interface Event {
 
 export default function HomePage() {
   const { user } = useAuth();
+  const t = useTranslations();
+  const locale = useLocale();
   const [featuredEvents, setFeaturedEvents] = useState<Event[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
 
@@ -55,7 +59,7 @@ export default function HomePage() {
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('de-DE', { 
+    return date.toLocaleDateString(locale === 'de' ? 'de-DE' : locale === 'fr' ? 'fr-FR' : 'en-US', { 
       day: '2-digit', 
       month: '2-digit', 
       year: 'numeric' 
@@ -77,10 +81,10 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center text-white">
             <h1 className="text-3xl md:text-5xl font-bold mb-4">
-              Verpasse keine Flugtage mehr!
+              {t('home.hero.title')}
             </h1>
             <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
-              Entdecken Sie die besten Flugtage, Luftfahrt-Events und Workshops in Ihrer Nähe
+              {t('home.hero.subtitle')}
             </p>
           </div>
         </div>
@@ -98,8 +102,8 @@ export default function HomePage() {
               <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-100 transition-colors">
                 <Plane className="h-6 w-6 text-gray-600 group-hover:text-blue-600 transition-colors" />
               </div>
-              <h3 className="text-base font-semibold text-[#021234] mb-1">Fly-In / Flugtag</h3>
-              <p className="text-xs text-gray-600">Events entdecken</p>
+              <h3 className="text-base font-semibold text-[#021234] mb-1">{t('home.quickActions.flyIn.title')}</h3>
+              <p className="text-xs text-gray-600">{t('home.quickActions.flyIn.description')}</p>
             </Link>
             
             {/* Karte Card */}
@@ -110,8 +114,8 @@ export default function HomePage() {
               <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center mb-3 group-hover:bg-purple-100 transition-colors">
                 <MapPin className="h-6 w-6 text-gray-600 group-hover:text-purple-600 transition-colors" />
               </div>
-              <h3 className="text-base font-semibold text-[#021234] mb-1">Karte</h3>
-              <p className="text-xs text-gray-600">Events auf der Karte</p>
+              <h3 className="text-base font-semibold text-[#021234] mb-1">{t('home.quickActions.map.title')}</h3>
+              <p className="text-xs text-gray-600">{t('home.quickActions.map.description')}</p>
             </Link>
 
             {/* Messe Card */}
@@ -122,8 +126,8 @@ export default function HomePage() {
               <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center mb-3 group-hover:bg-red-100 transition-colors">
                 <Building2 className="h-6 w-6 text-gray-600 group-hover:text-red-600 transition-colors" />
               </div>
-              <h3 className="text-base font-semibold text-[#021234] mb-1">Messe</h3>
-              <p className="text-xs text-gray-600">Luftfahrt-Messen</p>
+              <h3 className="text-base font-semibold text-[#021234] mb-1">{t('home.quickActions.fair.title')}</h3>
+              <p className="text-xs text-gray-600">{t('home.quickActions.fair.description')}</p>
             </Link>
 
             {/* Workshops Card */}
@@ -134,8 +138,8 @@ export default function HomePage() {
               <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center mb-3 group-hover:bg-yellow-100 transition-colors">
                 <GraduationCap className="h-6 w-6 text-gray-600 group-hover:text-yellow-600 transition-colors" />
               </div>
-              <h3 className="text-base font-semibold text-[#021234] mb-1">Workshops</h3>
-              <p className="text-xs text-gray-600">Workshops finden</p>
+              <h3 className="text-base font-semibold text-[#021234] mb-1">{t('home.quickActions.workshop.title')}</h3>
+              <p className="text-xs text-gray-600">{t('home.quickActions.workshop.description')}</p>
             </Link>
 
             {/* Sonstiges Card */}
@@ -146,8 +150,8 @@ export default function HomePage() {
               <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center mb-3 group-hover:bg-indigo-100 transition-colors">
                 <Briefcase className="h-6 w-6 text-gray-600 group-hover:text-indigo-600 transition-colors" />
               </div>
-              <h3 className="text-base font-semibold text-[#021234] mb-1">Sonstiges</h3>
-              <p className="text-xs text-gray-600">z.B. Reisen oder Ausflüge</p>
+              <h3 className="text-base font-semibold text-[#021234] mb-1">{t('home.quickActions.other.title')}</h3>
+              <p className="text-xs text-gray-600">{t('home.quickActions.other.description')}</p>
             </Link>
 
             {/* Event erstellen Card */}
@@ -158,8 +162,8 @@ export default function HomePage() {
               <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center mb-3 group-hover:bg-orange-100 transition-colors">
                 <Plus className="h-6 w-6 text-gray-600 group-hover:text-orange-600 transition-colors" />
               </div>
-              <h3 className="text-base font-semibold text-[#021234] mb-1">Event erstellen</h3>
-              <p className="text-xs text-gray-600">Neues Event anlegen</p>
+              <h3 className="text-base font-semibold text-[#021234] mb-1">{t('home.quickActions.create.title')}</h3>
+              <p className="text-xs text-gray-600">{t('home.quickActions.create.description')}</p>
             </Link>
           </div>
         </div>
@@ -171,13 +175,13 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl md:text-3xl font-bold text-[#021234]">
-                Vorgeschlagene Events
+                {t('home.featuredEvents.title')}
               </h2>
               <Link
                 href="/events"
                 className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold transition-colors"
               >
-                Alle sehen
+                {t('home.featuredEvents.seeAll')}
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
@@ -250,7 +254,7 @@ export default function HomePage() {
                               <span className="ml-2">{event.startTime}</span>
                             )}
                             {event.allDay && (
-                              <span className="ml-2">Ganztägig</span>
+                              <span className="ml-2">{t('home.featuredEvents.allDay')}</span>
                             )}
                           </div>
                         )}
@@ -264,7 +268,7 @@ export default function HomePage() {
                         
                         {event.icao && (
                           <div className="text-sm text-gray-500">
-                            ICAO: {event.icao}
+                            {t('home.featuredEvents.icao', { icao: event.icao })}
                           </div>
                         )}
                       </div>
@@ -283,16 +287,16 @@ export default function HomePage() {
         <div className="py-24 bg-blue-600">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-             An Ihrem Flugplatz ist auch ein Event?
+              {t('home.cta.title')}
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Registrieren Sie sich kostenlos und erstellen Sie Ihre eigenes Event
+              {t('home.cta.subtitle')}
             </p>
             <Link
               href="/auth/signup"
               className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors inline-block"
             >
-              Jetzt registrieren
+              {t('home.cta.button')}
             </Link>
           </div>
         </div>
@@ -300,3 +304,4 @@ export default function HomePage() {
     </div>
   );
 }
+

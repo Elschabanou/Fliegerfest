@@ -1,0 +1,406 @@
+{
+  "nav": {
+    "events": "Find Events",
+    "about": "About Us",
+    "createEvent": "Create Event",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "account": "My Account",
+    "logout": "Logout"
+  },
+  "footer": {
+    "title": "FliegerEvents",
+    "description": "Your platform for aviation events, air shows and workshops. Discover exciting events in the aviation world.",
+    "navigation": "Navigation",
+    "legal": "Legal",
+    "home": "Home",
+    "events": "Events",
+    "map": "Map",
+    "createEvent": "Create Event",
+    "account": "My Account",
+    "about": "About Us",
+    "imprint": "Imprint",
+    "privacy": "Privacy Policy",
+    "terms": "Terms & Conditions",
+    "cookies": "Cookie Policy",
+    "copyright": "© {year} FliegerEvents. All rights reserved.",
+    "language": "Language"
+  },
+  "home": {
+    "hero": {
+      "title": "Don't miss any air shows!",
+      "subtitle": "Discover the best air shows, aviation events and workshops near you"
+    },
+    "quickActions": {
+      "flyIn": {
+        "title": "Fly-In / Air Show",
+        "description": "Discover events"
+      },
+      "map": {
+        "title": "Map",
+        "description": "Events on the map"
+      },
+      "fair": {
+        "title": "Fair",
+        "description": "Aviation fairs"
+      },
+      "workshop": {
+        "title": "Workshops",
+        "description": "Find workshops"
+      },
+      "other": {
+        "title": "Other",
+        "description": "e.g. trips or excursions"
+      },
+      "create": {
+        "title": "Create Event",
+        "description": "Create new event"
+      }
+    },
+    "featuredEvents": {
+      "title": "Featured Events",
+      "seeAll": "See All",
+      "allDay": "All Day",
+      "icao": "ICAO: {icao}"
+    },
+    "cta": {
+      "title": "Is there an event at your airfield too?",
+      "subtitle": "Register for free and create your own event",
+      "button": "Register Now"
+    }
+  },
+  "events": {
+    "list": "List",
+    "map": "Map",
+    "searchPlaceholder": "Search for anything: Name, Description, Location, ICAO, Organizer, Email...",
+    "searchTips": "Search Tips:",
+    "searchTipsText": "You can search for names, descriptions, locations, ICAO codes, organizers, email addresses, phone numbers, websites and tags.",
+    "allEventTypes": "All Event Types",
+    "eventTypes": {
+      "Flugtag": "Air Show",
+      "Messe": "Fair",
+      "Fly-In": "Fly-In",
+      "Workshop": "Workshop",
+      "Vereinsveranstaltung": "Club Event",
+      "Sonstiges": "Other"
+    },
+    "timeFilter": "Time Filter",
+    "search": "Search",
+    "today": "Today",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "clearAllFilters": "Clear All Filters",
+    "fromDate": "From Date",
+    "toDate": "To Date",
+    "fromTime": "From Time",
+    "toTime": "To Time",
+    "activeFilters": "Active Filters:",
+    "type": "Type",
+    "searchTerm": "Search",
+    "from": "From",
+    "to": "To",
+    "eventsOnMap": "Events on the Map",
+    "loadingEvents": "Loading events...",
+    "loadingMap": "Loading map...",
+    "noEventsFound": "No Events Found",
+    "noEventsText": "Try different search criteria or create a new event.",
+    "allDay": "All Day",
+    "noDescription": "No description available.",
+    "by": "by",
+    "viewDetails": "View Details →",
+    "share": "Share Event",
+    "shared": "Shared!",
+    "linkCopied": "Link Copied!",
+    "icao": "ICAO: {icao}"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign In",
+      "subtitle": "Or",
+      "createAccount": "create a new account",
+      "email": "Email Address",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "backToHome": "Back to Home"
+    },
+    "signUp": {
+      "title": "Create Account",
+      "subtitle": "Or",
+      "signIn": "sign in with your existing account",
+      "name": "Full Name",
+      "namePlaceholder": "John Doe",
+      "email": "Email Address",
+      "emailPlaceholder": "john@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "At least 6 characters",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Repeat password",
+      "submit": "Create Account",
+      "submitting": "Creating...",
+      "success": "Registration Successful!",
+      "successMessage": "Your account has been successfully created. You will be redirected to the sign in page...",
+      "signInNow": "Sign In Now",
+      "backToHome": "Back to Home",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 6 characters"
+    }
+  },
+  "about": {
+    "title": "About Fliegerevents",
+    "subtitle": "Your central hub for all aviation events and air shows in Germany",
+    "description": "We connect the aviation community and make it easy to discover, organize and share exciting events. Whether air show, fly-in, workshop or club event – we have everything aviation has to offer.",
+    "discoverEvents": "Discover Events",
+    "mission": {
+      "title": "Our Mission",
+      "subtitle": "Strengthening the aviation community and making access to exciting events easier",
+      "passion": {
+        "title": "Passion",
+        "description": "We share the passion for aviation and want to share it with others"
+      },
+      "community": {
+        "title": "Community",
+        "description": "We bring private pilots together and promote exchange in the community"
+      },
+      "accessibility": {
+        "title": "Accessibility",
+        "description": "We make it easy to find, organize and attend events"
+      }
+    },
+    "why": {
+      "title": "Why Fliegerevents?",
+      "subtitle": "Discover the benefits of our platform",
+      "findEvents": {
+        "title": "Find Events",
+        "description": "Discover air shows, workshops and aviation events near you with our intelligent search function"
+      },
+      "locationBased": {
+        "title": "Location-Based",
+        "description": "Find events in your region or at your preferred airfield with our interactive map"
+      },
+      "community": {
+        "title": "Community",
+        "description": "Meet other private pilots, exchange ideas and share your passion for aviation"
+      },
+      "upToDate": {
+        "title": "Always Up-to-Date",
+        "description": "Stay informed about the latest events and dates – our platform is updated daily"
+      }
+    },
+    "whatWeOffer": {
+      "title": "What We Offer",
+      "eventList": {
+        "title": "Comprehensive Event List",
+        "description": "Browse hundreds of events by type, date, location or other criteria. From air shows to fly-ins to workshops – we have everything."
+      },
+      "createEvents": {
+        "title": "Create Your Own Events",
+        "description": "Organize your own event and share it with the community. Simple, fast and free."
+      },
+      "interactiveMap": {
+        "title": "Interactive Map",
+        "description": "Visualize events on an interactive map and find events near you at a glance."
+      },
+      "communityNetwork": {
+        "title": "Community Network",
+        "description": "Network with other pilots, clubs and organizations. Share your experiences and learn from each other."
+      }
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "subtitle": "Discover exciting events or create your own",
+      "discoverEvents": "Discover Events",
+      "createEvent": "Create Event"
+    }
+  },
+  "create": {
+    "title": "Create Event",
+    "back": "Back",
+    "backToEvents": "Back to Events",
+    "subtitle": "Share your aviation event with the community",
+    "titleLabel": "Event Title",
+    "titlePlaceholder": "e.g. Air Show at Airfield XYZ",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe your event...",
+    "location": "Location/Airfield",
+    "locationPlaceholder": "e.g. Mainz-Finthen Airfield",
+    "address": "Full Address",
+    "addressPlaceholder": "Street, ZIP City",
+    "geocode": "Find Coordinates",
+    "geocoding": "Searching...",
+    "geocodeSuccess": "Coordinates found: {name}",
+    "geocodeTitle": "Coordinates for Map",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "latitudePlaceholder": "e.g. 47.6500279",
+    "longitudePlaceholder": "e.g. 9.4800858",
+    "geocodeHint": "💡 Click \"Find Coordinates\" to automatically determine the coordinates for your location. These are needed so your event appears on the map.",
+    "date": "Date",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "allDay": "All-Day Event",
+    "eventType": "Event Type",
+    "eventTypeSelect": "Please select...",
+    "organizer": "Organizer",
+    "organizerPlaceholder": "Your name or club",
+    "contactEmail": "Contact Email",
+    "contactEmailPlaceholder": "contact@example.com",
+    "contactPhone": "Contact Phone (optional)",
+    "contactPhonePlaceholder": "+1 123 456789",
+    "maxParticipants": "Max. Participants (optional)",
+    "maxParticipantsPlaceholder": "e.g. 50",
+    "registrationRequired": "Registration Required",
+    "entryFee": "Entry Fee (€)",
+    "entryFeePlaceholder": "0.00",
+    "website": "Website (optional)",
+    "websitePlaceholder": "https://www.example.com",
+    "tags": "Tags (optional)",
+    "tagsPlaceholder": "Glider, Ultralight, Vintage (comma-separated)",
+    "image": "Cover Image (optional)",
+    "submit": "Create Event",
+    "submitting": "Creating...",
+    "locationRequired": "Please enter a location or address",
+    "geocodeError": "Error getting coordinates",
+    "success": "Event Successfully Created!",
+    "successMessage": "You will be redirected to the events page...",
+    "loading": "Loading..."
+  },
+  "eventDetails": {
+    "loading": "Loading event...",
+    "notFound": "Event not found",
+    "backToEvents": "Back to Events",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this event?",
+    "deleteError": "Error deleting event",
+    "share": "Share",
+    "shared": "Shared!",
+    "linkCopied": "Link Copied!",
+    "allDay": "All Day",
+    "entryFee": "Entry Fee",
+    "free": "Free",
+    "organizer": "Organizer",
+    "contact": "Contact",
+    "email": "Email",
+    "phone": "Phone",
+    "website": "Website",
+    "maxParticipants": "Max. Participants",
+    "registrationRequired": "Registration Required",
+    "tags": "Tags",
+    "createdBy": "Created by",
+    "location": "Location",
+    "address": "Address",
+    "icao": "ICAO",
+    "coordinates": "Coordinates",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "description": "Description",
+    "eventDetails": "Event Details",
+    "visitWebsite": "Visit Website",
+    "contactOrganizer": "Please contact the organizer."
+  },
+  "account": {
+    "title": "My Account",
+    "userInfo": "User Information",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "memberSince": "Member since",
+    "myEvents": "My Events",
+    "noEvents": "You haven't created any events yet.",
+    "createEvent": "Create Event",
+    "loading": "Loading...",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this event?",
+    "deleteError": "Error deleting event",
+    "edit": "Edit",
+    "logout": "Logout",
+    "unauthorized": "Unauthorized",
+    "pleaseSignIn": "Please sign in to view your account.",
+    "subtitle": "Manage your personal information and events",
+    "noEventsTitle": "No Events Found",
+    "view": "View",
+    "deleting": "Deleting..."
+  },
+  "impressum": {
+    "title": "Imprint",
+    "operator": "Website Operator:",
+    "contact": "Contact",
+    "phone": "Phone",
+    "email": "Email",
+    "description": "Description",
+    "responsible": "Responsible for content according to § 55 Abs. 2 RStV",
+    "disclaimer": "Disclaimer",
+    "contentLiability": "Liability for Content",
+    "contentLiabilityText": "As a service provider, we are responsible for our own content on these pages in accordance with general laws pursuant to § 7 para. 1 TMG. However, according to §§ 8 to 10 TMG, we as a service provider are not obligated to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity.",
+    "linkLiability": "Liability for Links",
+    "linkLiabilityText": "Our offer contains links to external websites of third parties, on whose contents we have no influence. Therefore, we cannot assume any liability for these external contents. The respective provider or operator of the pages is always responsible for the contents of the linked pages.",
+    "copyright": "Copyright",
+    "copyrightText": "The content and works created by the site operators on these pages are subject to German copyright law. The duplication, processing, distribution and any kind of exploitation outside the limits of copyright require the written consent of the respective author or creator.",
+    "disputeResolution": "Dispute Resolution",
+    "disputeResolutionText1": "The European Commission provides a platform for online dispute resolution (OS):",
+    "disputeResolutionText2": "You can find our email address above in the imprint.",
+    "disputeResolutionText3": "We are not willing or obligated to participate in dispute resolution proceedings before a consumer arbitration board."
+  },
+  "datenschutz": {
+    "title": "Privacy Policy",
+    "overview": "Privacy at a Glance",
+    "general": "General Information",
+    "generalText": "The following information provides a simple overview of what happens to your personal data when you visit this website. Personal data is any data with which you can be personally identified. Detailed information on the subject of data protection can be found in our privacy policy below this text.",
+    "dataCollection": "Data Collection on this Website",
+    "whoResponsible": "Who is responsible for data collection on this website?",
+    "whoResponsibleText": "Data processing on this website is carried out by the website operator. You can find their contact details in the section \"Information on the Responsible Party\" in this privacy policy.",
+    "howCollect": "How do we collect your data?",
+    "howCollectText1": "On the one hand, your data is collected by you providing it to us. This can be, for example, data that you enter in a contact form.",
+    "howCollectText2": "Other data is collected automatically or with your consent by our IT systems when you visit the website. This is mainly technical data (e.g. internet browser, operating system or time of page access). This data is collected automatically as soon as you enter this website.",
+    "whyUse": "What do we use your data for?",
+    "whyUseText": "Some of the data is collected to ensure error-free provision of the website. Other data may be used to analyze your user behavior.",
+    "yourRights": "What rights do you have regarding your data?",
+    "yourRightsText": "You have the right to receive information free of charge at any time about the origin, recipient and purpose of your stored personal data. You also have the right to request the correction or deletion of this data. If you have given consent to data processing, you can revoke this consent at any time for the future.",
+    "hosting": "Hosting",
+    "hostingText": "We host the contents of our website with the following provider:",
+    "hostingProvider": "Vercel Inc.",
+    "hostingAddress": "340 S Lemon Ave #4133",
+    "hostingCity": "Walnut, CA 91789",
+    "hostingCountry": "USA",
+    "hostingPrivacy": "Vercel Privacy Policy",
+    "generalInfo": "General Information and Mandatory Information",
+    "privacy": "Privacy",
+    "privacyText": "The operators of these pages take the protection of your personal data very seriously. We treat your personal data confidentially and in accordance with the statutory data protection regulations and this privacy policy.",
+    "responsibleParty": "Information on the Responsible Party",
+    "responsiblePartyText": "The responsible party for data processing on this website is:",
+    "storageDuration": "Storage Duration",
+    "storageDurationText": "Unless a more specific storage period has been specified within this privacy policy, your personal data will remain with us until the purpose for data processing no longer applies. If you assert a legitimate request for deletion or revoke consent for data processing, your data will be deleted, unless we have other legally permissible reasons for storing your personal data.",
+    "serverLogs": "Server Log Files",
+    "serverLogsText": "The provider of the pages automatically collects and stores information in so-called server log files, which your browser automatically transmits to us. These are:",
+    "serverLogsItems": {
+      "browser": "Browser type and browser version",
+      "os": "Operating system used",
+      "referrer": "Referrer URL",
+      "hostname": "Hostname of the accessing computer",
+      "time": "Time of server request",
+      "ip": "IP address"
+    },
+    "contactForm": "Contact Form",
+    "contactFormText": "If you send us inquiries via contact form, your details from the inquiry form, including the contact details you provided there, will be stored by us for the purpose of processing the inquiry and in case of follow-up questions. We do not pass on this data without your consent.",
+    "newsletter": "Newsletter",
+    "newsletterText": "If you would like to receive the newsletter offered on the website, we need an email address from you as well as information that allows us to verify that you are the owner of the email address provided and agree to receive the newsletter.",
+    "plugins": "Plugins and Tools",
+    "googleFonts": "Google Fonts (local hosting)",
+    "googleFontsText": "This site uses so-called Google Fonts, which are provided by Google, for the uniform display of fonts. The Google Fonts are installed locally. A connection to Google's servers does not take place.",
+    "erecht24": "eRecht24 Safe Sharing",
+    "erecht24Text": "This privacy policy was created with the privacy policy generator of eRecht24."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back"
+  }
+}
+

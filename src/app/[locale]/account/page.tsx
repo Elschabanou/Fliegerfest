@@ -2,9 +2,10 @@
 
 import { useAuth } from '@/components/AuthProvider';
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
+import { Link } from '@/i18n/routing';
 import { User as UserIcon, Calendar, MapPin, Trash2, Edit } from 'lucide-react';
-import Link from 'next/link';
+import { useTranslations, useLocale } from 'next-intl';
 
 type EventCreator = string | { $oid: string };
 
@@ -33,6 +34,10 @@ interface AccountUser {
 }
 
 export default function AccountPage() {
+  const t = useTranslations('account');
+  const tCommon = useTranslations('common');
+  const tEvents = useTranslations('events');
+  const locale = useLocale();
   const { user, token, logout } = useAuth();
   const [userEvents, setUserEvents] = useState<Event[]>([]);
   const [userData, setUserData] = useState<AccountUser | null>(null);
@@ -47,13 +52,9 @@ export default function AccountPage() {
           'Authorization': `Bearer ${token}`,
         },
       });
-      console.log('User profile response status:', response.status);
       if (response.ok) {
         const data: AccountUser = await response.json();
-        console.log('User data loaded:', data);
         setUserData(data);
-      } else {
-        console.error('User profile API error:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Fehler beim Laden der User-Daten:', error);
@@ -73,10 +74,6 @@ export default function AccountPage() {
         },
       });
       const data = await response.json();
-      console.log('Alle Events geladen:', data.events?.length || 0);
-      console.log('User ID:', user?.id);
-
-      // Filter events created by this user
       const filteredEvents = (data.events as Event[]).filter((event) => {
         const createdBy = event.createdBy;
         const eventCreatedBy =
@@ -84,12 +81,8 @@ export default function AccountPage() {
             ? createdBy.$oid
             : createdBy ?? '';
         const userId = user?.id ?? '';
-        const matches = eventCreatedBy.toString() === userId.toString();
-        console.log(`Event ${event._id}: createdBy=${eventCreatedBy}, userId=${userId}, matches=${matches}`);
-        return matches;
+        return eventCreatedBy.toString() === userId.toString();
       });
-
-      console.log('Gefilterte Events:', filteredEvents.length);
       setUserEvents(filteredEvents);
     } catch (error) {
       console.error('Fehler beim Laden der Events:', error);
@@ -107,7 +100,7 @@ export default function AccountPage() {
   }, [token, fetchUserData, fetchUserEvents]);
 
   const deleteEvent = async (eventId: string) => {
-    if (!confirm('Sind Sie sicher, dass Sie dieses Event löschen möchten?')) {
+    if (!confirm(t('deleteConfirm'))) {
       return;
     }
 
@@ -123,11 +116,11 @@ export default function AccountPage() {
       if (response.ok) {
         setUserEvents(userEvents.filter(event => event._id !== eventId));
       } else {
-        alert('Fehler beim Löschen des Events');
+        alert(t('deleteError'));
       }
     } catch (error) {
       console.error('Fehler beim Löschen:', error);
-      alert('Fehler beim Löschen des Events');
+      alert(t('deleteError'));
     } finally {
       setDeletingId(null);
     }
@@ -135,7 +128,8 @@ export default function AccountPage() {
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('de-DE', {
+      const localeMap: Record<string, string> = { de: 'de-DE', en: 'en-US', fr: 'fr-FR' };
+      return new Date(dateString).toLocaleDateString(localeMap[locale] || 'de-DE', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -150,8 +144,8 @@ export default function AccountPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-[#021234] mb-4">Nicht autorisiert</h1>
-            <p className="text-gray-600">Bitte melden Sie sich an, um Ihr Konto zu sehen.</p>
+            <h1 className="text-3xl font-bold text-[#021234] mb-4">{t('unauthorized') || 'Nicht autorisiert'}</h1>
+            <p className="text-gray-600">{t('pleaseSignIn') || 'Bitte melden Sie sich an, um Ihr Konto zu sehen.'}</p>
           </div>
         </div>
       </div>
@@ -161,39 +155,37 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#021234] mb-2">Mein Konto</h1>
-          <p className="text-gray-600">Verwalten Sie Ihre persönlichen Informationen und Ihre Events</p>
+          <h1 className="text-3xl font-bold text-[#021234] mb-2">{t('title')}</h1>
+          <p className="text-gray-600">{t('subtitle') || 'Verwalten Sie Ihre persönlichen Informationen und Ihre Events'}</p>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* User Information */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-center mb-4">
                 <UserIcon className="h-8 w-8 text-blue-600 mr-3" />
-                <h2 className="text-xl font-semibold text-[#021234]">Persönliche Informationen</h2>
+                <h2 className="text-xl font-semibold text-[#021234]">{t('userInfo')}</h2>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('name')}</label>
                   <p className="text-[#021234]">{userData?.name || user?.name}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">E-Mail</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('email')}</label>
                   <p className="text-[#021234]">{userData?.email || user?.email}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Rolle</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('role')}</label>
                   <p className="text-[#021234]">{userData?.role || user?.role || 'user'}</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Registriert seit</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('memberSince')}</label>
                   <p className="text-[#021234]">
                     {userData?.createdAt ? formatDate(userData.createdAt) : 'Unbekannt'}
                   </p>
@@ -204,39 +196,38 @@ export default function AccountPage() {
                 onClick={handleLogout}
                 className="mt-6 w-full inline-flex items-center justify-center px-4 py-2 border border-red-200 text-sm font-medium rounded-md text-red-600 hover:bg-red-50 transition-colors"
               >
-                Abmelden
+                {t('logout')}
               </button>
             </div>
           </div>
 
-          {/* User Events */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
                   <Calendar className="h-8 w-8 text-green-600 mr-3" />
-                  <h2 className="text-xl font-semibold text-[#021234]">Meine Events</h2>
+                  <h2 className="text-xl font-semibold text-[#021234]">{t('myEvents')}</h2>
                 </div>
                 <span className="text-sm text-gray-500">
-                  {userEvents.length} Event{userEvents.length !== 1 ? 's' : ''}
+                  {userEvents.length} {userEvents.length !== 1 ? 'Events' : 'Event'}
                 </span>
               </div>
 
               {loading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Events werden geladen...</p>
+                  <p className="text-gray-600">{t('loading')}</p>
                 </div>
               ) : userEvents.length === 0 ? (
                 <div className="text-center py-8">
                   <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-[#021234] mb-2">Keine Events gefunden</h3>
-                  <p className="text-gray-600 mb-4">Sie haben noch keine Events erstellt.</p>
+                  <h3 className="text-lg font-medium text-[#021234] mb-2">{t('noEventsTitle') || 'Keine Events gefunden'}</h3>
+                  <p className="text-gray-600 mb-4">{t('noEvents')}</p>
                   <Link
                     href="/events/create"
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                   >
-                    Erstes Event erstellen
+                    {t('createEvent')}
                   </Link>
                 </div>
               ) : (
@@ -256,7 +247,7 @@ export default function AccountPage() {
                               event.eventType === 'Vereinsveranstaltung' ? 'bg-yellow-100 text-yellow-800' :
                               'bg-gray-100 text-gray-800'
                             }`}>
-                              {event.eventType || 'Sonstiges'}
+                              {event.eventType ? tEvents(`eventTypes.${event.eventType}`) : tEvents('eventTypes.Sonstiges')}
                             </span>
                           </div>
 
@@ -286,7 +277,7 @@ export default function AccountPage() {
                             className="flex items-center justify-center px-3 py-2 text-sm text-blue-600 hover:text-blue-800 border border-blue-200 rounded-md hover:bg-blue-50 transition-colors"
                           >
                             <Edit className="h-4 w-4 mr-1" />
-                            Ansehen
+                            {t('view') || 'Ansehen'}
                           </Link>
 
                           <button
@@ -295,7 +286,7 @@ export default function AccountPage() {
                             className="flex items-center justify-center px-3 py-2 text-sm text-red-600 hover:text-red-800 border border-red-200 rounded-md hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Trash2 className="h-4 w-4 mr-1" />
-                            {deletingId === event._id ? 'Löschen...' : 'Löschen'}
+                            {deletingId === event._id ? t('deleting') || 'Löschen...' : t('delete')}
                           </button>
                         </div>
                       </div>
@@ -310,3 +301,4 @@ export default function AccountPage() {
     </div>
   );
 }
+

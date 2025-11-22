@@ -2,9 +2,6 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { AuthProvider } from '@/components/AuthProvider';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -26,9 +23,23 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // The middleware handles locale redirection
+  // This layout provides the root html/body structure
   return (
-    <html lang="de">
+    <html suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const path = window.location.pathname;
+                const locales = ['de', 'en', 'fr'];
+                const locale = locales.find(loc => path.startsWith('/' + loc + '/') || path === '/' + loc) || 'de';
+                document.documentElement.lang = locale;
+              })();
+            `,
+          }}
+        />
         <link
           rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -37,13 +48,7 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <AuthProvider>
-          <Navbar />
-          <main className="min-h-screen bg-gray-50">
-            {children}
-          </main>
-          <Footer />
-        </AuthProvider>
+        {children}
         <SpeedInsights />
       </body>
     </html>

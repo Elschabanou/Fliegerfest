@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
+import { Link } from '@/i18n/routing';
 import { ArrowLeft, MapPin, Loader } from 'lucide-react';
 import { geocodeLocation, isGeocodingSuccess } from '@/lib/geocoding';
+import { useTranslations } from 'next-intl';
 import Lottie from 'lottie-react';
 
 export default function CreateEventPage() {
+  const t = useTranslations('create');
+  const tCommon = useTranslations('common');
+  const tEvents = useTranslations('events');
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -47,7 +52,6 @@ export default function CreateEventPage() {
     }
   }, [user, authLoading, router]);
 
-  // Lade Animation-Daten
   useEffect(() => {
     fetch('/Message Sent Successfully _ Plane.json')
       .then(res => res.json())
@@ -71,7 +75,7 @@ export default function CreateEventPage() {
   const handleGeocode = async () => {
     const locationQuery = formData.location || formData.address;
     if (!locationQuery.trim()) {
-      setError('Bitte geben Sie einen Ort oder eine Adresse ein');
+      setError(t('locationRequired'));
       return;
     }
 
@@ -88,12 +92,12 @@ export default function CreateEventPage() {
           lat: result.lat,
           lon: result.lon
         }));
-        setGeocodingSuccess(`Koordinaten gefunden: ${result.display_name}`);
+        setGeocodingSuccess(t('geocodeSuccess', { name: result.display_name }));
       } else {
         setError(result.error);
       }
     } catch {
-      setError('Fehler beim Abrufen der Koordinaten');
+      setError(t('geocodeError'));
     } finally {
       setGeocoding(false);
     }
@@ -144,39 +148,33 @@ export default function CreateEventPage() {
 
       if (response.ok) {
         const event = await response.json();
-        console.log('Event erstellt, ID:', event._id);
-        // Animation anzeigen
         setShowAnimation(true);
         setLoading(false);
-        // Nach der Animation (ca. 2.5 Sekunden) zur Event-Seite weiterleiten
         setTimeout(() => {
           router.push('/events');
         }, 2500);
       } else {
         const errorData = await response.json();
-        console.log('Fehler beim Erstellen:', errorData);
-        setError(errorData.error || 'Ein Fehler ist aufgetreten');
+        setError(errorData.error || tCommon('error'));
       }
     } catch {
-      setError('Ein Fehler ist aufgetreten');
+      setError(tCommon('error'));
     } finally {
       setLoading(false);
     }
   };
 
-  // Zeige Ladeanimation während Auth-Check oder wenn nicht angemeldet (während Umleitung)
   if (authLoading || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Wird geladen...</p>
+          <p className="text-gray-600">{t('loading')}</p>
         </div>
       </div>
     );
   }
 
-  // Animation Overlay
   if (showAnimation) {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -194,8 +192,8 @@ export default function CreateEventPage() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
           )}
-          <h2 className="text-2xl font-bold text-[#021234] mt-4">Event erfolgreich erstellt!</h2>
-          <p className="text-gray-600 mt-2">Sie werden zur Event-Seite weitergeleitet...</p>
+          <h2 className="text-2xl font-bold text-[#021234] mt-4">{t('success')}</h2>
+          <p className="text-gray-600 mt-2">{t('successMessage')}</p>
         </div>
       </div>
     );
@@ -205,15 +203,15 @@ export default function CreateEventPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <button
-            onClick={() => router.push('/events')}
+          <Link
+            href="/events"
             className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 mb-4"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span>Zurück zu den Events</span>
-          </button>
-          <h1 className="text-3xl font-bold text-[#021234]">Neues Event erstellen</h1>
-          <p className="text-gray-600 mt-2">Teilen Sie Ihr Fliegerevent mit der Community</p>
+            <span>{t('backToEvents')}</span>
+          </Link>
+          <h1 className="text-3xl font-bold text-[#021234]">{t('title')}</h1>
+          <p className="text-gray-600 mt-2">{t('subtitle')}</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-8">
@@ -224,11 +222,10 @@ export default function CreateEventPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Information */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
-                  Titelbild (optional)
+                  {t('image')}
                 </label>
                 <input
                   type="file"
@@ -241,7 +238,7 @@ export default function CreateEventPage() {
               </div>
               <div className="md:col-span-2">
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                  Event-Titel *
+                  {t('titleLabel')} *
                 </label>
                 <input
                   type="text"
@@ -251,13 +248,13 @@ export default function CreateEventPage() {
                   value={formData.title}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder="z.B. Flugtag am Flugplatz XYZ"
+                  placeholder={t('titlePlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="eventType" className="block text-sm font-medium text-gray-700 mb-1">
-                  Event-Typ *
+                  {t('eventType')} *
                 </label>
                 <select
                   id="eventType"
@@ -267,19 +264,19 @@ export default function CreateEventPage() {
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                 >
-                  <option value="">Bitte wählen...</option>
-                  <option value="Flugtag">Flugtag</option>
-                  <option value="Messe">Messe</option>
-                  <option value="Fly-In">Fly-In</option>
-                  <option value="Workshop">Workshop</option>
-                  <option value="Vereinsveranstaltung">Vereinsveranstaltung</option>
-                  <option value="Sonstiges">Sonstiges</option>
+                  <option value="">{t('eventTypeSelect')}</option>
+                  <option value="Flugtag">{tEvents('eventTypes.Flugtag')}</option>
+                  <option value="Messe">{tEvents('eventTypes.Messe')}</option>
+                  <option value="Fly-In">{tEvents('eventTypes.Fly-In')}</option>
+                  <option value="Workshop">{tEvents('eventTypes.Workshop')}</option>
+                  <option value="Vereinsveranstaltung">{tEvents('eventTypes.Vereinsveranstaltung')}</option>
+                  <option value="Sonstiges">{tEvents('eventTypes.Sonstiges')}</option>
                 </select>
               </div>
 
               <div>
                 <label htmlFor="entryFee" className="block text-sm font-medium text-gray-700 mb-1">
-                  Eintrittspreis (€) *
+                  {t('entryFee')} *
                 </label>
                 <input
                   type="number"
@@ -291,13 +288,13 @@ export default function CreateEventPage() {
                   value={formData.entryFee}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder="0.00"
+                  placeholder={t('entryFeePlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="organizer" className="block text-sm font-medium text-gray-700 mb-1">
-                  Veranstalter *
+                  {t('organizer')} *
                 </label>
                 <input
                   type="text"
@@ -307,13 +304,13 @@ export default function CreateEventPage() {
                   value={formData.organizer}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder="Ihr Name oder Verein"
+                  placeholder={t('organizerPlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="maxParticipants" className="block text-sm font-medium text-gray-700 mb-1">
-                  Max. Teilnehmer (optional)
+                  {t('maxParticipants')}
                 </label>
                 <input
                   type="number"
@@ -323,14 +320,14 @@ export default function CreateEventPage() {
                   value={formData.maxParticipants}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder="z.B. 50"
+                  placeholder={t('maxParticipantsPlaceholder')}
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Beschreibung *
+                {t('description')} *
               </label>
               <textarea
                 id="description"
@@ -340,15 +337,14 @@ export default function CreateEventPage() {
                 value={formData.description}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                placeholder="Beschreiben Sie Ihr Event..."
+                placeholder={t('descriptionPlaceholder')}
               />
             </div>
 
-            {/* Location Information */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                  Ort/Flugplatz *
+                  {t('location')} *
                 </label>
                 <input
                   type="text"
@@ -358,13 +354,13 @@ export default function CreateEventPage() {
                   value={formData.location}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder="z.B. Flugplatz Mainz-Finthen"
+                  placeholder={t('locationPlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                  Vollständige Adresse *
+                  {t('address')} *
                 </label>
                 <input
                   type="text"
@@ -374,15 +370,14 @@ export default function CreateEventPage() {
                   value={formData.address}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder="Straße, PLZ Ort"
+                  placeholder={t('addressPlaceholder')}
                 />
               </div>
             </div>
 
-            {/* Geocoding Section */}
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-blue-900">Koordinaten für Karte</h3>
+                <h3 className="text-sm font-medium text-blue-900">{t('geocodeTitle')}</h3>
                 <button
                   type="button"
                   onClick={handleGeocode}
@@ -394,7 +389,7 @@ export default function CreateEventPage() {
                   ) : (
                     <MapPin className="h-4 w-4" />
                   )}
-                  <span>{geocoding ? 'Wird gesucht...' : 'Koordinaten finden'}</span>
+                  <span>{geocoding ? t('geocoding') : t('geocode')}</span>
                 </button>
               </div>
               
@@ -407,7 +402,7 @@ export default function CreateEventPage() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="lat" className="block text-xs font-medium text-gray-600 mb-1">
-                    Breitengrad (Latitude)
+                    {t('latitude')}
                   </label>
                   <input
                     type="text"
@@ -416,12 +411,12 @@ export default function CreateEventPage() {
                     value={formData.lat}
                     onChange={handleChange}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                    placeholder="z.B. 47.6500279"
+                    placeholder={t('latitudePlaceholder')}
                   />
                 </div>
                 <div>
                   <label htmlFor="lon" className="block text-xs font-medium text-gray-600 mb-1">
-                    Längengrad (Longitude)
+                    {t('longitude')}
                   </label>
                   <input
                     type="text"
@@ -430,21 +425,19 @@ export default function CreateEventPage() {
                     value={formData.lon}
                     onChange={handleChange}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                    placeholder="z.B. 9.4800858"
+                    placeholder={t('longitudePlaceholder')}
                   />
                 </div>
               </div>
               <p className="text-xs text-gray-600 mt-2">
-                💡 Klicken Sie auf &quot;Koordinaten finden&quot; um automatisch die Koordinaten für Ihren Ort zu ermitteln. 
-                Diese werden benötigt, damit Ihr Event auf der Karte angezeigt wird.
+                {t('geocodeHint')}
               </p>
             </div>
 
-            {/* Date and Time */}
             <div className="space-y-4">
               <div>
                 <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-                  Datum *
+                  {t('date')} *
                 </label>
                 <input
                   type="date"
@@ -467,7 +460,7 @@ export default function CreateEventPage() {
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label htmlFor="allDay" className="ml-2 block text-sm font-medium text-gray-700">
-                  Ganztägige Veranstaltung
+                  {t('allDay')}
                 </label>
               </div>
 
@@ -475,7 +468,7 @@ export default function CreateEventPage() {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
-                      Startzeit *
+                      {t('startTime')} *
                     </label>
                     <input
                       type="time"
@@ -490,7 +483,7 @@ export default function CreateEventPage() {
 
                   <div>
                     <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
-                      Endzeit *
+                      {t('endTime')} *
                     </label>
                     <input
                       type="time"
@@ -506,11 +499,10 @@ export default function CreateEventPage() {
               )}
             </div>
 
-            {/* Contact Information */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 mb-1">
-                  Kontakt-E-Mail *
+                  {t('contactEmail')} *
                 </label>
                 <input
                   type="email"
@@ -520,13 +512,13 @@ export default function CreateEventPage() {
                   value={formData.contactEmail}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder="kontakt@example.de"
+                  placeholder={t('contactEmailPlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="contactPhone" className="block text-sm font-medium text-gray-700 mb-1">
-                  Kontakt-Telefon (optional)
+                  {t('contactPhone')}
                 </label>
                 <input
                   type="tel"
@@ -535,14 +527,14 @@ export default function CreateEventPage() {
                   value={formData.contactPhone}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder="+49 123 456789"
+                  placeholder={t('contactPhonePlaceholder')}
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
-                Website (optional)
+                {t('website')}
               </label>
               <input
                 type="url"
@@ -551,13 +543,13 @@ export default function CreateEventPage() {
                 value={formData.website}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                placeholder="https://www.example.de"
+                placeholder={t('websitePlaceholder')}
               />
             </div>
 
             <div>
               <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
-                Tags (optional)
+                {t('tags')}
               </label>
               <input
                 type="text"
@@ -566,7 +558,7 @@ export default function CreateEventPage() {
                 value={formData.tags}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                placeholder="Segelflug, Ultraleicht, Oldtimer (durch Komma getrennt)"
+                placeholder={t('tagsPlaceholder')}
               />
             </div>
 
@@ -580,7 +572,7 @@ export default function CreateEventPage() {
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label htmlFor="registrationRequired" className="ml-2 block text-sm text-gray-700">
-                Anmeldung erforderlich
+                {t('registrationRequired')}
               </label>
             </div>
 
@@ -590,14 +582,14 @@ export default function CreateEventPage() {
                 onClick={() => router.push('/events')}
                 className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                Abbrechen
+                {tCommon('cancel')}
               </button>
               <button
                 type="submit"
                 disabled={loading}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Wird erstellt...' : 'Event erstellen'}
+                {loading ? t('submitting') : t('submit')}
               </button>
             </div>
           </form>
@@ -606,3 +598,4 @@ export default function CreateEventPage() {
     </div>
   );
 }
+

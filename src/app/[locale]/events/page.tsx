@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import { Calendar, MapPin, Clock, Euro, Filter, Search, X, LayoutGrid, Info, Share2 } from 'lucide-react';
 
 // Lazy load EventsMap - nur wenn benötigt
 const EventsMap = lazy(() => import('@/components/EventsMap').then(mod => ({ default: mod.default })));
-// import { useAuth } from '@/components/AuthProvider';
 
 interface Event {
   _id: string;
@@ -32,6 +32,8 @@ interface Event {
 }
 
 export default function EventsPage() {
+  const t = useTranslations('events');
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +93,7 @@ export default function EventsPage() {
     e.preventDefault();
     e.stopPropagation();
     
-    const eventUrl = `${window.location.origin}/events/${event._id}`;
+    const eventUrl = `${window.location.origin}/${locale}/events/${event._id}`;
     const eventTitle = event.title || event.name || 'Event';
     const shareData = {
       title: eventTitle,
@@ -100,19 +102,16 @@ export default function EventsPage() {
     };
 
     try {
-      // Versuche native Web Share API (funktioniert auf mobilen Geräten und einigen Browsern)
       if (navigator.share) {
         await navigator.share(shareData);
         setShareSuccessId(event._id);
         setTimeout(() => setShareSuccessId(null), 3000);
       } else {
-        // Fallback: Link in Zwischenablage kopieren
         await navigator.clipboard.writeText(eventUrl);
         setShareSuccessId(event._id);
         setTimeout(() => setShareSuccessId(null), 3000);
       }
     } catch (error) {
-      // Fehler beim Teilen (z.B. Benutzer hat abgebrochen) - ignorieren
       if ((error as Error).name !== 'AbortError') {
         console.error('Fehler beim Teilen:', error);
       }
@@ -122,20 +121,17 @@ export default function EventsPage() {
   const handleSearchInputChange = (value: string) => {
     setSearchTerm(value);
     
-    // Clear existing timeout
     if (searchTimeout) {
       clearTimeout(searchTimeout);
     }
     
-    // Set new timeout for debounced search
     const timeout = setTimeout(() => {
       fetchEvents();
-    }, 500); // 500ms delay
+    }, 500);
     
     setSearchTimeout(timeout);
   };
 
-  // Preset date filter functions
   const setDateFilterToday = () => {
     const todayValue = new Date().toISOString().split('T')[0];
     setDateFrom(todayValue);
@@ -175,14 +171,19 @@ export default function EventsPage() {
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('de-DE', {
+      const localeMap: Record<string, string> = {
+        'de': 'de-DE',
+        'en': 'en-US',
+        'fr': 'fr-FR'
+      };
+      return new Date(dateString).toLocaleDateString(localeMap[locale] || 'de-DE', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       });
     } catch {
-      return dateString; // Fallback zur ursprünglichen Zeichenkette
+      return dateString;
     }
   };
 
@@ -191,7 +192,6 @@ export default function EventsPage() {
     if (!base) return false;
     const eventDate = new Date(base);
     if (isNaN(eventDate.getTime())) return false;
-    // Wenn keine Uhrzeit mitgegeben ist, vergleiche bis zum Ende des Tages
     const hasExplicitTime = (e.dateTime && /T\d{2}:\d{2}/.test(e.dateTime)) || !!e.startTime || !!e.endTime;
     if (!hasExplicitTime) {
       eventDate.setHours(23, 59, 59, 999);
@@ -204,7 +204,6 @@ export default function EventsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-0">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-
               <div className="flex w-full sm:w-auto rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
                 <button
                   type="button"
@@ -214,7 +213,7 @@ export default function EventsPage() {
                   }`}
                 >
                   <LayoutGrid className="h-4 w-4" />
-                  <span>Liste</span>
+                  <span>{t('list')}</span>
                 </button>
                 <button
                   type="button"
@@ -224,25 +223,23 @@ export default function EventsPage() {
                   }`}
                 >
                   <MapPin className="h-4 w-4" />
-                  <span>Karte</span>
+                  <span>{t('map')}</span>
                 </button>
               </div>
             </div>
         </div>
 
-        {/* Search and Filters - Sticky */}
         {!showMap && (
           <div 
             id="filter-section" 
             className="sticky top-0 z-50 bg-white rounded-lg shadow-md p-6 mb-8 mt-2"
           >
           <div className="space-y-4">
-            {/* Hauptsuchfeld */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
-                placeholder="Suche nach allem: Name, Beschreibung, Ort, ICAO, Organisator, E-Mail..."
+                placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => handleSearchInputChange(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -251,7 +248,7 @@ export default function EventsPage() {
               <div className="absolute inset-y-0 right-3 flex items-center">
                 <button
                   type="button"
-                  aria-label="Suchtipps anzeigen"
+                  aria-label={t('searchTips')}
                   onClick={() => setShowSearchTips((prev) => !prev)}
                   onMouseEnter={() => setShowSearchTips(true)}
                   onMouseLeave={() => setShowSearchTips(false)}
@@ -261,14 +258,13 @@ export default function EventsPage() {
                 </button>
                 {showSearchTips && (
                   <div className="absolute top-8 right-0 w-64 rounded-md bg-white shadow-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 transition-opacity duration-150 z-10">
-                    <strong className="text-gray-800 block mb-1">Suchtipps:</strong>
-                    Sie können nach Namen, Beschreibungen, Orten, ICAO-Codes, Organisatoren, E-Mail-Adressen, Telefonnummern, Websites und Tags suchen.
+                    <strong className="text-gray-800 block mb-1">{t('searchTips')}</strong>
+                    {t('searchTipsText')}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Basic Filters */}
             <>
                 <div className="grid md:grid-cols-2 gap-4">
                   <select
@@ -276,13 +272,13 @@ export default function EventsPage() {
                     onChange={(e) => setEventType(e.target.value)}
                     className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white placeholder:text-gray-400 dark:bg-white"
                   >
-                    <option value="">Alle Event-Typen</option>
-                    <option value="Flugtag">Flugtag</option>
-                    <option value="Messe">Messe</option>
-                    <option value="Fly-In">Fly-In</option>
-                    <option value="Workshop">Workshop</option>
-                    <option value="Vereinsveranstaltung">Vereinsveranstaltung</option>
-                    <option value="Sonstiges">Sonstiges</option>
+                    <option value="">{t('allEventTypes')}</option>
+                    <option value="Flugtag">{t('eventTypes.Flugtag')}</option>
+                    <option value="Messe">{t('eventTypes.Messe')}</option>
+                    <option value="Fly-In">{t('eventTypes.Fly-In')}</option>
+                    <option value="Workshop">{t('eventTypes.Workshop')}</option>
+                    <option value="Vereinsveranstaltung">{t('eventTypes.Vereinsveranstaltung')}</option>
+                    <option value="Sonstiges">{t('eventTypes.Sonstiges')}</option>
                   </select>
                   <div className="flex space-x-2 md:justify-end">
                     <button
@@ -290,40 +286,38 @@ export default function EventsPage() {
                       className="flex items-center justify-center space-x-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
                     >
                       <Filter className="h-5 w-5" />
-                      <span>Zeit-Filter</span>
+                      <span>{t('timeFilter')}</span>
                     </button>
                     <button
                       onClick={handleSearch}
                       className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       <Search className="h-5 w-5" />
-                      <span>Suchen</span>
+                      <span>{t('search')}</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Advanced Time Filters */}
                 {showAdvancedFilters && (
               <div className="border-t pt-4 space-y-4">
-                {/* Preset Filter Buttons */}
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={setDateFilterToday}
                     className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hover:bg-blue-200 transition-colors"
                   >
-                    Heute
+                    {t('today')}
                   </button>
                   <button
                     onClick={setDateFilterThisWeek}
                     className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hover:bg-blue-200 transition-colors"
                   >
-                    Diese Woche
+                    {t('thisWeek')}
                   </button>
                   <button
                     onClick={setDateFilterThisMonth}
                     className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hover:bg-blue-200 transition-colors"
                   >
-                    Dieser Monat
+                    {t('thisMonth')}
                   </button>
                   {hasActiveFilters && (
                     <button
@@ -331,17 +325,16 @@ export default function EventsPage() {
                       className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm hover:bg-red-200 transition-colors flex items-center space-x-1"
                     >
                       <X className="h-3 w-3" />
-                      <span>Alle Filter löschen</span>
+                      <span>{t('clearAllFilters')}</span>
                     </button>
                   )}
                 </div>
 
-                {/* Date Range Filters */}
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       <Calendar className="inline h-4 w-4 mr-1" />
-                      Von Datum
+                      {t('fromDate')}
                     </label>
                     <input
                       type="date"
@@ -353,7 +346,7 @@ export default function EventsPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       <Calendar className="inline h-4 w-4 mr-1" />
-                      Bis Datum
+                      {t('toDate')}
                     </label>
                     <input
                       type="date"
@@ -365,7 +358,7 @@ export default function EventsPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       <Clock className="inline h-4 w-4 mr-1" />
-                      Von Zeit
+                      {t('fromTime')}
                     </label>
                     <input
                       type="time"
@@ -377,7 +370,7 @@ export default function EventsPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       <Clock className="inline h-4 w-4 mr-1" />
-                      Bis Zeit
+                      {t('toTime')}
                     </label>
                     <input
                       type="time"
@@ -388,19 +381,18 @@ export default function EventsPage() {
                   </div>
                 </div>
 
-                {/* Active Filters Display */}
                 {hasActiveFilters && (
                   <div className="bg-blue-50 p-3 rounded-lg">
-                    <h4 className="text-sm font-medium text-blue-900 mb-2">Aktive Filter:</h4>
+                    <h4 className="text-sm font-medium text-blue-900 mb-2">{t('activeFilters')}</h4>
                     <div className="flex flex-wrap gap-2 text-sm">
-                      {eventType && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Typ: {eventType}</span>}
-                      {searchTerm && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Suche: {searchTerm}</span>}
+                      {eventType && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">{t('type')}: {eventType}</span>}
+                      {searchTerm && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">{t('searchTerm')}: {searchTerm}</span>}
                       {dateFrom && dateFrom !== today && (
-                        <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Ab: {dateFrom}</span>
+                        <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">{t('from')}: {dateFrom}</span>
                       )}
-                      {dateTo && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Bis: {dateTo}</span>}
-                      {timeFrom && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Von: {timeFrom}</span>}
-                      {timeTo && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">Bis: {timeTo}</span>}
+                      {dateTo && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">{t('to')}: {dateTo}</span>}
+                      {timeFrom && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">{t('from')}: {timeFrom}</span>}
+                      {timeTo && <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded">{t('to')}: {timeTo}</span>}
                     </div>
                   </div>
                 )}
@@ -411,17 +403,15 @@ export default function EventsPage() {
         </div>
         )}
 
-        {/* Events Display */}
         {loading ? (
-          /* Loading State - Skeleton Loader */
           <div className="space-y-6">
             {showMap ? (
               <div className="mb-8 -mx-4 sm:mx-0">
-                <h2 className="px-4 sm:px-0 text-2xl font-semibold text-[#021234] mb-4 mt-4">Events auf der Karte</h2>
+                <h2 className="px-4 sm:px-0 text-2xl font-semibold text-[#021234] mb-4 mt-4">{t('eventsOnMap')}</h2>
                 <div className="h-[32rem] bg-gray-100 rounded-lg flex items-center justify-center animate-pulse">
                   <div className="text-center">
                     <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Events werden geladen...</p>
+                    <p className="text-gray-600">{t('loadingEvents')}</p>
                   </div>
                 </div>
               </div>
@@ -442,24 +432,23 @@ export default function EventsPage() {
             )}
           </div>
         ) : showMap ? (
-          /* Karten-Ansicht */
           <div className="mb-8 md:mb-8 -mx-4 sm:mx-0">
             <div className="px-4 sm:px-0 flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 mt-4 gap-4">
-              <h2 className="text-2xl font-semibold text-[#021234]">Events auf der Karte</h2>
+              <h2 className="text-2xl font-semibold text-[#021234]">{t('eventsOnMap')}</h2>
               <div className="w-full sm:w-auto sm:max-w-xs">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Event-Typ</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('allEventTypes')}</label>
                 <select
                   value={eventType}
                   onChange={(e) => setEventType(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white text-sm"
                 >
-                  <option value="">Alle Event-Typen</option>
-                  <option value="Flugtag">Flugtag</option>
-                  <option value="Messe">Messe</option>
-                  <option value="Fly-In">Fly-In</option>
-                  <option value="Workshop">Workshop</option>
-                  <option value="Vereinsveranstaltung">Vereinsveranstaltung</option>
-                  <option value="Sonstiges">Sonstiges</option>
+                  <option value="">{t('allEventTypes')}</option>
+                  <option value="Flugtag">{t('eventTypes.Flugtag')}</option>
+                  <option value="Messe">{t('eventTypes.Messe')}</option>
+                  <option value="Fly-In">{t('eventTypes.Fly-In')}</option>
+                  <option value="Workshop">{t('eventTypes.Workshop')}</option>
+                  <option value="Vereinsveranstaltung">{t('eventTypes.Vereinsveranstaltung')}</option>
+                  <option value="Sonstiges">{t('eventTypes.Sonstiges')}</option>
                 </select>
               </div>
             </div>
@@ -468,7 +457,7 @@ export default function EventsPage() {
                 <div className="h-[calc(100vh-180px)] md:h-[32rem] bg-gray-100 rounded-lg flex items-center justify-center">
                   <div className="text-center">
                     <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-pulse" />
-                    <p className="text-gray-600">Karte wird geladen...</p>
+                    <p className="text-gray-600">{t('loadingMap')}</p>
                   </div>
                 </div>
               }>
@@ -479,11 +468,10 @@ export default function EventsPage() {
         ) : events.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-[#021234] mb-2">Keine Events gefunden</h3>
-            <p className="text-gray-600">Versuchen Sie andere Suchkriterien oder erstellen Sie ein neues Event.</p>
+            <h3 className="text-lg font-medium text-[#021234] mb-2">{t('noEventsFound')}</h3>
+            <p className="text-gray-600">{t('noEventsText')}</p>
           </div>
         ) : (
-          /* Listen-Ansicht */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
               <Link
@@ -491,7 +479,6 @@ export default function EventsPage() {
                 href={`/events/${event._id}`}
                 className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col relative group ${isPastEvent(event) ? 'opacity-60 grayscale' : ''}`}
               >
-                {/* Share Button - Positioniert über der gesamten Karte */}
                 <button
                   onClick={(e) => {
                     e.preventDefault();
@@ -499,12 +486,12 @@ export default function EventsPage() {
                     handleShare(event, e);
                   }}
                   className="absolute top-3 right-3 bg-white text-gray-700 hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-colors shadow-lg z-[1]"
-                  title="Event teilen"
+                  title={t('share')}
                 >
                   <Share2 className="h-5 w-5" />
                   {shareSuccessId === event._id && (
                     <span className="absolute -top-10 right-0 bg-gray-900 text-white text-xs px-3 py-1.5 rounded whitespace-nowrap shadow-lg z-[2]">
-                      {typeof navigator.share !== 'undefined' ? 'Geteilt!' : 'Link kopiert!'}
+                      {typeof navigator.share !== 'undefined' ? t('shared') : t('linkCopied')}
                     </span>
                   )}
                 </button>
@@ -531,7 +518,7 @@ export default function EventsPage() {
                 <div className="flex flex-col flex-1 p-6">
                   <div className="flex items-start justify-between mb-3">
                     <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                      {event.eventType || 'Sonstiges'}
+                      {event.eventType || t('eventTypes.Sonstiges')}
                     </span>
                     {event.entryFee && event.entryFee > 0 && (
                       <span className="flex items-center text-green-600 font-semibold">
@@ -542,7 +529,7 @@ export default function EventsPage() {
                   </div>
 
                   <h3 className="text-xl font-semibold text-[#021234] mb-2">{event.title || event.name || event._id}</h3>
-                  <p className="text-gray-600 mb-4 line-clamp-3">{event.description || 'Keine Beschreibung verfügbar.'}</p>
+                  <p className="text-gray-600 mb-4 line-clamp-3">{event.description || t('noDescription')}</p>
 
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center text-gray-600">
@@ -552,7 +539,7 @@ export default function EventsPage() {
                     {event.allDay ? (
                       <div className="flex items-center text-gray-600">
                         <Clock className="h-4 w-4 mr-2" />
-                        <span>Ganztägig</span>
+                        <span>{t('allDay')}</span>
                       </div>
                     ) : event.startTime && event.endTime && (
                       <div className="flex items-center text-gray-600">
@@ -566,7 +553,7 @@ export default function EventsPage() {
                     </div>
                     {event.icao && (
                       <div className="flex items-center text-gray-600">
-                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">ICAO: {event.icao}</span>
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">{t('icao', { icao: event.icao })}</span>
                       </div>
                     )}
                   </div>
@@ -582,9 +569,9 @@ export default function EventsPage() {
                   )}
 
                   <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100">
-                    <span className="text-sm text-gray-500">{event.organizer ? `von ${event.organizer}` : 'Event'}</span>
+                    <span className="text-sm text-gray-500">{event.organizer ? `${t('by')} ${event.organizer}` : 'Event'}</span>
                     <span className="text-blue-600 font-medium whitespace-nowrap group-hover:underline">
-                      Details ansehen →
+                      {t('viewDetails')}
                     </span>
                   </div>
                 </div>
@@ -596,3 +583,4 @@ export default function EventsPage() {
     </div>
   );
 }
+

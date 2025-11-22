@@ -77,7 +77,7 @@ export default function EventsMapPage() {
           <div className="flex items-center space-x-3">
             <MapPin className="h-8 w-8 text-blue-600" />
             <div>
-              <h1 className="text-3xl font-bold text-[#021234]">Events auf der Karte</h1>
+              <h1 className="text-3xl font-bold text-[#021234] pt-[5px]">Events auf der Karte</h1>
               <p className="text-gray-600">
                 {eventsWithCoords.length} von {events.length} Events mit Standortdaten
               </p>

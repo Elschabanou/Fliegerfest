@@ -1,0 +1,406 @@
+{
+  "nav": {
+    "events": "Trouver des événements",
+    "about": "À propos",
+    "createEvent": "Créer un événement",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "account": "Mon compte",
+    "logout": "Se déconnecter"
+  },
+  "footer": {
+    "title": "FliegerEvents",
+    "description": "Votre plateforme pour les événements aéronautiques, les meetings aériens et les ateliers. Découvrez des événements passionnants dans le monde de l'aviation.",
+    "navigation": "Navigation",
+    "legal": "Légal",
+    "home": "Accueil",
+    "events": "Événements",
+    "map": "Carte",
+    "createEvent": "Créer un événement",
+    "account": "Mon compte",
+    "about": "À propos",
+    "imprint": "Mentions légales",
+    "privacy": "Confidentialité",
+    "terms": "CGU",
+    "cookies": "Politique des cookies",
+    "copyright": "© {year} FliegerEvents. Tous droits réservés.",
+    "language": "Langue"
+  },
+  "home": {
+    "hero": {
+      "title": "Ne manquez plus aucun meeting aérien !",
+      "subtitle": "Découvrez les meilleurs meetings aériens, événements aéronautiques et ateliers près de chez vous"
+    },
+    "quickActions": {
+      "flyIn": {
+        "title": "Fly-In / Meeting aérien",
+        "description": "Découvrir des événements"
+      },
+      "map": {
+        "title": "Carte",
+        "description": "Événements sur la carte"
+      },
+      "fair": {
+        "title": "Salon",
+        "description": "Salons aéronautiques"
+      },
+      "workshop": {
+        "title": "Ateliers",
+        "description": "Trouver des ateliers"
+      },
+      "other": {
+        "title": "Autre",
+        "description": "ex. voyages ou excursions"
+      },
+      "create": {
+        "title": "Créer un événement",
+        "description": "Créer un nouvel événement"
+      }
+    },
+    "featuredEvents": {
+      "title": "Événements recommandés",
+      "seeAll": "Voir tout",
+      "allDay": "Toute la journée",
+      "icao": "ICAO : {icao}"
+    },
+    "cta": {
+      "title": "Y a-t-il aussi un événement sur votre aérodrome ?",
+      "subtitle": "Inscrivez-vous gratuitement et créez votre propre événement",
+      "button": "S'inscrire maintenant"
+    }
+  },
+  "events": {
+    "list": "Liste",
+    "map": "Carte",
+    "searchPlaceholder": "Rechercher tout : Nom, Description, Lieu, ICAO, Organisateur, Email...",
+    "searchTips": "Conseils de recherche :",
+    "searchTipsText": "Vous pouvez rechercher des noms, descriptions, lieux, codes ICAO, organisateurs, adresses e-mail, numéros de téléphone, sites web et tags.",
+    "allEventTypes": "Tous les types d'événements",
+    "eventTypes": {
+      "Flugtag": "Meeting aérien",
+      "Messe": "Salon",
+      "Fly-In": "Fly-In",
+      "Workshop": "Atelier",
+      "Vereinsveranstaltung": "Événement de club",
+      "Sonstiges": "Autre"
+    },
+    "timeFilter": "Filtre temporel",
+    "search": "Rechercher",
+    "today": "Aujourd'hui",
+    "thisWeek": "Cette semaine",
+    "thisMonth": "Ce mois",
+    "clearAllFilters": "Effacer tous les filtres",
+    "fromDate": "Date de début",
+    "toDate": "Date de fin",
+    "fromTime": "Heure de début",
+    "toTime": "Heure de fin",
+    "activeFilters": "Filtres actifs :",
+    "type": "Type",
+    "searchTerm": "Recherche",
+    "from": "De",
+    "to": "À",
+    "eventsOnMap": "Événements sur la carte",
+    "loadingEvents": "Chargement des événements...",
+    "loadingMap": "Chargement de la carte...",
+    "noEventsFound": "Aucun événement trouvé",
+    "noEventsText": "Essayez d'autres critères de recherche ou créez un nouvel événement.",
+    "allDay": "Toute la journée",
+    "noDescription": "Aucune description disponible.",
+    "by": "par",
+    "viewDetails": "Voir les détails →",
+    "share": "Partager l'événement",
+    "shared": "Partagé !",
+    "linkCopied": "Lien copié !",
+    "icao": "ICAO : {icao}"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Se connecter",
+      "subtitle": "Ou",
+      "createAccount": "créer un nouveau compte",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "votre@email.fr",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "submit": "Se connecter",
+      "submitting": "Connexion...",
+      "backToHome": "Retour à l'accueil"
+    },
+    "signUp": {
+      "title": "Créer un compte",
+      "subtitle": "Ou",
+      "signIn": "connectez-vous avec votre compte existant",
+      "name": "Nom complet",
+      "namePlaceholder": "Jean Dupont",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "jean@exemple.fr",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Au moins 6 caractères",
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Répéter le mot de passe",
+      "submit": "Créer un compte",
+      "submitting": "Création...",
+      "success": "Inscription réussie !",
+      "successMessage": "Votre compte a été créé avec succès. Vous allez être redirigé vers la page de connexion...",
+      "signInNow": "Se connecter maintenant",
+      "backToHome": "Retour à l'accueil",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères"
+    }
+  },
+  "about": {
+    "title": "À propos de Fliegerevents",
+    "subtitle": "Votre plateforme centrale pour tous les événements aéronautiques et meetings aériens en Allemagne",
+    "description": "Nous connectons la communauté aéronautique et facilitons la découverte, l'organisation et le partage d'événements passionnants. Que ce soit un meeting aérien, un fly-in, un atelier ou un événement de club – nous avons tout ce que l'aviation a à offrir.",
+    "discoverEvents": "Découvrir les événements",
+    "mission": {
+      "title": "Notre mission",
+      "subtitle": "Renforcer la communauté aéronautique et faciliter l'accès aux événements passionnants",
+      "passion": {
+        "title": "Passion",
+        "description": "Nous partageons la passion pour l'aviation et souhaitons la partager avec d'autres"
+      },
+      "community": {
+        "title": "Communauté",
+        "description": "Nous rassemblons les pilotes privés et favorisons les échanges dans la communauté"
+      },
+      "accessibility": {
+        "title": "Accessibilité",
+        "description": "Nous facilitons la découverte, l'organisation et la participation aux événements"
+      }
+    },
+    "why": {
+      "title": "Pourquoi Fliegerevents ?",
+      "subtitle": "Découvrez les avantages de notre plateforme",
+      "findEvents": {
+        "title": "Trouver des événements",
+        "description": "Découvrez des meetings aériens, ateliers et événements aéronautiques près de chez vous avec notre fonction de recherche intelligente"
+      },
+      "locationBased": {
+        "title": "Basé sur la localisation",
+        "description": "Trouvez des événements dans votre région ou sur votre aérodrome préféré avec notre carte interactive"
+      },
+      "community": {
+        "title": "Communauté",
+        "description": "Rencontrez d'autres pilotes privés, échangez et partagez votre passion pour l'aviation"
+      },
+      "upToDate": {
+        "title": "Toujours à jour",
+        "description": "Restez informé des derniers événements et dates – notre plateforme est mise à jour quotidiennement"
+      }
+    },
+    "whatWeOffer": {
+      "title": "Ce que nous offrons",
+      "eventList": {
+        "title": "Liste complète d'événements",
+        "description": "Parcourez des centaines d'événements par type, date, lieu ou autres critères. Des meetings aériens aux fly-ins en passant par les ateliers – nous avons tout."
+      },
+      "createEvents": {
+        "title": "Créer vos propres événements",
+        "description": "Organisez votre propre événement et partagez-le avec la communauté. Simple, rapide et gratuit."
+      },
+      "interactiveMap": {
+        "title": "Carte interactive",
+        "description": "Visualisez les événements sur une carte interactive et trouvez des événements près de chez vous en un coup d'œil."
+      },
+      "communityNetwork": {
+        "title": "Réseau communautaire",
+        "description": "Réseauz avec d'autres pilotes, clubs et organisations. Partagez vos expériences et apprenez les uns des autres."
+      }
+    },
+    "cta": {
+      "title": "Prêt à commencer ?",
+      "subtitle": "Découvrez des événements passionnants ou créez le vôtre",
+      "discoverEvents": "Découvrir les événements",
+      "createEvent": "Créer un événement"
+    }
+  },
+  "create": {
+    "title": "Créer un événement",
+    "back": "Retour",
+    "backToEvents": "Retour aux événements",
+    "subtitle": "Partagez votre événement aéronautique avec la communauté",
+    "titleLabel": "Titre de l'événement",
+    "titlePlaceholder": "ex. Meeting aérien à l'aérodrome XYZ",
+    "description": "Description",
+    "descriptionPlaceholder": "Décrivez votre événement...",
+    "location": "Lieu/Aérodrome",
+    "locationPlaceholder": "ex. Aérodrome de Mainz-Finthen",
+    "address": "Adresse complète",
+    "addressPlaceholder": "Rue, Code postal Ville",
+    "geocode": "Trouver les coordonnées",
+    "geocoding": "Recherche...",
+    "geocodeSuccess": "Coordonnées trouvées : {name}",
+    "geocodeTitle": "Coordonnées pour la carte",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "latitudePlaceholder": "ex. 47.6500279",
+    "longitudePlaceholder": "ex. 9.4800858",
+    "geocodeHint": "💡 Cliquez sur \"Trouver les coordonnées\" pour déterminer automatiquement les coordonnées de votre lieu. Celles-ci sont nécessaires pour que votre événement apparaisse sur la carte.",
+    "date": "Date",
+    "startTime": "Heure de début",
+    "endTime": "Heure de fin",
+    "allDay": "Événement toute la journée",
+    "eventType": "Type d'événement",
+    "eventTypeSelect": "Veuillez sélectionner...",
+    "organizer": "Organisateur",
+    "organizerPlaceholder": "Votre nom ou club",
+    "contactEmail": "E-mail de contact",
+    "contactEmailPlaceholder": "contact@exemple.fr",
+    "contactPhone": "Téléphone de contact (optionnel)",
+    "contactPhonePlaceholder": "+33 1 23 45 67 89",
+    "maxParticipants": "Max. participants (optionnel)",
+    "maxParticipantsPlaceholder": "ex. 50",
+    "registrationRequired": "Inscription requise",
+    "entryFee": "Prix d'entrée (€)",
+    "entryFeePlaceholder": "0.00",
+    "website": "Site web (optionnel)",
+    "websitePlaceholder": "https://www.exemple.fr",
+    "tags": "Tags (optionnel)",
+    "tagsPlaceholder": "Planeur, ULM, Vintage (séparés par des virgules)",
+    "image": "Image de couverture (optionnel)",
+    "submit": "Créer l'événement",
+    "submitting": "Création...",
+    "locationRequired": "Veuillez entrer un lieu ou une adresse",
+    "geocodeError": "Erreur lors de l'obtention des coordonnées",
+    "success": "Événement créé avec succès !",
+    "successMessage": "Vous allez être redirigé vers la page des événements...",
+    "loading": "Chargement..."
+  },
+  "eventDetails": {
+    "loading": "Chargement de l'événement...",
+    "notFound": "Événement non trouvé",
+    "backToEvents": "Retour aux événements",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet événement ?",
+    "deleteError": "Erreur lors de la suppression de l'événement",
+    "share": "Partager",
+    "shared": "Partagé !",
+    "linkCopied": "Lien copié !",
+    "allDay": "Toute la journée",
+    "entryFee": "Prix d'entrée",
+    "free": "Gratuit",
+    "organizer": "Organisateur",
+    "contact": "Contact",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "website": "Site web",
+    "maxParticipants": "Max. participants",
+    "registrationRequired": "Inscription requise",
+    "tags": "Tags",
+    "createdBy": "Créé par",
+    "location": "Lieu",
+    "address": "Adresse",
+    "icao": "ICAO",
+    "coordinates": "Coordonnées",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "description": "Description",
+    "eventDetails": "Détails de l'événement",
+    "visitWebsite": "Visiter le site web",
+    "contactOrganizer": "Veuillez contacter l'organisateur."
+  },
+  "account": {
+    "title": "Mon compte",
+    "userInfo": "Informations utilisateur",
+    "name": "Nom",
+    "email": "E-mail",
+    "role": "Rôle",
+    "memberSince": "Membre depuis",
+    "myEvents": "Mes événements",
+    "noEvents": "Vous n'avez pas encore créé d'événements.",
+    "createEvent": "Créer un événement",
+    "loading": "Chargement...",
+    "delete": "Supprimer",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet événement ?",
+    "deleteError": "Erreur lors de la suppression de l'événement",
+    "edit": "Modifier",
+    "logout": "Se déconnecter",
+    "unauthorized": "Non autorisé",
+    "pleaseSignIn": "Veuillez vous connecter pour voir votre compte.",
+    "subtitle": "Gérez vos informations personnelles et vos événements",
+    "noEventsTitle": "Aucun événement trouvé",
+    "view": "Voir",
+    "deleting": "Suppression..."
+  },
+  "impressum": {
+    "title": "Mentions légales",
+    "operator": "Opérateur du site web :",
+    "contact": "Contact",
+    "phone": "Téléphone",
+    "email": "E-mail",
+    "description": "Description",
+    "responsible": "Responsable du contenu selon § 55 Abs. 2 RStV",
+    "disclaimer": "Avertissement",
+    "contentLiability": "Responsabilité du contenu",
+    "contentLiabilityText": "En tant que prestataire de services, nous sommes responsables de notre propre contenu sur ces pages conformément aux lois générales en vertu du § 7 para. 1 TMG. Cependant, selon les §§ 8 à 10 TMG, nous en tant que prestataire de services ne sommes pas tenus de surveiller les informations tierces transmises ou stockées ou d'enquêter sur des circonstances indiquant une activité illégale.",
+    "linkLiability": "Responsabilité des liens",
+    "linkLiabilityText": "Notre offre contient des liens vers des sites web externes de tiers, sur le contenu desquels nous n'avons aucune influence. Par conséquent, nous ne pouvons assumer aucune responsabilité pour ces contenus externes. Le fournisseur ou l'opérateur respectif des pages est toujours responsable du contenu des pages liées.",
+    "copyright": "Droit d'auteur",
+    "copyrightText": "Le contenu et les œuvres créés par les opérateurs du site sur ces pages sont soumis au droit d'auteur allemand. La duplication, le traitement, la distribution et toute forme d'exploitation en dehors des limites du droit d'auteur nécessitent le consentement écrit de l'auteur ou du créateur respectif.",
+    "disputeResolution": "Résolution des litiges",
+    "disputeResolutionText1": "La Commission européenne fournit une plateforme de règlement en ligne des litiges (OS) :",
+    "disputeResolutionText2": "Vous pouvez trouver notre adresse e-mail ci-dessus dans les mentions légales.",
+    "disputeResolutionText3": "Nous ne sommes pas disposés ou obligés de participer à des procédures de règlement des litiges devant un conseil d'arbitrage des consommateurs."
+  },
+  "datenschutz": {
+    "title": "Politique de confidentialité",
+    "overview": "Confidentialité en un coup d'œil",
+    "general": "Informations générales",
+    "generalText": "Les informations suivantes donnent un aperçu simple de ce qui arrive à vos données personnelles lorsque vous visitez ce site web. Les données personnelles sont toutes les données avec lesquelles vous pouvez être personnellement identifié. Des informations détaillées sur le sujet de la protection des données peuvent être trouvées dans notre politique de confidentialité ci-dessous.",
+    "dataCollection": "Collecte de données sur ce site web",
+    "whoResponsible": "Qui est responsable de la collecte de données sur ce site web ?",
+    "whoResponsibleText": "Le traitement des données sur ce site web est effectué par l'opérateur du site web. Vous pouvez trouver leurs coordonnées dans la section \"Informations sur la partie responsable\" dans cette politique de confidentialité.",
+    "howCollect": "Comment collectons-nous vos données ?",
+    "howCollectText1": "D'une part, vos données sont collectées lorsque vous nous les fournissez. Il peut s'agir, par exemple, de données que vous saisissez dans un formulaire de contact.",
+    "howCollectText2": "D'autres données sont collectées automatiquement ou avec votre consentement par nos systèmes informatiques lorsque vous visitez le site web. Il s'agit principalement de données techniques (par exemple, navigateur Internet, système d'exploitation ou heure d'accès à la page). Ces données sont collectées automatiquement dès que vous entrez sur ce site web.",
+    "whyUse": "À quoi utilisons-nous vos données ?",
+    "whyUseText": "Une partie des données est collectée pour assurer la fourniture sans erreur du site web. D'autres données peuvent être utilisées pour analyser votre comportement utilisateur.",
+    "yourRights": "Quels droits avez-vous concernant vos données ?",
+    "yourRightsText": "Vous avez le droit de recevoir des informations gratuites à tout moment sur l'origine, le destinataire et le but de vos données personnelles stockées. Vous avez également le droit de demander la correction ou la suppression de ces données. Si vous avez donné votre consentement au traitement des données, vous pouvez révoquer ce consentement à tout moment pour l'avenir.",
+    "hosting": "Hébergement",
+    "hostingText": "Nous hébergeons le contenu de notre site web auprès du fournisseur suivant :",
+    "hostingProvider": "Vercel Inc.",
+    "hostingAddress": "340 S Lemon Ave #4133",
+    "hostingCity": "Walnut, CA 91789",
+    "hostingCountry": "USA",
+    "hostingPrivacy": "Politique de confidentialité de Vercel",
+    "generalInfo": "Informations générales et informations obligatoires",
+    "privacy": "Confidentialité",
+    "privacyText": "Les opérateurs de ces pages prennent très au sérieux la protection de vos données personnelles. Nous traitons vos données personnelles de manière confidentielle et conformément aux réglementations légales sur la protection des données et cette politique de confidentialité.",
+    "responsibleParty": "Informations sur la partie responsable",
+    "responsiblePartyText": "La partie responsable du traitement des données sur ce site web est :",
+    "storageDuration": "Durée de stockage",
+    "storageDurationText": "Sauf indication d'une période de stockage plus spécifique dans cette politique de confidentialité, vos données personnelles resteront chez nous jusqu'à ce que l'objectif du traitement des données ne s'applique plus. Si vous faites valoir une demande légitime de suppression ou révoquez le consentement au traitement des données, vos données seront supprimées, sauf si nous avons d'autres raisons légalement admissibles pour stocker vos données personnelles.",
+    "serverLogs": "Fichiers journaux du serveur",
+    "serverLogsText": "Le fournisseur des pages collecte et stocke automatiquement des informations dans des fichiers journaux du serveur, que votre navigateur nous transmet automatiquement. Ce sont :",
+    "serverLogsItems": {
+      "browser": "Type et version du navigateur",
+      "os": "Système d'exploitation utilisé",
+      "referrer": "URL du référent",
+      "hostname": "Nom d'hôte de l'ordinateur accédant",
+      "time": "Heure de la demande du serveur",
+      "ip": "Adresse IP"
+    },
+    "contactForm": "Formulaire de contact",
+    "contactFormText": "Si vous nous envoyez des demandes via le formulaire de contact, vos détails du formulaire de demande, y compris les coordonnées que vous y avez fournies, seront stockés par nous aux fins du traitement de la demande et en cas de questions de suivi. Nous ne transmettons pas ces données sans votre consentement.",
+    "newsletter": "Newsletter",
+    "newsletterText": "Si vous souhaitez recevoir la newsletter proposée sur le site web, nous avons besoin d'une adresse e-mail de votre part ainsi que d'informations qui nous permettent de vérifier que vous êtes le propriétaire de l'adresse e-mail fournie et que vous acceptez de recevoir la newsletter.",
+    "plugins": "Plugins et outils",
+    "googleFonts": "Google Fonts (hébergement local)",
+    "googleFontsText": "Ce site utilise des polices Google, fournies par Google, pour l'affichage uniforme des polices. Les polices Google sont installées localement. Une connexion aux serveurs de Google n'a pas lieu.",
+    "erecht24": "eRecht24 Safe Sharing",
+    "erecht24Text": "Cette politique de confidentialité a été créée avec le générateur de politique de confidentialité d'eRecht24."
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour"
+  }
+}
+
