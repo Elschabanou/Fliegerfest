@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import { ArrowLeft, MapPin } from 'lucide-react';
 import EventsMap from '@/components/EventsMap';
+import { useTranslations } from 'next-intl';
 
 interface Event {
   _id: string;
@@ -26,6 +27,7 @@ interface Event {
 }
 
 export default function EventsMapPage() {
+  const t = useTranslations('events');
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +52,7 @@ export default function EventsMapPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Events werden geladen...</p>
+          <p className="text-gray-600">{t('loadingMap')}</p>
         </div>
       </div>
     );
@@ -71,45 +73,42 @@ export default function EventsMapPage() {
             className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 mb-4"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span>Zurück zu den Events</span>
+            <span>{t('backToEvents') || 'Zurück zu den Events'}</span>
           </Link>
           
           <div className="flex items-center space-x-3">
             <MapPin className="h-8 w-8 text-blue-600" />
             <div>
-              <h1 className="text-3xl font-bold text-[#021234] pt-[5px]">Events auf der Karte</h1>
+              <h1 className="text-3xl font-bold text-[#021234] pt-[5px]">{t('eventsOnMap')}</h1>
               <p className="text-gray-600">
-                {eventsWithCoords.length} von {events.length} Events mit Standortdaten
+                {eventsWithCoords.length} {t('of') || 'von'} {events.length} {t('eventsWithLocation') || 'Events mit Standortdaten'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Karte */}
         <div className="bg-white rounded-lg shadow-lg p-6">
           <EventsMap events={events} />
           
           {eventsWithCoords.length === 0 && (
             <div className="mt-6 text-center">
               <p className="text-gray-600 mb-4">
-                Keine Events mit Standortdaten gefunden. Fügen Sie Koordinaten (lat/lon) zu Ihren Events hinzu, 
-                um sie auf der Karte anzuzeigen.
+                {t('noEventsWithLocation') || 'Keine Events mit Standortdaten gefunden. Fügen Sie Koordinaten (lat/lon) zu Ihren Events hinzu, um sie auf der Karte anzuzeigen.'}
               </p>
               <Link
                 href="/events/create"
                 className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                <span>Event erstellen</span>
+                <span>{t('createEvent') || 'Event erstellen'}</span>
               </Link>
             </div>
           )}
         </div>
 
-        {/* Event-Liste für Events ohne Koordinaten */}
         {events.length > eventsWithCoords.length && (
           <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-semibold text-[#021234] mb-4">
-              Events ohne Standortdaten ({events.length - eventsWithCoords.length})
+              {t('eventsWithoutLocation') || 'Events ohne Standortdaten'} ({events.length - eventsWithCoords.length})
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {events
@@ -124,10 +123,10 @@ export default function EventsMapPage() {
                       {event.title || event.name || event._id}
                     </h3>
                     <p className="text-sm text-gray-600 mb-2">
-                      {event.description || 'Keine Beschreibung'}
+                      {event.description || t('noDescription')}
                     </p>
                     <p className="text-xs text-gray-500">
-                      Koordinaten erforderlich für Kartenanzeige
+                      {t('coordinatesRequired') || 'Koordinaten erforderlich für Kartenanzeige'}
                     </p>
                   </div>
                 ))}
@@ -138,3 +137,4 @@ export default function EventsMapPage() {
     </div>
   );
 }
+
