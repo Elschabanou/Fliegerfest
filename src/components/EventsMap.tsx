@@ -657,13 +657,13 @@ export default function EventsMap({ events, selectedEventType = '' }: EventsMapP
 
   return (
     <div className="relative">
-      {/* Standort / Suche */}
-      <div className="absolute top-4 right-4 w-full max-w-[75%] sm:max-w-sm md:max-w-xs z-[1000] flex flex-col gap-3">
-        <div className="bg-white/95 backdrop-blur rounded-lg border border-gray-200 p-3 shadow-md">
+      {/* Mobile: Suchbox über der Karte */}
+      <div className="block sm:hidden mb-3">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-md">
           <div className="flex items-center gap-2 mb-2">
             <button
               onClick={() => { setLocationMode('device'); }}
-              className={`px-2 py-1 text-xs rounded border ${locationMode === 'device' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-700'}`}
+              className={`flex-1 px-2 py-1 text-xs rounded border ${locationMode === 'device' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-700'}`}
             >Eigener Standort</button>
             <button
               onClick={() => {
@@ -676,21 +676,69 @@ export default function EventsMap({ events, selectedEventType = '' }: EventsMapP
                   setLocationMode('custom');
                 }
               }}
-              className={`px-2 py-1 text-xs rounded border ${locationMode === 'custom' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-700'}`}
+              className={`flex-1 px-2 py-1 text-xs rounded border ${locationMode === 'custom' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-700'}`}
             >Eigener Ort</button>
           </div>
-          <form onSubmit={handleSearchLocation} className="flex items-center gap-2">
-            <input
-              type="text"
-              value={customQuery}
-              onChange={(e) => setCustomQuery(e.target.value)}
-              placeholder="Ort suchen (z.B. Tübingen)"
-              ref={searchInputRef}
-              className={`flex-1 border rounded px-2 py-1 text-sm bg-white text-[#021234] placeholder:text-gray-400 ${geocodingError ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500'}`}
-            />
-            <button type="submit" disabled={isGeocoding} className="px-3 py-1 text-sm rounded bg-blue-600 text-white disabled:opacity-50">Suche</button>
-          </form>
-          {geocodingError && <div className="mt-2 text-xs text-red-600">{geocodingError}</div>}
+          {locationMode === 'custom' && (
+            <form onSubmit={handleSearchLocation} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={customQuery}
+                onChange={(e) => setCustomQuery(e.target.value)}
+                placeholder="Ort suchen (z.B. Tübingen)"
+                ref={searchInputRef}
+                className={`flex-1 border rounded px-2 py-1 text-sm bg-white text-[#021234] placeholder:text-gray-400 ${geocodingError ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500'}`}
+              />
+              <button type="submit" disabled={isGeocoding} className="px-3 py-1 text-sm rounded bg-blue-600 text-white disabled:opacity-50">Suche</button>
+            </form>
+          )}
+          {locationMode === 'custom' && geocodingError && <div className="mt-2 text-xs text-red-600">{geocodingError}</div>}
+        </div>
+
+        {/* Fehlermeldung */}
+        {locationError && (
+          <div className="mt-2 bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-lg text-sm">
+            {locationError}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop: Standort / Suche - absolut positioniert */}
+      <div className="hidden sm:block absolute top-4 right-4 w-full max-w-sm md:max-w-xs z-[1000] flex flex-col gap-3">
+        <div className="bg-white/95 backdrop-blur rounded-lg border border-gray-200 p-3 shadow-md">
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={() => { setLocationMode('device'); }}
+              className={`flex-1 px-2 py-1 text-xs rounded border ${locationMode === 'device' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-700'}`}
+            >Eigener Standort</button>
+            <button
+              onClick={() => {
+                if (!customLocation && !customQuery.trim()) {
+                  setGeocodingError('Bitte einen eigenen Ort eingeben');
+                  setLocationMode('custom');
+                  // Input fokussieren
+                  setTimeout(() => searchInputRef.current?.focus(), 0);
+                } else {
+                  setLocationMode('custom');
+                }
+              }}
+              className={`flex-1 px-2 py-1 text-xs rounded border ${locationMode === 'custom' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-700'}`}
+            >Eigener Ort</button>
+          </div>
+          {locationMode === 'custom' && (
+            <form onSubmit={handleSearchLocation} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={customQuery}
+                onChange={(e) => setCustomQuery(e.target.value)}
+                placeholder="Ort suchen (z.B. Tübingen)"
+                ref={searchInputRef}
+                className={`flex-1 border rounded px-2 py-1 text-sm bg-white text-[#021234] placeholder:text-gray-400 ${geocodingError ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500'}`}
+              />
+              <button type="submit" disabled={isGeocoding} className="px-3 py-1 text-sm rounded bg-blue-600 text-white disabled:opacity-50">Suche</button>
+            </form>
+          )}
+          {locationMode === 'custom' && geocodingError && <div className="mt-2 text-xs text-red-600">{geocodingError}</div>}
         </div>
 
         {/* Fehlermeldung */}
@@ -699,22 +747,29 @@ export default function EventsMap({ events, selectedEventType = '' }: EventsMapP
             {locationError}
           </div>
         )}
-        
-        {/* Erfolgsmeldung */}
-        {userLocation && !locationError && showLocationFound && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded-lg text-sm max-w-xs">
-            Standort gefunden!
+      </div>
+
+      {/* Mobile: Reichweiten-Regler über der Karte, unter den Event-Typen */}
+      <div className="block sm:hidden mb-3">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-md">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700">Reichweite</span>
+            <span className="text-sm text-gray-600">{radiusKm} km</span>
           </div>
-        )}
+          <input
+            type="range"
+            min={0}
+            max={500}
+            step={10}
+            value={radiusKm}
+            onChange={(e) => setRadiusKm(Number(e.target.value))}
+            className="w-full"
+          />
+        </div>
       </div>
-
-      {/* Karte */}
-      <div className="h-[calc(100vh-180px)] sm:h-[32rem] w-full rounded-none sm:rounded-lg overflow-hidden border border-gray-200">
-        <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }}></div>
-      </div>
-
-      {/* Reichweiten-Regler */}
-      <div className="absolute bottom-4 right-4 w-full max-w-[75%] sm:max-w-xs md:max-w-xs z-[1000] bg-white/95 backdrop-blur rounded-lg border border-gray-200 p-3 shadow-md">
+      
+      {/* Desktop: Reichweiten-Regler - absolut positioniert */}
+      <div className="hidden sm:block absolute bottom-4 right-4 w-auto max-w-xs z-[1000] bg-white/95 backdrop-blur rounded-lg border border-gray-200 p-3 shadow-md">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-700">Reichweite</span>
           <span className="text-sm text-gray-600">{radiusKm} km</span>
@@ -728,7 +783,19 @@ export default function EventsMap({ events, selectedEventType = '' }: EventsMapP
           onChange={(e) => setRadiusKm(Number(e.target.value))}
           className="w-full"
         />
-        <div className="mt-1 text-xs text-gray-500 hidden md:block">Events außerhalb des Radius werden ausgegraut.</div>
+        <div className="mt-1 text-xs text-gray-500">Events außerhalb des Radius werden ausgegraut.</div>
+      </div>
+
+      {/* Karte */}
+      <div className="h-[calc(100vh-16rem)] sm:h-[calc(100vh-12rem)] w-full rounded-none sm:rounded-lg overflow-hidden border border-gray-200 relative">
+        <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }}></div>
+        
+        {/* Erfolgsmeldung in der Karte */}
+        {userLocation && !locationError && showLocationFound && (
+          <div className="absolute top-4 left-6 bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded-lg text-sm z-[1000] shadow-md">
+            Standort gefunden!
+          </div>
+        )}
       </div>
     </div>
   );

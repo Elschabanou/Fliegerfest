@@ -170,13 +170,13 @@ export default function HomePage() {
       </div>
 
       {/* Featured Events Section */}
-      {featuredEvents.length > 0 && (
-        <div className="pb-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#021234]">
-                {t('home.featuredEvents.title')}
-              </h2>
+      <div className="pb-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#021234]">
+              {t('home.featuredEvents.title')}
+            </h2>
+            {!loadingEvents && (
               <Link
                 href="/events"
                 className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold transition-colors"
@@ -184,103 +184,129 @@ export default function HomePage() {
                 {t('home.featuredEvents.seeAll')}
                 <ArrowRight className="h-5 w-5" />
               </Link>
-            </div>
-            {loadingEvents ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="bg-gray-100 rounded-lg shadow-md overflow-hidden animate-pulse">
-                    <div className="h-48 w-full bg-gray-200"></div>
-                    <div className="p-6 space-y-4">
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-4 bg-gray-200 rounded w-full"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {featuredEvents.map((event) => (
-                  <Link
-                    key={event._id}
-                    href={`/events/${event._id}`}
-                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col group"
-                  >
-                    {/* Event Image */}
-                    {event.imageurl && (
-                      <div className="relative h-48 w-full overflow-hidden">
-                        <Image
-                          src={event.imageurl}
-                          alt={event.title || event.name || 'Event'}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                    )}
-                    {!event.imageurl && (
-                      <div className="h-48 w-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                        <Calendar className="h-16 w-16 text-white opacity-50" />
-                      </div>
-                    )}
-                    
-                    {/* Event Content */}
-                    <div className="p-6 flex flex-col flex-1 min-w-0">
-                      {/* Event Type Tag */}
-                      {event.eventType && (
-                        <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-1 rounded-full mb-2 w-fit">
-                          {event.eventType}
-                        </span>
-                      )}
-                      
-                      {/* Event Title */}
-                      <h3 className="text-lg font-semibold text-[#021234] mb-2 line-clamp-2 min-w-0">
-                        {event.title || event.name || 'Unbenanntes Event'}
-                      </h3>
-                      
-                      {/* Event Description */}
-                      {event.description && (
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2 min-w-0">
-                          {event.description}
-                        </p>
-                      )}
-                      
-                      {/* Event Details */}
-                      <div className="mt-auto space-y-2">
-                        {event.date && (
-                          <div className="flex items-center text-sm text-gray-600">
-                            <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
-                            <span>{formatDate(event.date)}</span>
-                            {event.startTime && !event.allDay && (
-                              <span className="ml-2">{event.startTime}</span>
-                            )}
-                            {event.allDay && (
-                              <span className="ml-2">{t('home.featuredEvents.allDay')}</span>
-                            )}
-                          </div>
-                        )}
-                        
-                        {event.location && (
-                          <div className="flex items-center text-sm text-gray-600 min-w-0">
-                            <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                            <span className="line-clamp-1 min-w-0">{event.location}</span>
-                          </div>
-                        )}
-                        
-                        {event.icao && (
-                          <div className="text-sm text-gray-500">
-                            {t('home.featuredEvents.icao', { icao: event.icao })}
-                          </div>
-                        )}
-                      </div>
-                      
-                    </div>
-                  </Link>
-                ))}
-              </div>
             )}
           </div>
+          {loadingEvents ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse flex flex-col">
+                  {/* Image Placeholder */}
+                  <div className="h-48 w-full bg-gradient-to-br from-gray-200 to-gray-300"></div>
+                  
+                  {/* Content Placeholder */}
+                  <div className="p-6 flex flex-col flex-1 min-w-0 space-y-3">
+                    {/* Event Type Tag Placeholder */}
+                    <div className="h-5 bg-gray-200 rounded-full w-20"></div>
+                    
+                    {/* Title Placeholder */}
+                    <div className="space-y-2">
+                      <div className="h-5 bg-gray-200 rounded w-full"></div>
+                      <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                    
+                    {/* Description Placeholder */}
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-full"></div>
+                      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                    </div>
+                    
+                    {/* Details Placeholder */}
+                    <div className="mt-auto space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-gray-200 rounded w-32"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : featuredEvents.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredEvents.map((event) => (
+                <Link
+                  key={event._id}
+                  href={`/events/${event._id}`}
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col group"
+                >
+                  {/* Event Image */}
+                  {event.imageurl && (
+                    <div className="relative h-48 w-full overflow-hidden">
+                      <Image
+                        src={event.imageurl}
+                        alt={event.title || event.name || 'Event'}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
+                  {!event.imageurl && (
+                    <div className="h-48 w-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                      <Calendar className="h-16 w-16 text-white opacity-50" />
+                    </div>
+                  )}
+                  
+                  {/* Event Content */}
+                  <div className="p-6 flex flex-col flex-1 min-w-0">
+                    {/* Event Type Tag */}
+                    {event.eventType && (
+                      <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-1 rounded-full mb-2 w-fit">
+                        {event.eventType}
+                      </span>
+                    )}
+                    
+                    {/* Event Title */}
+                    <h3 className="text-lg font-semibold text-[#021234] mb-2 line-clamp-2 min-w-0">
+                      {event.title || event.name || 'Unbenanntes Event'}
+                    </h3>
+                    
+                    {/* Event Description */}
+                    {event.description && (
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2 min-w-0">
+                        {event.description}
+                      </p>
+                    )}
+                    
+                    {/* Event Details */}
+                    <div className="mt-auto space-y-2">
+                      {event.date && (
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <span>{formatDate(event.date)}</span>
+                          {event.startTime && !event.allDay && (
+                            <span className="ml-2">{event.startTime}</span>
+                          )}
+                          {event.allDay && (
+                            <span className="ml-2">{t('home.featuredEvents.allDay')}</span>
+                          )}
+                        </div>
+                      )}
+                      
+                      {event.location && (
+                        <div className="flex items-center text-sm text-gray-600 min-w-0">
+                          <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <span className="line-clamp-1 min-w-0">{event.location}</span>
+                        </div>
+                      )}
+                      
+                      {event.icao && (
+                        <div className="text-sm text-gray-500">
+                          {t('home.featuredEvents.icao', { icao: event.icao })}
+                        </div>
+                      )}
+                    </div>
+                    
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : null}
         </div>
-      )}
+      </div>
 
       {/* CTA Section */}
       {!user && (

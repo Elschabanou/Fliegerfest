@@ -200,7 +200,7 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-0">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -452,9 +452,9 @@ export default function EventsPage() {
                 </select>
               </div>
             </div>
-            <div className="-mx-4 sm:mx-0 md:mx-0">
+            <div className="-mx-4 sm:mx-0 md:mx-0 px-4 sm:px-0">
               <Suspense fallback={
-                <div className="h-[calc(100vh-180px)] md:h-[32rem] bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="h-[24rem] md:h-[32rem] bg-gray-100 rounded-lg flex items-center justify-center">
                   <div className="text-center">
                     <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-pulse" />
                     <p className="text-gray-600">{t('loadingMap')}</p>
