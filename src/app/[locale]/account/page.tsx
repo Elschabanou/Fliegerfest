@@ -35,7 +35,6 @@ interface AccountUser {
 
 export default function AccountPage() {
   const t = useTranslations('account');
-  const tCommon = useTranslations('common');
   const tEvents = useTranslations('events');
   const locale = useLocale();
   const { user, token, logout } = useAuth();

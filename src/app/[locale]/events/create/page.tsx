@@ -147,7 +147,7 @@ export default function CreateEventPage() {
       });
 
       if (response.ok) {
-        const event = await response.json();
+        await response.json();
         setShowAnimation(true);
         setLoading(false);
         setTimeout(() => {

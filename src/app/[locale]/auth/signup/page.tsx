@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { Link } from '@/i18n/routing';
 import { Calendar, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '@/components/AuthProvider';
 import { useTranslations } from 'next-intl';
 
 export default function SignUpPage() {
