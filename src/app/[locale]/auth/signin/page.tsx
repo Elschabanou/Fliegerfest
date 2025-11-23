@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { Link } from '@/i18n/routing';
 import { Calendar, Eye, EyeOff } from 'lucide-react';
@@ -17,6 +17,19 @@ export default function SignInPage() {
   const router = useRouter();
   const { login } = useAuth();
   const tCommon = useTranslations('common');
+  
+  // Lese redirect Parameter aus URL
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get('redirect');
+      if (redirect) {
+        setRedirectTo(redirect);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +49,8 @@ export default function SignInPage() {
 
       if (response.ok) {
         login(data.token, data.user);
-        router.push('/events');
+        // Weiterleitung zur ursprünglich gewünschten Seite oder zu /events
+        router.push(redirectTo || '/events');
       } else {
         setError(data.error || tCommon('error'));
       }

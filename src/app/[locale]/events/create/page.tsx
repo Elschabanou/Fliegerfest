@@ -50,7 +50,7 @@ export default function CreateEventPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.replace('/auth/signin');
+      router.replace('/auth/signin?redirect=/events/create');
     }
   }, [user, authLoading, router]);
 
