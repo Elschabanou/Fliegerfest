@@ -1,6 +1,7 @@
 import { AuthProvider } from '@/components/AuthProvider';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import StructuredData from '@/components/StructuredData';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     fr: 'Votre plateforme pour les événements aéronautiques, les meetings aériens et les ateliers. Découvrez des événements passionnants dans le monde de l\'aviation.',
   };
   
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://fliegerevents.de';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fliegerevents.de';
   
   return {
     title: titles[locale as keyof typeof titles] || titles.de,
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       siteName: 'Fliegerevents',
       images: [
         {
-          url: '/og-image.png',
+          url: new URL('/og-image.png', siteUrl).toString(),
           width: 1200,
           height: 630,
           alt: titles[locale as keyof typeof titles] || titles.de,
@@ -47,7 +48,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       card: 'summary_large_image',
       title: titles[locale as keyof typeof titles] || titles.de,
       description: descriptions[locale as keyof typeof descriptions] || descriptions.de,
-      images: ['/og-image.png'],
+      images: [new URL('/og-image.png', siteUrl).toString()],
     },
     alternates: {
       canonical: `${siteUrl}/${locale}`,
@@ -79,6 +80,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
+      <StructuredData />
       <AuthProvider>
         <Navbar />
         <main className="min-h-screen bg-gray-50">

@@ -56,6 +56,12 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
   const [geocodingError, setGeocodingError] = useState<string | null>(null);
   const [showLocationFound, setShowLocationFound] = useState<boolean>(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [showAirports, setShowAirports] = useState<boolean>(false);
+  const [airports, setAirports] = useState<Array<{icao: string, iata: string | null, name: string, lat: number, lon: number, type: string, municipality: string | null, country: string | null}>>([]);
+  const [isLoadingAirports, setIsLoadingAirports] = useState<boolean>(false);
+  const airportMarkersRef = useRef<unknown[]>([]);
+  const lastBoundsRef = useRef<{minLat: number, maxLat: number, minLon: number, maxLon: number} | null>(null);
+  const allAirportsRef = useRef<Array<{icao: string, iata: string | null, name: string, lat: number, lon: number, type: string, municipality: string | null, country: string | null}>>([]);
 
   useEffect(() => {
     setIsClient(true);
@@ -111,7 +117,10 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
           if (mapRef.current && leafletRef.current && isMapInitialized) {
             try {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (mapRef.current as any).setView([newLocation.lat, newLocation.lon], 12);
+              const currentZoom = (mapRef.current as any).getZoom ? (mapRef.current as any).getZoom() : 7;
+              // Verwende aktuellen Zoom oder mindestens 7 für besseren Überblick
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (mapRef.current as any).setView([newLocation.lat, newLocation.lon], Math.max(currentZoom || 7, 7));
               updateMarkers();
             } catch (error) {
               console.warn('Fehler beim Bewegen der Karte zum Standort:', error);
@@ -367,6 +376,37 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
           autoPanPaddingBottomRight: [16, 40]
         });
         
+        // Marker beim Klick vergrößern
+        marker.on('click', () => {
+          const iconElement = marker.getElement();
+          if (iconElement) {
+            const iconDiv = iconElement.querySelector('div');
+            const svgElement = iconDiv?.querySelector('svg');
+            if (iconDiv && svgElement) {
+              iconDiv.style.width = '56px';
+              iconDiv.style.height = '67px';
+              iconDiv.style.transition = 'all 0.3s ease';
+              svgElement.setAttribute('width', '56');
+              svgElement.setAttribute('height', '67');
+            }
+          }
+        });
+        
+        // Marker beim Schließen des Popups wieder normal groß machen
+        marker.on('popupclose', () => {
+          const iconElement = marker.getElement();
+          if (iconElement) {
+            const iconDiv = iconElement.querySelector('div');
+            const svgElement = iconDiv?.querySelector('svg');
+            if (iconDiv && svgElement) {
+              iconDiv.style.width = '40px';
+              iconDiv.style.height = '48px';
+              svgElement.setAttribute('width', '40');
+              svgElement.setAttribute('height', '48');
+            }
+          }
+        });
+        
         // Event-Listener für Klick auf Popup hinzufügen
         marker.on('popupopen', () => {
           const popupElement = marker.getPopup()?.getElement();
@@ -405,6 +445,236 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
     isUpdatingMarkersRef.current = false;
   }, [userLocation, customLocation, locationMode, events, radiusKm, isMapInitialized, isSmallScreen, selectedEventType]);
 
+  // Alle Flugplätze von Deutschland und umliegenden Ländern einmal laden
+  const loadAllAirports = useCallback(() => {
+    if (isLoadingAirports || allAirportsRef.current.length > 0) return;
+
+    setIsLoadingAirports(true);
+    
+    fetch('/api/airports?loadAll=true')
+      .then(res => res.json())
+      .then(data => {
+        if (data.airports) {
+          allAirportsRef.current = data.airports;
+          // Filtere Flughäfen für aktuellen sichtbaren Bereich
+          filterAirportsForBounds();
+        }
+        setIsLoadingAirports(false);
+      })
+      .catch(error => {
+        console.error('Fehler beim Laden der Flughäfen:', error);
+        setIsLoadingAirports(false);
+      });
+  }, [isLoadingAirports]);
+
+  // Filtere Flughäfen für aktuellen sichtbaren Bereich (ohne neu zu laden)
+  const filterAirportsForBounds = useCallback(() => {
+    if (!mapRef.current || !showAirports || allAirportsRef.current.length === 0) return;
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const map = mapRef.current as any;
+      const bounds = map.getBounds();
+      
+      if (!bounds) return;
+
+      const minLat = bounds.getSouth();
+      const maxLat = bounds.getNorth();
+      const minLon = bounds.getWest();
+      const maxLon = bounds.getEast();
+
+      // Erweitere Bounds leicht, um Flughäfen am Rand einzubeziehen
+      const latPadding = (maxLat - minLat) * 0.1;
+      const lonPadding = (maxLon - minLon) * 0.1;
+
+      const paddedBounds = {
+        minLat: minLat - latPadding,
+        maxLat: maxLat + latPadding,
+        minLon: minLon - lonPadding,
+        maxLon: maxLon + lonPadding,
+      };
+
+      // Filtere Flughäfen aus bereits geladenen Daten
+      const visibleAirports = allAirportsRef.current.filter(airport => 
+        airport.lat >= paddedBounds.minLat && 
+        airport.lat <= paddedBounds.maxLat && 
+        airport.lon >= paddedBounds.minLon && 
+        airport.lon <= paddedBounds.maxLon
+      );
+
+      setAirports(visibleAirports);
+    } catch (error) {
+      console.error('Fehler beim Filtern der Flughäfen:', error);
+    }
+  }, [showAirports]);
+
+  // Flughäfen laden wenn Checkbox aktiviert wird
+  useEffect(() => {
+    if (showAirports && isMapInitialized) {
+      if (allAirportsRef.current.length === 0) {
+        // Erstes Mal: Lade alle Flugplätze der Region
+        loadAllAirports();
+      } else {
+        // Bereits geladen: Filtere nur für aktuellen Bereich
+        filterAirportsForBounds();
+      }
+    } else if (!showAirports) {
+      // Flughäfen zurücksetzen wenn deaktiviert
+      setAirports([]);
+      lastBoundsRef.current = null;
+    }
+  }, [showAirports, isMapInitialized, loadAllAirports, filterAirportsForBounds]);
+
+  // Airport-Marker aktualisieren
+  const updateAirportMarkers = useCallback(() => {
+    if (!mapRef.current || !leafletRef.current || !isMapInitialized || !showAirports) {
+      // Entferne alle Airport-Marker wenn nicht angezeigt werden sollen
+      if (!showAirports && airportMarkersRef.current.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (airportMarkersRef.current as any[]).forEach(marker => {
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (marker && mapRef.current && (mapRef.current as any).removeLayer && (marker as any)._map) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (mapRef.current as any).removeLayer(marker as any);
+            }
+          } catch (error) {
+            console.warn('Fehler beim Entfernen eines Airport-Markers:', error);
+          }
+        });
+        airportMarkersRef.current = [];
+      }
+      return;
+    }
+
+    // Alte Airport-Marker entfernen
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (airportMarkersRef.current as any[]).forEach(marker => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (marker && mapRef.current && (mapRef.current as any).removeLayer && (marker as any)._map) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (mapRef.current as any).removeLayer(marker as any);
+        }
+      } catch (error) {
+        console.warn('Fehler beim Entfernen eines Airport-Markers:', error);
+      }
+    });
+    airportMarkersRef.current = [];
+
+    // Neue Airport-Marker hinzufügen
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const L = leafletRef.current as any;
+
+    // Aktuellen Zoom-Level abfragen für dynamische Icon-Größe
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const currentZoom = (mapRef.current as any)?.getZoom ? (mapRef.current as any).getZoom() : 6;
+    
+    // Icon-Größe basierend auf Zoom-Level (kleiner bei niedrigem Zoom, größer bei hohem Zoom)
+    // Zoom 3-5: 12px, Zoom 6-8: 16px, Zoom 9-11: 20px, Zoom 12+: 24px
+    const iconSize = currentZoom <= 5 ? 12 : currentZoom <= 8 ? 16 : currentZoom <= 11 ? 20 : 24;
+    const iconAnchor = iconSize / 2;
+    const popupAnchorY = -iconAnchor;
+
+    airports.forEach((airport) => {
+      try {
+        // Bestimme Icon basierend auf Typ
+        const isHeliport = airport.type && airport.type.toLowerCase().includes('heliport');
+        const iconPath = isHeliport ? '/Heli.svg' : '/airport.svg';
+        const iconAlt = isHeliport ? 'Heliport' : 'Flughafen';
+        
+        // Flughafen-Icon: Verwende airport.svg oder Heli.svg für Heliports
+        const airportIcon = L.divIcon({
+          className: 'airport-marker',
+          html: `
+            <div style="
+              position: relative;
+              width: ${iconSize}px;
+              height: ${iconSize}px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              opacity: 0.7;
+            ">
+              <img src="${iconPath}" alt="${iconAlt}" style="width: ${iconSize}px; height: ${iconSize}px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" />
+            </div>
+          `,
+          iconSize: [iconSize, iconSize],
+          iconAnchor: [iconAnchor, iconAnchor],
+          popupAnchor: [0, popupAnchorY]
+        });
+
+        const airportMarker = L.marker([airport.lat, airport.lon], { 
+          icon: airportIcon,
+          opacity: 0.6,
+          zIndexOffset: -100 // Hinter den Event-Markern
+        });
+        
+        airportMarker.addTo(mapRef.current);
+        
+        const popupContent = `
+          <div style="padding: 8px; font-family: system-ui; max-width: 200px;">
+            <strong style="font-size: 14px; color: #333;">${airport.name || airport.icao}</strong>
+            ${airport.icao ? `<p style="margin: 4px 0; font-size: 12px; color: #666;">ICAO: ${airport.icao}</p>` : ''}
+            ${airport.iata ? `<p style="margin: 4px 0; font-size: 12px; color: #666;">IATA: ${airport.iata}</p>` : ''}
+            ${airport.municipality ? `<p style="margin: 4px 0; font-size: 12px; color: #666;">📍 ${airport.municipality}</p>` : ''}
+            ${airport.country ? `<p style="margin: 4px 0; font-size: 11px; color: #999;">${airport.country}</p>` : ''}
+            ${airport.type ? `<p style="margin: 4px 0; font-size: 11px; color: #999;">Typ: ${airport.type}</p>` : ''}
+          </div>
+        `;
+        
+        airportMarker.bindPopup(popupContent, {
+          className: 'airport-popup',
+          maxWidth: 220,
+          autoPan: false
+        });
+
+        airportMarkersRef.current.push(airportMarker);
+      } catch (error) {
+        console.warn('Fehler beim Hinzufügen eines Airport-Markers:', error);
+      }
+    });
+  }, [airports, showAirports, isMapInitialized]);
+  
+  // State für Zoom-Level, um Marker bei Zoom-Änderung zu aktualisieren
+  const [currentZoom, setCurrentZoom] = useState<number>(6);
+  
+  // Zoom-Level überwachen und Marker aktualisieren
+  useEffect(() => {
+    if (!isMapInitialized || !mapRef.current) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = mapRef.current as any;
+    
+    const handleZoomChange = () => {
+      const zoom = map.getZoom();
+      setCurrentZoom(zoom);
+      // Marker aktualisieren wenn sich Zoom ändert
+      if (showAirports) {
+        updateAirportMarkers();
+      }
+    };
+
+    map.on('zoomend', handleZoomChange);
+    
+    // Initialen Zoom-Level setzen
+    const initialZoom = map.getZoom();
+    if (initialZoom) {
+      setCurrentZoom(initialZoom);
+    }
+
+    return () => {
+      map.off('zoomend', handleZoomChange);
+    };
+  }, [isMapInitialized, showAirports, updateAirportMarkers]);
+
+  // Airport-Marker aktualisieren wenn sich showAirports oder airports ändern
+  useEffect(() => {
+    if (isMapInitialized) {
+      updateAirportMarkers();
+    }
+  }, [isMapInitialized, showAirports, airports, updateAirportMarkers]);
+
   const handleSearchLocation = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!customQuery.trim()) {
@@ -424,9 +694,9 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
         if (mapRef.current) {
           try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const currentZoom = (mapRef.current as any).getZoom ? (mapRef.current as any).getZoom() : 8;
+            const currentZoom = (mapRef.current as any).getZoom ? (mapRef.current as any).getZoom() : 7;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (mapRef.current as any).setView([loc.lat, loc.lon], Math.max(currentZoom || 8, 10));
+            (mapRef.current as any).setView([loc.lat, loc.lon], Math.max(currentZoom || 7, 7));
           } catch {}
         }
         updateMarkers();
@@ -492,12 +762,12 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
           if (eventsWithCoords.length > 0) {
             centerLat = eventsWithCoords.reduce((sum, event) => sum + parseFloat(event.lat!), 0) / eventsWithCoords.length;
             centerLon = eventsWithCoords.reduce((sum, event) => sum + parseFloat(event.lon!), 0) / eventsWithCoords.length;
-            zoom = 8;
+            zoom = 6; // Etwas näher für besseren Überblick
           } else {
             // Standard-Zentrum (Deutschland) wenn keine Events vorhanden
             centerLat = 51.1657; // Deutschland-Mitte
             centerLon = 10.4515;
-            zoom = 6;
+            zoom = 4; // Etwas näher für besseren Überblick
           }
 
           const map = L.map(mapContainer, {
@@ -597,6 +867,7 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
       } finally {
         mapRef.current = null;
         markersRef.current = [];
+        airportMarkersRef.current = [];
         setIsMapInitialized(false);
         isUpdatingMarkersRef.current = false;
       }
@@ -612,6 +883,38 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMapInitialized, userLocation, customLocation, locationMode, events, radiusKm, selectedEventType]);
 
+  // Event-Listener für Kartenbewegung und Zoom (für Flughäfen)
+  useEffect(() => {
+    if (!isMapInitialized || !mapRef.current) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = mapRef.current as any;
+    let moveTimeout: NodeJS.Timeout | null = null;
+
+    const handleMapMove = () => {
+      // Debounce: Warte 300ms nach letzter Bewegung
+      if (moveTimeout) {
+        clearTimeout(moveTimeout);
+      }
+      moveTimeout = setTimeout(() => {
+        if (showAirports && allAirportsRef.current.length > 0) {
+          filterAirportsForBounds();
+        }
+      }, 300);
+    };
+
+    map.on('moveend', handleMapMove);
+    map.on('zoomend', handleMapMove);
+
+    return () => {
+      if (moveTimeout) {
+        clearTimeout(moveTimeout);
+      }
+      map.off('moveend', handleMapMove);
+      map.off('zoomend', handleMapMove);
+    };
+  }, [isMapInitialized, showAirports, filterAirportsForBounds]);
+
   // Beim Umschalten den jeweils aktiven Standort in die Kartenmitte setzen
   useEffect(() => {
     if (!isMapInitialized || !mapRef.current) return;
@@ -619,9 +922,9 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
       const baseLocation = (locationMode === 'custom' && customLocation) ? customLocation : userLocation;
       if (baseLocation) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const currentZoom = (mapRef.current as any).getZoom ? (mapRef.current as any).getZoom() : 8;
+        const currentZoom = (mapRef.current as any).getZoom ? (mapRef.current as any).getZoom() : 7;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (mapRef.current as any).setView([baseLocation.lat, baseLocation.lon], Math.max(currentZoom || 8, 10));
+        (mapRef.current as any).setView([baseLocation.lat, baseLocation.lon], Math.max(currentZoom || 7, 7));
       }
     } catch (error) {
       console.warn('Fehler beim Zentrieren der Karte nach Umschalten:', error);
@@ -742,6 +1045,23 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
               className="w-full"
             />
           </div>
+
+          {/* Flughäfen anzeigen - vorübergehend ausgeblendet */}
+          {/* <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="showAirports"
+              checked={showAirports}
+              onChange={(e) => setShowAirports(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label htmlFor="showAirports" className="text-sm font-medium text-gray-700 cursor-pointer">
+              Flughäfen anzeigen
+            </label>
+            {isLoadingAirports && showAirports && (
+              <span className="text-xs text-gray-500 ml-auto">Lädt...</span>
+            )}
+          </div> */}
         </div>
 
         {/* Fehlermeldung */}
@@ -799,21 +1119,42 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
       </div>
       
       {/* Desktop: Reichweiten-Regler - absolut positioniert */}
-      <div className="hidden sm:block absolute bottom-4 right-4 w-auto max-w-xs z-[1000] bg-white/95 backdrop-blur rounded-lg border border-gray-200 p-3 shadow-md">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">Reichweite</span>
-          <span className="text-sm text-gray-600">{radiusKm} km</span>
+      <div className="hidden sm:block absolute bottom-4 right-4 w-auto max-w-xs z-[1000] bg-white/95 backdrop-blur rounded-lg border border-gray-200 p-3 shadow-md space-y-3">
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700">Reichweite</span>
+            <span className="text-sm text-gray-600">{radiusKm} km</span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={500}
+            step={10}
+            value={radiusKm}
+            onChange={(e) => setRadiusKm(Number(e.target.value))}
+            className="w-full"
+          />
+          <div className="mt-1 text-xs text-gray-500">Events außerhalb des Radius werden ausgegraut.</div>
         </div>
-        <input
-          type="range"
-          min={0}
-          max={500}
-          step={10}
-          value={radiusKm}
-          onChange={(e) => setRadiusKm(Number(e.target.value))}
-          className="w-full"
-        />
-        <div className="mt-1 text-xs text-gray-500">Events außerhalb des Radius werden ausgegraut.</div>
+        
+        {/* Flughäfen anzeigen - vorübergehend ausgeblendet */}
+        {/* <div className="border-t pt-3">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="showAirportsDesktop"
+              checked={showAirports}
+              onChange={(e) => setShowAirports(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label htmlFor="showAirportsDesktop" className="text-sm font-medium text-gray-700 cursor-pointer">
+              Flughäfen anzeigen
+            </label>
+            {isLoadingAirports && showAirports && (
+              <span className="text-xs text-gray-500 ml-auto">Lädt...</span>
+            )}
+          </div>
+        </div> */}
       </div>
 
       {/* Karte */}

@@ -21,6 +21,8 @@ interface Event {
   startTime?: string;
   endTime?: string;
   allDay?: boolean;
+  multiDay?: boolean;
+  endDate?: string;
   eventType?: string;
   entryFee?: number;
 }
@@ -276,12 +278,20 @@ export default function HomePage() {
                       {event.date && (
                         <div className="flex items-center text-sm text-gray-600">
                           <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
-                          <span>{formatDate(event.date)}</span>
-                          {event.startTime && !event.allDay && (
+                          <span>
+                            {formatDate(event.date)}
+                            {event.multiDay && event.endDate && (
+                              <> - {formatDate(event.endDate)}</>
+                            )}
+                          </span>
+                          {event.startTime && !event.allDay && !event.multiDay && (
                             <span className="ml-2">{event.startTime}</span>
                           )}
                           {event.allDay && (
                             <span className="ml-2">{t('home.featuredEvents.allDay')}</span>
+                          )}
+                          {event.multiDay && (
+                            <span className="ml-2">{t('eventDetails.multiDay')}</span>
                           )}
                         </div>
                       )}

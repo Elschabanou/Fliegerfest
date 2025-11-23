@@ -24,9 +24,11 @@ export default function CreateEventPage() {
     location: '',
     address: '',
     date: '',
+    endDate: '',
     startTime: '',
     endTime: '',
     allDay: false,
+    multiDay: false,
     eventType: '',
     organizer: '',
     contactEmail: '',
@@ -61,6 +63,17 @@ export default function CreateEventPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
+    
+    // Wenn multiDay deaktiviert wird, Enddatum zurücksetzen
+    if (name === 'multiDay' && !(e.target as HTMLInputElement).checked) {
+      setFormData(prev => ({
+        ...prev,
+        multiDay: false,
+        endDate: ''
+      }));
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
@@ -120,11 +133,15 @@ export default function CreateEventPage() {
       form.append('location', formData.location);
       form.append('address', formData.address);
       form.append('date', formData.date);
-      if (!formData.allDay) {
+      if (formData.endDate) {
+        form.append('endDate', formData.endDate);
+      }
+      if (!formData.allDay && !formData.multiDay) {
         form.append('startTime', formData.startTime);
         form.append('endTime', formData.endTime);
       }
       form.append('allDay', String(formData.allDay));
+      form.append('multiDay', String(formData.multiDay));
       form.append('eventType', formData.eventType);
       form.append('organizer', formData.organizer);
       form.append('contactEmail', formData.contactEmail || (user?.email ?? ''));
@@ -450,18 +467,54 @@ export default function CreateEventPage() {
                 />
               </div>
 
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="allDay"
-                  name="allDay"
-                  checked={formData.allDay}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="allDay" className="ml-2 block text-sm font-medium text-gray-700">
-                  {t('allDay')}
-                </label>
+              <div className="space-y-3">
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="allDay"
+                      name="allDay"
+                      checked={formData.allDay}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="allDay" className="ml-2 block text-sm font-medium text-gray-700">
+                      {t('allDay')}
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="multiDay"
+                      name="multiDay"
+                      checked={formData.multiDay}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="multiDay" className="ml-2 block text-sm font-medium text-gray-700">
+                      {t('multiDay')}
+                    </label>
+                  </div>
+                </div>
+
+                {formData.multiDay && (
+                  <div>
+                    <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+                      {t('endDate')} *
+                    </label>
+                    <input
+                      type="date"
+                      id="endDate"
+                      name="endDate"
+                      required={formData.multiDay}
+                      min={formData.date}
+                      value={formData.endDate}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                    />
+                  </div>
+                )}
               </div>
 
               {!formData.allDay && (

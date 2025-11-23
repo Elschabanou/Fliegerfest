@@ -22,9 +22,11 @@ interface Event {
   imageurl?: string;
   date?: string;
   dateTime?: string;
+  endDate?: string;
   startTime?: string;
   endTime?: string;
   allDay?: boolean;
+  multiDay?: boolean;
   eventType?: string;
   entryFee?: number;
   organizer?: string;
@@ -539,12 +541,22 @@ export default function EventsPage() {
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center text-gray-600">
                       <Calendar className="h-4 w-4 mr-2" />
-                      <span>{formatDate(event.date || event.dateTime || '')}</span>
+                      <span>
+                        {formatDate(event.date || event.dateTime || '')}
+                        {event.multiDay && event.endDate && (
+                          <> - {formatDate(event.endDate)}</>
+                        )}
+                      </span>
                     </div>
                     {event.allDay ? (
                       <div className="flex items-center text-gray-600">
                         <Clock className="h-4 w-4 mr-2" />
                         <span>{t('allDay')}</span>
+                      </div>
+                    ) : event.multiDay ? (
+                      <div className="flex items-center text-gray-600">
+                        <Clock className="h-4 w-4 mr-2" />
+                        <span>{t('multiDay')}</span>
                       </div>
                     ) : event.startTime && event.endTime && (
                       <div className="flex items-center text-gray-600">

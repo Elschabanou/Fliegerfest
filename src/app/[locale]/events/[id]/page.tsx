@@ -21,9 +21,11 @@ interface Event {
   icao: string;
   imageurl: string;
   date: string;
+  endDate?: string;
   startTime?: string;
   endTime?: string;
   allDay?: boolean;
+  multiDay?: boolean;
   eventType?: string;
   organizer?: string;
   contactEmail?: string;
@@ -249,12 +251,22 @@ export default function EventDetailPage() {
                     <div className="space-y-3">
                       <div className="flex items-center text-gray-700">
                         <Calendar className="h-5 w-5 mr-3 text-blue-600" />
-                        <span>{formatDate(event.date)}</span>
+                        <span>
+                          {formatDate(event.date)}
+                          {event.multiDay && event.endDate && (
+                            <> - {formatDate(event.endDate)}</>
+                          )}
+                        </span>
                       </div>
                       {event.allDay ? (
                         <div className="flex items-center text-gray-700">
                           <Clock className="h-5 w-5 mr-3 text-blue-600" />
                           <span>{t('allDay')}</span>
+                        </div>
+                      ) : event.multiDay ? (
+                        <div className="flex items-center text-gray-700">
+                          <Clock className="h-5 w-5 mr-3 text-blue-600" />
+                          <span>{t('multiDay')}</span>
                         </div>
                       ) : event.startTime && event.endTime && (
                         <div className="flex items-center text-gray-700">

@@ -10,28 +10,30 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fliegerevents.de';
+
 export const metadata: Metadata = {
   title: 'Fliegerevents - Events für Privatflieger',
-  description: 'Entdecken Sie Flugtage, Luftfahrt-Events und Workshops für Privatflieger',
+  description: 'Ihre Plattform für Luftfahrt-Events, Flugtage und Workshops. Entdecken Sie spannende Veranstaltungen in der Luftfahrtwelt.',
   icons: {
     icon: [
-      { url: '/favicon.ico' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: new URL('/favicon.ico', siteUrl).toString() },
+      { url: new URL('/favicon-16x16.png', siteUrl).toString(), sizes: '16x16', type: 'image/png' },
+      { url: new URL('/favicon-32x32.png', siteUrl).toString(), sizes: '32x32', type: 'image/png' },
+      { url: new URL('/apple-touch-icon.png', siteUrl).toString(), sizes: '180x180', type: 'image/png' },
     ],
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    shortcut: new URL('/favicon.ico', siteUrl).toString(),
+    apple: new URL('/apple-touch-icon.png', siteUrl).toString(),
   },
   // Open Graph für Social Media
   openGraph: {
     title: 'Fliegerevents - Events für Privatflieger',
     description: 'Ihre Plattform für Luftfahrt-Events, Flugtage und Workshops. Entdecken Sie spannende Veranstaltungen in der Luftfahrtwelt.',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://fliegerevents.de',
+    url: siteUrl,
     siteName: 'Fliegerevents',
     images: [
       {
-        url: '/og-image.png',
+        url: new URL('/og-image.png', siteUrl).toString(),
         width: 1200,
         height: 630,
         alt: 'Fliegerevents - Events für Privatflieger',
@@ -45,7 +47,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Fliegerevents - Events für Privatflieger',
     description: 'Ihre Plattform für Luftfahrt-Events, Flugtage und Workshops. Entdecken Sie spannende Veranstaltungen in der Luftfahrtwelt.',
-    images: ['/og-image.png'],
+    images: [new URL('/og-image.png', siteUrl).toString()],
   },
   // Weitere SEO-Meta-Tags
   keywords: ['Flugtage', 'Luftfahrt-Events', 'Privatflieger', 'Fly-In', 'Flugzeug', 'Aviation', 'Flugtag', 'Luftfahrt', 'Workshop', 'Flugplatz'],
@@ -63,7 +65,7 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://fliegerevents.de'),
+  metadataBase: new URL(siteUrl),
 };
 
 export default function RootLayout({
