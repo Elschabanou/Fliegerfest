@@ -250,7 +250,7 @@ export default function EventDetailPage() {
                     <h3 className="font-semibold text-[#021234] mb-3">{t('eventDetails') || 'Event-Details'}</h3>
                     <div className="space-y-3">
                       <div className="flex items-center text-gray-700">
-                        <Calendar className="h-5 w-5 mr-3 text-blue-600" />
+                        <Calendar className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
                         <span>
                           {formatDate(event.date)}
                           {event.multiDay && event.endDate && (
@@ -260,29 +260,29 @@ export default function EventDetailPage() {
                       </div>
                       {event.allDay ? (
                         <div className="flex items-center text-gray-700">
-                          <Clock className="h-5 w-5 mr-3 text-blue-600" />
+                          <Clock className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
                           <span>{t('allDay')}</span>
                         </div>
                       ) : event.multiDay ? (
                         <div className="flex items-center text-gray-700">
-                          <Clock className="h-5 w-5 mr-3 text-blue-600" />
+                          <Clock className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
                           <span>{t('multiDay')}</span>
                         </div>
                       ) : event.startTime && event.endTime && (
                         <div className="flex items-center text-gray-700">
-                          <Clock className="h-5 w-5 mr-3 text-blue-600" />
+                          <Clock className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
                           <span>{event.startTime} - {event.endTime}</span>
                         </div>
                       )}
-                      {event.entryFee && event.entryFee > 0 && (
+                      {event.entryFee != null && Number(event.entryFee) > 0 && (
                         <div className="flex items-center text-gray-700">
-                          <Euro className="h-5 w-5 mr-3 text-blue-600" />
+                          <Euro className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
                           <span>{event.entryFee} € {t('entryFee')}</span>
                         </div>
                       )}
                       {event.maxParticipants && (
                         <div className="flex items-center text-gray-700">
-                          <User className="h-5 w-5 mr-3 text-blue-600" />
+                          <User className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
                           <span>{t('maxParticipants')}: {event.maxParticipants}</span>
                         </div>
                       )}
@@ -293,7 +293,7 @@ export default function EventDetailPage() {
                     <h3 className="font-semibold text-[#021234] mb-3">{t('location')}</h3>
                     <div className="space-y-3">
                       <div className="flex items-center text-gray-700">
-                        <MapPin className="h-5 w-5 mr-3 text-blue-600" />
+                        <MapPin className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
                         <span>{event.location || event.name}</span>
                       </div>
                       {event.address && (

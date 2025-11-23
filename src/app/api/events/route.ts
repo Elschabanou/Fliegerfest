@@ -109,8 +109,9 @@ export async function GET(request: NextRequest) {
     // add me a mongo query to get the events
 
     // Verwende das Mongoose Model
+    // Sortiere nach Startdatum (date), nicht nach Enddatum, damit mehrtägige Events richtig sortiert werden
     const events = await Event.find(query)
-      // .sort({ date: 1 })
+      .sort({ date: 1 })
       // .limit(limit * 1)
       // .skip((page - 1) * limit)
       // .lean();

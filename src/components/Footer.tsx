@@ -9,7 +9,7 @@ export default function Footer() {
   const t = useTranslations('footer');
   
   return (
-    <footer className="bg-gray-900 text-white overflow-hidden">
+    <footer className="bg-gray-900 text-white overflow-hidden mt-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo und Beschreibung */}

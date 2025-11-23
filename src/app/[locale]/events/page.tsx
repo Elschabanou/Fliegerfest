@@ -66,7 +66,14 @@ export default function EventsPage() {
       
       const response = await fetch(`/api/events?${params}`);
       const data = await response.json();
-      setEvents(data.events || []);
+      // Sortiere Events nach Startdatum (date), nicht nach Enddatum
+      // Damit werden mehrtägige Events richtig sortiert
+      const sortedEvents = (data.events || []).sort((a: Event, b: Event) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        return dateA - dateB;
+      });
+      setEvents(sortedEvents);
     } catch (error) {
       console.error('Fehler beim Laden der Events:', error);
     } finally {
@@ -202,9 +209,9 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-0">
+        <div className="pt-8 pb-4">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex w-full sm:w-auto rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
                 <button
@@ -234,7 +241,7 @@ export default function EventsPage() {
         {!showMap && (
           <div 
             id="filter-section" 
-            className="sticky top-0 z-50 bg-white rounded-lg shadow-md p-6 mb-8 mt-2"
+            className="sticky top-0 z-[100] bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-8"
           >
           <div className="space-y-4">
             <div className="relative">
@@ -527,7 +534,7 @@ export default function EventsPage() {
                     <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                       {event.eventType || t('eventTypes.Sonstiges')}
                     </span>
-                    {event.entryFee && event.entryFee > 0 && (
+                    {event.entryFee != null && Number(event.entryFee) > 0 && (
                       <span className="flex items-center text-green-600 font-semibold">
                         <Euro className="h-4 w-4 mr-1" />
                         {event.entryFee}
