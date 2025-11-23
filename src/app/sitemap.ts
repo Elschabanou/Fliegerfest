@@ -41,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // Hole alle Events aus der Datenbank
-  let eventUrls: MetadataRoute.Sitemap = [];
+  const eventUrls: MetadataRoute.Sitemap = [];
   
   try {
     const events = await Event.find({ isActive: { $ne: false } })
