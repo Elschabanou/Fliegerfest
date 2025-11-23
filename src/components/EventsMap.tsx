@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { geocodeLocation, isGeocodingSuccess } from '@/lib/geocoding';
 import { MapPin } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface Event {
   _id: string;
@@ -27,9 +28,12 @@ interface Event {
 interface EventsMapProps {
   events: Event[];
   selectedEventType?: string;
+  eventType?: string;
+  onEventTypeChange?: (eventType: string) => void;
 }
 
-export default function EventsMap({ events, selectedEventType = '' }: EventsMapProps) {
+export default function EventsMap({ events, selectedEventType = '', eventType = '', onEventTypeChange }: EventsMapProps) {
+  const t = useTranslations('events');
   const [isClient, setIsClient] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{lat: number, lon: number} | null>(null);
@@ -657,42 +661,81 @@ export default function EventsMap({ events, selectedEventType = '' }: EventsMapP
 
   return (
     <div className="relative">
-      {/* Mobile: Suchbox über der Karte */}
-      <div className="block sm:hidden mb-3">
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-md">
-          <div className="flex items-center gap-2 mb-2">
-            <button
-              onClick={() => { setLocationMode('device'); }}
-              className={`flex-1 px-2 py-1 text-xs rounded border ${locationMode === 'device' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-700'}`}
-            >Eigener Standort</button>
-            <button
-              onClick={() => {
-                if (!customLocation && !customQuery.trim()) {
-                  setGeocodingError('Bitte einen eigenen Ort eingeben');
-                  setLocationMode('custom');
-                  // Input fokussieren
-                  setTimeout(() => searchInputRef.current?.focus(), 0);
-                } else {
-                  setLocationMode('custom');
-                }
-              }}
-              className={`flex-1 px-2 py-1 text-xs rounded border ${locationMode === 'custom' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-700'}`}
-            >Eigener Ort</button>
-          </div>
-          {locationMode === 'custom' && (
-            <form onSubmit={handleSearchLocation} className="flex items-center gap-2">
-              <input
-                type="text"
-                value={customQuery}
-                onChange={(e) => setCustomQuery(e.target.value)}
-                placeholder="Ort suchen (z.B. Tübingen)"
-                ref={searchInputRef}
-                className={`flex-1 border rounded px-2 py-1 text-sm bg-white text-[#021234] placeholder:text-gray-400 ${geocodingError ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500'}`}
-              />
-              <button type="submit" disabled={isGeocoding} className="px-3 py-1 text-sm rounded bg-blue-600 text-white disabled:opacity-50">Suche</button>
-            </form>
+      {/* Mobile: Alle Bedienelemente in einer Karte */}
+      <div className="block sm:hidden mb-3 mx-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-md space-y-4">
+          {/* Event-Typen-Auswahl */}
+          {onEventTypeChange && (
+            <div>
+              <select
+                value={eventType}
+                onChange={(e) => onEventTypeChange(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white placeholder:text-gray-400 dark:bg-white"
+              >
+                <option value="">{t('allEventTypes')}</option>
+                <option value="Flugtag">{t('eventTypes.Flugtag')}</option>
+                <option value="Messe">{t('eventTypes.Messe')}</option>
+                <option value="Fly-In">{t('eventTypes.Fly-In')}</option>
+                <option value="Workshop">{t('eventTypes.Workshop')}</option>
+                <option value="Vereinsveranstaltung">{t('eventTypes.Vereinsveranstaltung')}</option>
+                <option value="Sonstiges">{t('eventTypes.Sonstiges')}</option>
+              </select>
+            </div>
           )}
-          {locationMode === 'custom' && geocodingError && <div className="mt-2 text-xs text-red-600">{geocodingError}</div>}
+
+          {/* Standort-Modus */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <button
+                onClick={() => { setLocationMode('device'); }}
+                className={`flex-1 px-2 py-1 text-xs rounded border ${locationMode === 'device' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-700'}`}
+              >Eigener Standort</button>
+              <button
+                onClick={() => {
+                  if (!customLocation && !customQuery.trim()) {
+                    setGeocodingError('Bitte einen eigenen Ort eingeben');
+                    setLocationMode('custom');
+                    // Input fokussieren
+                    setTimeout(() => searchInputRef.current?.focus(), 0);
+                  } else {
+                    setLocationMode('custom');
+                  }
+                }}
+                className={`flex-1 px-2 py-1 text-xs rounded border ${locationMode === 'custom' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-700'}`}
+              >Eigener Ort</button>
+            </div>
+            {locationMode === 'custom' && (
+              <form onSubmit={handleSearchLocation} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={customQuery}
+                  onChange={(e) => setCustomQuery(e.target.value)}
+                  placeholder="Ort suchen (z.B. Tübingen)"
+                  ref={searchInputRef}
+                  className={`flex-1 border rounded px-2 py-1 text-sm bg-white text-[#021234] placeholder:text-gray-400 ${geocodingError ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500'}`}
+                />
+                <button type="submit" disabled={isGeocoding} className="px-3 py-1 text-sm rounded bg-blue-600 text-white disabled:opacity-50">Suche</button>
+              </form>
+            )}
+            {locationMode === 'custom' && geocodingError && <div className="mt-2 text-xs text-red-600">{geocodingError}</div>}
+          </div>
+
+          {/* Reichweiten-Regler */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700">Reichweite</span>
+              <span className="text-sm text-gray-600">{radiusKm} km</span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={500}
+              step={10}
+              value={radiusKm}
+              onChange={(e) => setRadiusKm(Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
         </div>
 
         {/* Fehlermeldung */}
@@ -747,25 +790,6 @@ export default function EventsMap({ events, selectedEventType = '' }: EventsMapP
             {locationError}
           </div>
         )}
-      </div>
-
-      {/* Mobile: Reichweiten-Regler über der Karte, unter den Event-Typen */}
-      <div className="block sm:hidden mb-3">
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-md">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Reichweite</span>
-            <span className="text-sm text-gray-600">{radiusKm} km</span>
-          </div>
-          <input
-            type="range"
-            min={0}
-            max={500}
-            step={10}
-            value={radiusKm}
-            onChange={(e) => setRadiusKm(Number(e.target.value))}
-            className="w-full"
-          />
-        </div>
       </div>
       
       {/* Desktop: Reichweiten-Regler - absolut positioniert */}

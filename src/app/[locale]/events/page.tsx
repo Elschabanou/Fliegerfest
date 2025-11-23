@@ -435,7 +435,7 @@ export default function EventsPage() {
           <div className="mb-8 md:mb-8 -mx-4 sm:mx-0">
             <div className="px-4 sm:px-0 flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 mt-4 gap-4">
               <h2 className="text-2xl font-semibold text-[#021234]">{t('eventsOnMap')}</h2>
-              <div className="w-full sm:w-auto sm:max-w-xs">
+              <div className="hidden sm:block w-full sm:w-auto sm:max-w-xs">
                 <label className="block text-sm font-medium text-gray-700 mb-2">{t('allEventTypes')}</label>
                 <select
                   value={eventType}
@@ -461,7 +461,12 @@ export default function EventsPage() {
                   </div>
                 </div>
               }>
-                <EventsMap events={events} selectedEventType={eventType} />
+                <EventsMap 
+                  events={events} 
+                  selectedEventType={eventType}
+                  eventType={eventType}
+                  onEventTypeChange={setEventType}
+                />
               </Suspense>
             </div>
           </div>
