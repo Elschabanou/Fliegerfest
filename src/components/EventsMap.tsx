@@ -515,15 +515,21 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
 
           mapRef.current = map;
           
-          // MapTiler OMT Layer hinzufügen
+          // MapTiler Layer hinzufügen
           const maptilerApiKey = process.env.NEXT_PUBLIC_MAPTILER_API_KEY || '';
           if (maptilerApiKey) {
-            L.tileLayer(`https://api.maptiler.com/maps/openmaptiles/{z}/{x}/{y}.png?key=${maptilerApiKey}`, {
+            // Verfügbare MapTiler Styles: streets-v2, basic-v2, outdoor-v2, satellite, hybrid
+            // Wechsle 'streets-v2' zu einem anderen Style, falls gewünscht
+            const mapStyle = 'streets-v2';
+            L.tileLayer(`https://api.maptiler.com/maps/${mapStyle}/{z}/{x}/{y}.png?key=${maptilerApiKey}`, {
               attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-              maxZoom: 20,
-              tileSize: 512,
-              zoomOffset: -1
-            }).addTo(map);
+              maxZoom: 22,
+              tileSize: 256,
+              zoomOffset: 0
+            }).addTo(map).on('tileerror', (error) => {
+              console.error('Fehler beim Laden der MapTiler-Kacheln:', error);
+              console.warn('Bitte überprüfe deinen MapTiler API-Key in den Umgebungsvariablen.');
+            });
           } else {
             // Fallback zu OpenStreetMap wenn kein API-Key vorhanden
             console.warn('MapTiler API-Key nicht gefunden. Verwende OpenStreetMap als Fallback.');
