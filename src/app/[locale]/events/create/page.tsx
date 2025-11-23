@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from '@/i18n/routing';
 import { Link } from '@/i18n/routing';
-import { ArrowLeft, MapPin, Loader } from 'lucide-react';
+import { ArrowLeft, MapPin, Loader, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { geocodeLocation, isGeocodingSuccess } from '@/lib/geocoding';
 import { useTranslations } from 'next-intl';
 import Lottie from 'lottie-react';
@@ -42,6 +42,7 @@ export default function CreateEventPage() {
     lon: ''
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [geocoding, setGeocoding] = useState(false);
   const [geocodingSuccess, setGeocodingSuccess] = useState<string | null>(null);
   const [showAnimation, setShowAnimation] = useState(false);
@@ -82,7 +83,29 @@ export default function CreateEventPage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setImageFile(file);
+    if (file) {
+      setImageFile(file);
+      // Erstelle Vorschau-URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    // Reset file input
+    const fileInput = document.getElementById('image') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  const handleImageButtonClick = () => {
+    document.getElementById('image')?.click();
   };
 
   const handleGeocode = async () => {
@@ -167,6 +190,8 @@ export default function CreateEventPage() {
         await response.json();
         setShowAnimation(true);
         setLoading(false);
+        setImageFile(null);
+        setImagePreview(null);
         setTimeout(() => {
           router.push('/events');
         }, 2500);
@@ -239,20 +264,55 @@ export default function CreateEventPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('image')}
+              </label>
+              {imagePreview ? (
+                <div className="relative inline-block">
+                  <div className="relative w-full max-w-md h-64 rounded-lg overflow-hidden border-2 border-gray-300">
+                    <img
+                      src={imagePreview}
+                      alt="Vorschau"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-lg transition-colors"
+                      title="Bild entfernen"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleImageButtonClick}
+                    className="flex flex-col items-center justify-center w-full max-w-md h-32 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 hover:border-blue-400 transition-colors cursor-pointer"
+                  >
+                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                    <span className="text-sm text-gray-600 font-medium">
+                      {t('image') || 'Bild hochladen'}
+                    </span>
+                    <span className="text-xs text-gray-500 mt-1">
+                      Klicken Sie hier, um ein Bild auszuwählen
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('image')}
-                </label>
-                <input
-                  type="file"
-                  id="image"
-                  name="image"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="w-full"
-                />
-              </div>
               <div className="md:col-span-2">
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
                   {t('titleLabel')} *
