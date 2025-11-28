@@ -222,8 +222,8 @@ export default function EventDetailPage() {
           </div>
 
           <div className="p-6">
-            {event.imageurl && (
-              <div className="mb-8">
+            <div className="mb-8">
+              {event.imageurl ? (
                 <div className="h-64 w-full overflow-hidden rounded-lg cursor-pointer relative" onClick={() => setShowImageModal(true)}>
                   <Image
                     src={event.imageurl}
@@ -235,8 +235,18 @@ export default function EventDetailPage() {
                     }}
                   />
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="h-64 w-full bg-gray-200 rounded-lg flex items-center justify-center">
+                  <Image
+                    src="/logo.png"
+                    alt="Fliegerevents Logo"
+                    width={120}
+                    height={120}
+                    className="opacity-30 object-contain"
+                  />
+                </div>
+              )}
+            </div>
             
             <div className="grid lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">

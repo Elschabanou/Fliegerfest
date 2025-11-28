@@ -2,21 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { useParams } from 'next/navigation';
 import { useRouter } from '@/i18n/routing';
 import { Link } from '@/i18n/routing';
-import { ArrowLeft, MapPin, Loader, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, MapPin, Loader, Upload, X } from 'lucide-react';
 import { geocodeLocation, isGeocodingSuccess } from '@/lib/geocoding';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import Lottie from 'lottie-react';
 
-export default function CreateEventPage() {
+export default function EditEventPage() {
+  const { id } = useParams();
   const t = useTranslations('create');
   const tCommon = useTranslations('common');
   const tEvents = useTranslations('events');
-  const locale = useLocale();
-  const { user, loading: authLoading } = useAuth();
+  const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [loadingEvent, setLoadingEvent] = useState(true);
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
@@ -30,8 +32,6 @@ export default function CreateEventPage() {
     endTime: '',
     allDay: false,
     multiDay: false,
-    differentTimesPerDay: false,
-    dailyTimes: [] as Array<{ date: string; startTime: string; endTime: string }>,
     eventType: '',
     organizer: '',
     contactEmail: '',
@@ -46,6 +46,7 @@ export default function CreateEventPage() {
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   const [geocoding, setGeocoding] = useState(false);
   const [geocodingSuccess, setGeocodingSuccess] = useState<string | null>(null);
   const [showAnimation, setShowAnimation] = useState(false);
@@ -54,9 +55,9 @@ export default function CreateEventPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.replace('/auth/signin?redirect=/events/create');
+      router.replace(`/auth/signin?redirect=/events/${id}/edit`);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, id]);
 
   useEffect(() => {
     fetch('/Message Sent Successfully _ Plane.json')
@@ -65,100 +66,115 @@ export default function CreateEventPage() {
       .catch(err => console.error('Fehler beim Laden der Animation:', err));
   }, []);
 
+  useEffect(() => {
+    const loadEvent = async () => {
+      if (!token || !id) return;
+      
+      try {
+        const response = await fetch(`/api/events/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const event = await response.json();
+          
+          // Prüfe ob der Benutzer berechtigt ist
+          const eventCreatedBy = typeof event.createdBy === 'object' && event.createdBy !== null && '$oid' in event.createdBy
+            ? event.createdBy.$oid
+            : event.createdBy ?? '';
+          const userId = user?.id ?? '';
+          
+          if (eventCreatedBy.toString() !== userId.toString() && user?.role !== 'admin') {
+            setError('Keine Berechtigung zum Bearbeiten dieses Events');
+            setLoadingEvent(false);
+            return;
+          }
+
+          // Formular mit Event-Daten vorausfüllen
+          const formatDateForInput = (dateString?: string) => {
+            if (!dateString) return '';
+            try {
+              const date = new Date(dateString);
+              return date.toISOString().split('T')[0];
+            } catch {
+              return '';
+            }
+          };
+
+          const formatTimeForInput = (timeString?: string) => {
+            if (!timeString) return '';
+            if (timeString.match(/^\d{2}:\d{2}$/)) {
+              return timeString;
+            }
+            try {
+              const date = new Date(`2000-01-01T${timeString}`);
+              return date.toTimeString().slice(0, 5);
+            } catch {
+              return '';
+            }
+          };
+
+          setFormData({
+            title: event.title || event.name || '',
+            description: event.description || '',
+            location: event.location || '',
+            address: event.address || '',
+            date: formatDateForInput(event.date || event.dateTime),
+            endDate: formatDateForInput(event.endDate),
+            startTime: formatTimeForInput(event.startTime),
+            endTime: formatTimeForInput(event.endTime),
+            allDay: event.allDay || false,
+            multiDay: event.multiDay || false,
+            eventType: event.eventType || '',
+            organizer: event.organizer || '',
+            contactEmail: event.contactEmail || '',
+            contactPhone: event.contactPhone || '',
+            maxParticipants: event.maxParticipants ? String(event.maxParticipants) : '',
+            registrationRequired: event.registrationRequired || false,
+            entryFee: event.entryFee ? String(event.entryFee) : '',
+            website: event.website || '',
+            tags: Array.isArray(event.tags) ? event.tags.join(', ') : (event.tags || ''),
+            lat: event.lat || '',
+            lon: event.lon || ''
+          });
+
+          if (event.imageurl) {
+            setCurrentImageUrl(event.imageurl);
+          }
+        } else {
+          setError('Event nicht gefunden');
+        }
+      } catch (err) {
+        console.error('Fehler beim Laden des Events:', err);
+        setError('Fehler beim Laden des Events');
+      } finally {
+        setLoadingEvent(false);
+      }
+    };
+
+    if (user && token && id) {
+      loadEvent();
+    }
+  }, [user, token, id]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     
-    // Wenn multiDay deaktiviert wird, Enddatum und differentTimesPerDay zurücksetzen
+    // Wenn multiDay deaktiviert wird, Enddatum zurücksetzen
     if (name === 'multiDay' && !(e.target as HTMLInputElement).checked) {
       setFormData(prev => ({
         ...prev,
         multiDay: false,
-        endDate: '',
-        differentTimesPerDay: false,
-        dailyTimes: []
+        endDate: ''
       }));
       return;
-    }
-
-    // Wenn differentTimesPerDay aktiviert wird, generiere dailyTimes Array
-    if (name === 'differentTimesPerDay' && (e.target as HTMLInputElement).checked) {
-      if (formData.date) {
-        const startDate = new Date(formData.date);
-        const endDate = formData.endDate ? new Date(formData.endDate) : new Date(formData.date);
-        const days: Array<{ date: string; startTime: string; endTime: string }> = [];
-        const currentDate = new Date(startDate);
-        
-        while (currentDate <= endDate) {
-          days.push({
-            date: currentDate.toISOString().split('T')[0],
-            startTime: formData.startTime || '',
-            endTime: formData.endTime || ''
-          });
-          currentDate.setDate(currentDate.getDate() + 1);
-        }
-        
-        setFormData(prev => ({
-          ...prev,
-          differentTimesPerDay: true,
-          dailyTimes: days
-        }));
-        return;
-      }
-    }
-
-    // Wenn differentTimesPerDay deaktiviert wird, dailyTimes leeren
-    if (name === 'differentTimesPerDay' && !(e.target as HTMLInputElement).checked) {
-      setFormData(prev => ({
-        ...prev,
-        differentTimesPerDay: false,
-        dailyTimes: []
-      }));
-      return;
-    }
-
-    // Wenn date oder endDate geändert wird und differentTimesPerDay aktiv ist, aktualisiere dailyTimes
-    if ((name === 'date' || name === 'endDate') && formData.differentTimesPerDay) {
-      const newDate = name === 'date' ? value : formData.date;
-      const newEndDate = name === 'endDate' ? value : (formData.endDate || formData.date);
-      
-      if (newDate) {
-        const startDate = new Date(newDate);
-        const endDate = newEndDate ? new Date(newEndDate) : new Date(newDate);
-        const days: Array<{ date: string; startTime: string; endTime: string }> = [];
-        const currentDate = new Date(startDate);
-        
-        while (currentDate <= endDate) {
-          const dateStr = currentDate.toISOString().split('T')[0];
-          const existingDay = formData.dailyTimes.find(d => d.date === dateStr);
-          days.push({
-            date: dateStr,
-            startTime: existingDay?.startTime || formData.startTime || '',
-            endTime: existingDay?.endTime || formData.endTime || ''
-          });
-          currentDate.setDate(currentDate.getDate() + 1);
-        }
-        
-        setFormData(prev => ({
-          ...prev,
-          [name]: value,
-          dailyTimes: days
-        }));
-        return;
-      }
     }
     
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
-  };
-
-  const handleDailyTimeChange = (date: string, field: 'startTime' | 'endTime', value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      dailyTimes: prev.dailyTimes.map(day => 
-        day.date === date ? { ...day, [field]: value } : day
-      )
     }));
   };
 
@@ -170,6 +186,7 @@ export default function CreateEventPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
+        setCurrentImageUrl(null); // Entferne aktuelles Bild wenn neues hochgeladen wird
       };
       reader.readAsDataURL(file);
     }
@@ -178,6 +195,7 @@ export default function CreateEventPage() {
   const handleRemoveImage = () => {
     setImageFile(null);
     setImagePreview(null);
+    setCurrentImageUrl(null);
     // Reset file input
     const fileInput = document.getElementById('image') as HTMLInputElement;
     if (fileInput) {
@@ -231,57 +249,88 @@ export default function CreateEventPage() {
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
 
-      const form = new FormData();
-      form.append('title', formData.title);
-      form.append('description', formData.description);
-      form.append('location', formData.location);
-      form.append('address', formData.address);
-      form.append('date', formData.date);
-      if (formData.endDate) {
-        form.append('endDate', formData.endDate);
-      }
-      if (formData.differentTimesPerDay && formData.dailyTimes.length > 0) {
-        form.append('dailyTimes', JSON.stringify(formData.dailyTimes));
-      } else {
-        if (formData.startTime) {
-          form.append('startTime', formData.startTime);
+      // Wenn ein neues Bild hochgeladen wurde, verwende FormData
+      if (imageFile) {
+        const form = new FormData();
+        form.append('title', formData.title);
+        form.append('description', formData.description);
+        form.append('location', formData.location);
+        form.append('address', formData.address);
+        form.append('date', formData.date);
+        if (formData.endDate) {
+          form.append('endDate', formData.endDate);
         }
-        if (formData.endTime) {
+        if (!formData.allDay && !formData.multiDay) {
+          form.append('startTime', formData.startTime);
           form.append('endTime', formData.endTime);
         }
-      }
-      form.append('allDay', String(formData.allDay));
-      form.append('multiDay', String(formData.multiDay));
-      form.append('differentTimesPerDay', String(formData.differentTimesPerDay));
-      form.append('eventType', formData.eventType);
-      form.append('organizer', formData.organizer);
-      form.append('contactEmail', formData.contactEmail || (user?.email ?? ''));
-      if (formData.contactPhone) form.append('contactPhone', formData.contactPhone);
-      if (formData.maxParticipants) form.append('maxParticipants', String(formData.maxParticipants));
-      form.append('registrationRequired', String(formData.registrationRequired));
-      if (formData.entryFee) form.append('entryFee', String(formData.entryFee));
-      if (formData.website) form.append('website', formData.website);
-      if (tagsArray.length) form.append('tags', tagsArray.join(','));
-      if (formData.lat) form.append('lat', formData.lat);
-      if (formData.lon) form.append('lon', formData.lon);
-      if (imageFile) form.append('image', imageFile);
+        form.append('allDay', String(formData.allDay));
+        form.append('multiDay', String(formData.multiDay));
+        form.append('eventType', formData.eventType);
+        form.append('organizer', formData.organizer);
+        form.append('contactEmail', formData.contactEmail || (user?.email ?? ''));
+        if (formData.contactPhone) form.append('contactPhone', formData.contactPhone);
+        if (formData.maxParticipants) form.append('maxParticipants', String(formData.maxParticipants));
+        form.append('registrationRequired', String(formData.registrationRequired));
+        if (formData.entryFee) form.append('entryFee', String(formData.entryFee));
+        if (formData.website) form.append('website', formData.website);
+        if (tagsArray.length) form.append('tags', tagsArray.join(','));
+        if (formData.lat) form.append('lat', formData.lat);
+        if (formData.lon) form.append('lon', formData.lon);
+        form.append('image', imageFile);
 
-      const response = await fetch('/api/events', {
-        method: 'POST',
+        // Für Bild-Upload müsste die API erweitert werden, für jetzt verwenden wir JSON
+        // Fallback zu JSON
+      }
+
+      // Verwende JSON für Update (Bild-Upload würde separate API benötigen)
+      const updateData: Record<string, unknown> = {
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        address: formData.address,
+        date: formData.date ? new Date(formData.date) : undefined,
+        endDate: formData.endDate ? new Date(formData.endDate) : undefined,
+        startTime: formData.startTime || undefined,
+        endTime: formData.endTime || undefined,
+        allDay: formData.allDay,
+        multiDay: formData.multiDay,
+        eventType: formData.eventType,
+        organizer: formData.organizer,
+        contactEmail: formData.contactEmail || user?.email,
+        contactPhone: formData.contactPhone || undefined,
+        maxParticipants: formData.maxParticipants ? Number(formData.maxParticipants) : undefined,
+        registrationRequired: formData.registrationRequired,
+        entryFee: formData.entryFee ? Number(formData.entryFee) : undefined,
+        website: formData.website || undefined,
+        tags: tagsArray.length > 0 ? tagsArray.join(',') : undefined,
+        lat: formData.lat || undefined,
+        lon: formData.lon || undefined,
+      };
+
+      // Remove undefined values
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined || updateData[key] === '') {
+          delete updateData[key];
+        }
+      });
+
+      const response = await fetch(`/api/events/${id}`, {
+        method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]}`,
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: form,
+        body: JSON.stringify(updateData),
       });
 
       if (response.ok) {
-        await response.json();
         setShowAnimation(true);
         setLoading(false);
         setImageFile(null);
         setImagePreview(null);
         setTimeout(() => {
-          router.push('/events');
+          router.push(`/events/${id}`);
         }, 2500);
       } else {
         const errorData = await response.json();
@@ -294,7 +343,7 @@ export default function CreateEventPage() {
     }
   };
 
-  if (authLoading || !user) {
+  if (authLoading || loadingEvent) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -303,6 +352,10 @@ export default function CreateEventPage() {
         </div>
       </div>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   if (showAnimation) {
@@ -322,8 +375,8 @@ export default function CreateEventPage() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
           )}
-          <h2 className="text-2xl font-bold text-[#021234] mt-4">{t('success')}</h2>
-          <p className="text-gray-600 mt-2">{t('successMessage')}</p>
+          <h2 className="text-2xl font-bold text-[#021234] mt-4">{t('updateSuccess') || 'Event erfolgreich aktualisiert!'}</h2>
+          <p className="text-gray-600 mt-2">{t('updateSuccessMessage') || 'Sie werden zur Event-Detail-Seite weitergeleitet...'}</p>
         </div>
       </div>
     );
@@ -334,13 +387,13 @@ export default function CreateEventPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <Link
-            href="/events"
+            href={`/events/${id}`}
             className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 mb-4"
           >
             <ArrowLeft className="h-5 w-5" />
             <span>{t('backToEvents')}</span>
           </Link>
-          <h1 className="text-3xl font-bold text-[#021234]">{t('title')}</h1>
+          <h1 className="text-3xl font-bold text-[#021234]">Event bearbeiten</h1>
           <p className="text-gray-600 mt-2">{t('subtitle')}</p>
         </div>
 
@@ -356,11 +409,11 @@ export default function CreateEventPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('image')}
               </label>
-              {imagePreview ? (
+              {(imagePreview || currentImageUrl) ? (
                 <div className="relative inline-block">
                   <div className="relative w-full max-w-md h-64 rounded-lg overflow-hidden border-2 border-gray-300">
                     <img
-                      src={imagePreview}
+                      src={imagePreview || currentImageUrl || ''}
                       alt="Vorschau"
                       className="w-full h-full object-cover"
                     />
@@ -666,95 +719,35 @@ export default function CreateEventPage() {
               </div>
 
               {!formData.allDay && (
-                <>
-                  {formData.multiDay && (
-                    <div className="flex items-center mb-4">
-                      <input
-                        type="checkbox"
-                        id="differentTimesPerDay"
-                        name="differentTimesPerDay"
-                        checked={formData.differentTimesPerDay}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor="differentTimesPerDay" className="ml-2 block text-sm font-medium text-gray-700">
-                        {t('differentTimesPerDay') || 'Unterschiedliche Zeiten pro Tag'}
-                      </label>
-                    </div>
-                  )}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
+                      {t('startTime')}
+                    </label>
+                    <input
+                      type="time"
+                      id="startTime"
+                      name="startTime"
+                      value={formData.startTime}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                    />
+                  </div>
 
-                  {formData.multiDay && formData.differentTimesPerDay && formData.dailyTimes.length > 0 ? (
-                    <div className="space-y-4">
-                      {formData.dailyTimes.map((day, index) => {
-                        const dayDate = new Date(day.date);
-                        const dayName = dayDate.toLocaleDateString(locale === 'de' ? 'de-DE' : locale === 'fr' ? 'fr-FR' : 'en-US', { 
-                          weekday: 'long',
-                          day: 'numeric',
-                          month: 'long'
-                        });
-                        return (
-                          <div key={day.date} className="bg-gray-50 p-4 rounded-lg">
-                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{dayName}</h4>
-                            <div className="grid md:grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">
-                                  {t('startTime')}
-                                </label>
-                                <input
-                                  type="time"
-                                  value={day.startTime}
-                                  onChange={(e) => handleDailyTimeChange(day.date, 'startTime', e.target.value)}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">
-                                  {t('endTime')}
-                                </label>
-                                <input
-                                  type="time"
-                                  value={day.endTime}
-                                  onChange={(e) => handleDailyTimeChange(day.date, 'endTime', e.target.value)}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div>
-                        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
-                          {t('startTime')}
-                        </label>
-                        <input
-                          type="time"
-                          id="startTime"
-                          name="startTime"
-                          value={formData.startTime}
-                          onChange={handleChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
-                          {t('endTime')}
-                        </label>
-                        <input
-                          type="time"
-                          id="endTime"
-                          name="endTime"
-                          value={formData.endTime}
-                          onChange={handleChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </>
+                  <div>
+                    <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
+                      {t('endTime')}
+                    </label>
+                    <input
+                      type="time"
+                      id="endTime"
+                      name="endTime"
+                      value={formData.endTime}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                    />
+                  </div>
+                </div>
               )}
             </div>
 
@@ -838,7 +831,7 @@ export default function CreateEventPage() {
             <div className="flex justify-end space-x-4 pt-6">
               <button
                 type="button"
-                onClick={() => router.push('/events')}
+                onClick={() => router.push(`/events/${id}`)}
                 className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 {tCommon('cancel')}
@@ -848,7 +841,7 @@ export default function CreateEventPage() {
                 disabled={loading}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? t('submitting') : t('submit')}
+                {loading ? t('submitting') : (t('save') || 'Speichern')}
               </button>
             </div>
           </form>

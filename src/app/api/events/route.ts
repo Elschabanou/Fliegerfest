@@ -165,8 +165,15 @@ export async function POST(request: NextRequest) {
         if (key === 'image') return; // Datei separat behandeln
         if (typeof value === 'string') {
           // parse booleans and numbers where applicable
-          if (key === 'registrationRequired' || key === 'allDay' || key === 'multiDay') {
+          if (key === 'registrationRequired' || key === 'allDay' || key === 'multiDay' || key === 'differentTimesPerDay') {
             eventData[key] = value === 'true' || value === 'on';
+          } else if (key === 'dailyTimes') {
+            // Parse dailyTimes JSON
+            try {
+              eventData[key] = JSON.parse(value);
+            } catch {
+              // Ignore invalid JSON
+            }
           } else if (key === 'endDate') {
             // Parse endDate as Date
             if (value) {

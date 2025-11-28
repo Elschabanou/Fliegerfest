@@ -250,6 +250,7 @@
     "endDate": "Date de fin",
     "allDay": "Événement toute la journée",
     "multiDay": "Événement sur plusieurs jours",
+    "differentTimesPerDay": "Horaires différents par jour",
     "eventType": "Type d'événement",
     "eventTypeSelect": "Veuillez sélectionner...",
     "organizer": "Organisateur",
@@ -274,6 +275,8 @@
     "geocodeError": "Erreur lors de l'obtention des coordonnées",
     "success": "Événement créé avec succès !",
     "successMessage": "Vous allez être redirigé vers la page des événements...",
+    "updateSuccess": "Événement mis à jour avec succès !",
+    "updateSuccessMessage": "Vous allez être redirigé vers la page de détails de l'événement...",
     "loading": "Chargement..."
   },
   "eventDetails": {

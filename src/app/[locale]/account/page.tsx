@@ -15,10 +15,25 @@ interface Event {
   name?: string;
   description?: string;
   location?: string;
+  address?: string;
   date?: string;
   dateTime?: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
+  allDay?: boolean;
+  multiDay?: boolean;
   eventType?: string;
   organizer?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  maxParticipants?: number;
+  registrationRequired?: boolean;
+  entryFee?: number;
+  website?: string;
+  tags?: string;
+  lat?: string;
+  lon?: string;
   imageurl?: string;
   createdAt?: string;
   createdBy?: EventCreator;
@@ -239,7 +254,7 @@ export default function AccountPage() {
                             <h3 className="text-lg font-semibold text-[#021234]">
                               {event.title || event.name || 'Unbenanntes Event'}
                             </h3>
-                            <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                            <span className={`inline-block w-fit px-2 py-1 text-xs rounded-full ${
                               event.eventType === 'Flugtag' ? 'bg-blue-100 text-blue-800' :
                               event.eventType === 'Messe' ? 'bg-green-100 text-green-800' :
                               event.eventType === 'Workshop' ? 'bg-purple-100 text-purple-800' :
@@ -272,11 +287,11 @@ export default function AccountPage() {
 
                         <div className="flex flex-col sm:flex-row sm:space-x-2 gap-2 sm:gap-0 md:ml-4 w-full md:w-auto">
                           <Link
-                            href={`/events/${event._id}`}
+                            href={`/events/${event._id}/edit`}
                             className="flex items-center justify-center px-3 py-2 text-sm text-blue-600 hover:text-blue-800 border border-blue-200 rounded-md hover:bg-blue-50 transition-colors"
                           >
                             <Edit className="h-4 w-4 mr-1" />
-                            {t('view') || 'Ansehen'}
+                            {t('edit') || 'Bearbeiten'}
                           </Link>
 
                           <button

@@ -112,6 +112,7 @@
     "noEventsFound": "Keine Events gefunden",
     "noEventsText": "Versuchen Sie andere Suchkriterien oder erstellen Sie ein neues Event.",
     "allDay": "Ganztägig",
+    "multiDay": "Mehrtägig",
     "noDescription": "Keine Beschreibung verfügbar.",
     "by": "von",
     "viewDetails": "Details ansehen →",
@@ -251,6 +252,7 @@
     "endTime": "Endzeit",
     "allDay": "Ganztägige Veranstaltung",
     "multiDay": "Mehrtägige Veranstaltung",
+    "differentTimesPerDay": "Unterschiedliche Zeiten pro Tag",
     "eventType": "Event-Typ",
     "eventTypeSelect": "Bitte wählen...",
     "organizer": "Veranstalter",
@@ -271,10 +273,13 @@
     "image": "Titelbild (optional)",
     "submit": "Event erstellen",
     "submitting": "Wird erstellt...",
+    "save": "Speichern",
     "locationRequired": "Bitte geben Sie einen Ort oder eine Adresse ein",
     "geocodeError": "Fehler beim Abrufen der Koordinaten",
     "success": "Event erfolgreich erstellt!",
     "successMessage": "Sie werden zur Event-Seite weitergeleitet...",
+    "updateSuccess": "Event erfolgreich aktualisiert!",
+    "updateSuccessMessage": "Sie werden zur Event-Detail-Seite weitergeleitet...",
     "loading": "Wird geladen..."
   },
   "eventDetails": {
@@ -333,7 +338,11 @@
     "subtitle": "Verwalten Sie Ihre persönlichen Informationen und Ihre Events",
     "noEventsTitle": "Keine Events gefunden",
     "view": "Ansehen",
-    "deleting": "Löschen..."
+    "deleting": "Löschen...",
+    "save": "Speichern",
+    "saving": "Speichern...",
+    "saveError": "Fehler beim Speichern",
+    "cancel": "Abbrechen"
   },
   "impressum": {
     "title": "Impressum",

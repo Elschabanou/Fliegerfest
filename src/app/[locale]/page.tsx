@@ -247,8 +247,14 @@ export default function HomePage() {
                     </div>
                   )}
                   {!event.imageurl && (
-                    <div className="h-48 w-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                      <Calendar className="h-16 w-16 text-white opacity-50" />
+                    <div className="h-48 w-full bg-gray-200 flex items-center justify-center">
+                      <Image
+                        src="/logo.png"
+                        alt="Fliegerevents Logo"
+                        width={80}
+                        height={80}
+                        className="opacity-30 object-contain"
+                      />
                     </div>
                   )}
                   

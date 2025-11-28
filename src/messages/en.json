@@ -250,6 +250,7 @@
     "endDate": "End Date",
     "allDay": "All-Day Event",
     "multiDay": "Multi-Day Event",
+    "differentTimesPerDay": "Different times per day",
     "eventType": "Event Type",
     "eventTypeSelect": "Please select...",
     "organizer": "Organizer",
@@ -274,6 +275,8 @@
     "geocodeError": "Error getting coordinates",
     "success": "Event Successfully Created!",
     "successMessage": "You will be redirected to the events page...",
+    "updateSuccess": "Event Successfully Updated!",
+    "updateSuccessMessage": "You will be redirected to the event detail page...",
     "loading": "Loading..."
   },
   "eventDetails": {

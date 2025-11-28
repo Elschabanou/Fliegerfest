@@ -526,7 +526,14 @@ export default function EventsPage() {
                   </div>
                 )}
                 {!event.imageurl && (
-                  <div className="h-48 w-full bg-gray-100 relative">
+                  <div className="h-48 w-full bg-gray-200 flex items-center justify-center">
+                    <Image
+                      src="/logo.png"
+                      alt="Fliegerevents Logo"
+                      width={80}
+                      height={80}
+                      className="opacity-30 object-contain"
+                    />
                   </div>
                 )}
                 <div className="flex flex-col flex-1 p-6">
