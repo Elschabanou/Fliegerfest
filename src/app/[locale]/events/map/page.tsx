@@ -5,6 +5,7 @@ import { Link } from '@/i18n/routing';
 import { ArrowLeft, MapPin } from 'lucide-react';
 import EventsMap from '@/components/EventsMap';
 import { useTranslations } from 'next-intl';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 interface Event {
   _id: string;
@@ -28,12 +29,30 @@ interface Event {
 
 export default function EventsMapPage() {
   const t = useTranslations('events');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const eventId = searchParams.get('eventId');
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Zeitfilter
+  const today = new Date().toISOString().split('T')[0];
+  const [eventType, setEventType] = useState(searchParams.get('eventType') || '');
+  const [dateFrom, setDateFrom] = useState(searchParams.get('dateFrom') || today);
+  const [dateTo, setDateTo] = useState(searchParams.get('dateTo') || '');
+  const [timeFrom, setTimeFrom] = useState(searchParams.get('timeFrom') || '');
+  const [timeTo, setTimeTo] = useState(searchParams.get('timeTo') || '');
 
   const fetchEvents = useCallback(async () => {
     try {
-      const response = await fetch('/api/events');
+      const params = new URLSearchParams();
+      if (eventType) params.append('eventType', eventType);
+      if (dateFrom) params.append('dateFrom', dateFrom);
+      if (dateTo) params.append('dateTo', dateTo);
+      if (timeFrom) params.append('timeFrom', timeFrom);
+      if (timeTo) params.append('timeTo', timeTo);
+      
+      const response = await fetch(`/api/events?${params}`);
       const data = await response.json();
       setEvents(data.events || []);
     } catch (error) {
@@ -41,6 +60,14 @@ export default function EventsMapPage() {
     } finally {
       setLoading(false);
     }
+  }, [eventType, dateFrom, dateTo, timeFrom, timeTo]);
+  
+  const clearTimeFilters = useCallback(() => {
+    const todayDate = new Date().toISOString().split('T')[0];
+    setDateFrom(todayDate);
+    setDateTo('');
+    setTimeFrom('');
+    setTimeTo('');
   }, []);
 
   useEffect(() => {
@@ -88,7 +115,23 @@ export default function EventsMapPage() {
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <EventsMap events={events} />
+          <EventsMap 
+            events={events} 
+            focusedEventId={eventId || undefined}
+            eventType={eventType}
+            onEventTypeChange={setEventType}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            timeFrom={timeFrom}
+            timeTo={timeTo}
+            onDateFromChange={setDateFrom}
+            onDateToChange={setDateTo}
+            onTimeFromChange={setTimeFrom}
+            onTimeToChange={setTimeTo}
+            onClearTimeFilters={clearTimeFilters}
+            showFullscreen={true}
+            showTimeFilters={true}
+          />
           
           {eventsWithCoords.length === 0 && (
             <div className="mt-6 text-center">

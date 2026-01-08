@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { geocodeLocation, isGeocodingSuccess } from '@/lib/geocoding';
-import { MapPin } from 'lucide-react';
+import { MapPin, Maximize2, Minimize2, Filter, Calendar, Clock, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface Event {
@@ -30,9 +30,38 @@ interface EventsMapProps {
   selectedEventType?: string;
   eventType?: string;
   onEventTypeChange?: (eventType: string) => void;
+  focusedEventId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  timeFrom?: string;
+  timeTo?: string;
+  onDateFromChange?: (date: string) => void;
+  onDateToChange?: (date: string) => void;
+  onTimeFromChange?: (time: string) => void;
+  onTimeToChange?: (time: string) => void;
+  onClearTimeFilters?: () => void;
+  showFullscreen?: boolean;
+  showTimeFilters?: boolean;
 }
 
-export default function EventsMap({ events, selectedEventType = '', eventType = '', onEventTypeChange }: EventsMapProps) {
+export default function EventsMap({ 
+  events, 
+  selectedEventType = '', 
+  eventType = '', 
+  onEventTypeChange, 
+  focusedEventId,
+  dateFrom,
+  dateTo,
+  timeFrom,
+  timeTo,
+  onDateFromChange,
+  onDateToChange,
+  onTimeFromChange,
+  onTimeToChange,
+  onClearTimeFilters,
+  showFullscreen = false,
+  showTimeFilters = false
+}: EventsMapProps) {
   const t = useTranslations('events');
   const [isClient, setIsClient] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
@@ -44,6 +73,7 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
   const mapRef = useRef<unknown>(null);
   const leafletRef = useRef<unknown>(null);
   const markersRef = useRef<unknown[]>([]);
+  const eventMarkersMapRef = useRef<Map<string, unknown>>(new Map());
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const isUpdatingMarkersRef = useRef<boolean>(false);
   const circleRef = useRef<unknown>(null);
@@ -57,6 +87,8 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
   const [showLocationFound, setShowLocationFound] = useState<boolean>(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [showAirports, setShowAirports] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showTimeFiltersDropdown, setShowTimeFiltersDropdown] = useState(false);
   const [airports, setAirports] = useState<Array<{icao: string, iata: string | null, name: string, lat: number, lon: number, type: string, municipality: string | null, country: string | null}>>([]);
   const [isLoadingAirports, setIsLoadingAirports] = useState<boolean>(false);
   const airportMarkersRef = useRef<unknown[]>([]);
@@ -186,6 +218,7 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
     });
     
     markersRef.current = [];
+    eventMarkersMapRef.current.clear();
 
     // Radius-Kreis aktualisieren
     try {
@@ -376,37 +409,6 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
           autoPanPaddingBottomRight: [16, 40]
         });
         
-        // Marker beim Klick vergrößern
-        marker.on('click', () => {
-          const iconElement = marker.getElement();
-          if (iconElement) {
-            const iconDiv = iconElement.querySelector('div');
-            const svgElement = iconDiv?.querySelector('svg');
-            if (iconDiv && svgElement) {
-              iconDiv.style.width = '56px';
-              iconDiv.style.height = '67px';
-              iconDiv.style.transition = 'all 0.3s ease';
-              svgElement.setAttribute('width', '56');
-              svgElement.setAttribute('height', '67');
-            }
-          }
-        });
-        
-        // Marker beim Schließen des Popups wieder normal groß machen
-        marker.on('popupclose', () => {
-          const iconElement = marker.getElement();
-          if (iconElement) {
-            const iconDiv = iconElement.querySelector('div');
-            const svgElement = iconDiv?.querySelector('svg');
-            if (iconDiv && svgElement) {
-              iconDiv.style.width = '40px';
-              iconDiv.style.height = '48px';
-              svgElement.setAttribute('width', '40');
-              svgElement.setAttribute('height', '48');
-            }
-          }
-        });
-        
         // Event-Listener für Klick auf Popup hinzufügen
         marker.on('popupopen', () => {
           const popupElement = marker.getPopup()?.getElement();
@@ -437,6 +439,8 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
         }
 
         markersRef.current.push(marker);
+        // Speichere Marker mit Event-ID für späteren Zugriff
+        eventMarkersMapRef.current.set(event._id, marker);
       } catch (error) {
         console.warn('Fehler beim Hinzufügen eines Event-Markers:', error);
       }
@@ -444,6 +448,54 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
 
     isUpdatingMarkersRef.current = false;
   }, [userLocation, customLocation, locationMode, events, radiusKm, isMapInitialized, isSmallScreen, selectedEventType]);
+
+  // Event fokussieren wenn focusedEventId vorhanden ist
+  const focusEvent = useCallback((eventId: string) => {
+    if (!mapRef.current || !leafletRef.current || !isMapInitialized) return;
+
+    const event = events.find(e => e._id === eventId);
+    if (!event) return;
+
+    const lat = parseFloat(event.lat || '');
+    const lon = parseFloat(event.lon || '');
+    
+    if (isNaN(lat) || isNaN(lon)) return;
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const map = mapRef.current as any;
+      
+      // Stelle sicher, dass die Karte die richtige Größe hat
+      map.invalidateSize();
+      
+      // Warte kurz, damit invalidateSize wirksam wird
+      setTimeout(() => {
+        // Zentriere Karte auf Event mit Zoom-Level 15 für gute Sicht
+        // Verwende panTo mit einem Padding, um sicherzustellen, dass das Event zentriert ist
+        map.setView([lat, lon], 15, { animate: true, duration: 0.5 });
+        
+        // Warte bis die Animation abgeschlossen ist
+        map.once('moveend', () => {
+          // Öffne Popup nach kurzer Verzögerung
+          setTimeout(() => {
+            const marker = eventMarkersMapRef.current.get(eventId);
+            if (marker) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (marker as any).openPopup();
+              // Stelle sicher, dass die Karte das Popup richtig anzeigt und zentriert bleibt
+              map.invalidateSize();
+              // Zentriere nochmal nach Popup-Öffnung, falls nötig
+              setTimeout(() => {
+                map.setView([lat, lon], 15);
+              }, 100);
+            }
+          }, 200);
+        });
+      }, 200);
+    } catch (error) {
+      console.warn('Fehler beim Fokussieren des Events:', error);
+    }
+  }, [events, isMapInitialized]);
 
   // Alle Flugplätze von Deutschland und umliegenden Ländern einmal laden
   const loadAllAirports = useCallback(() => {
@@ -883,6 +935,26 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMapInitialized, userLocation, customLocation, locationMode, events, radiusKm, selectedEventType]);
 
+  // Event fokussieren wenn focusedEventId vorhanden ist
+  useEffect(() => {
+    if (focusedEventId && isMapInitialized) {
+      // Warte länger, damit die Karte vollständig geladen und alle Marker hinzugefügt sind
+      const timer = setTimeout(() => {
+        // Prüfe ob Marker bereits vorhanden sind
+        if (eventMarkersMapRef.current.has(focusedEventId) || markersRef.current.length > 0) {
+          focusEvent(focusedEventId);
+        } else {
+          // Falls Marker noch nicht geladen sind, warte noch etwas
+          const retryTimer = setTimeout(() => {
+            focusEvent(focusedEventId);
+          }, 1000);
+          return () => clearTimeout(retryTimer);
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [focusedEventId, isMapInitialized, focusEvent]);
+
   // Event-Listener für Kartenbewegung und Zoom (für Flughäfen)
   useEffect(() => {
     if (!isMapInitialized || !mapRef.current) return;
@@ -946,6 +1018,39 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
     return () => clearTimeout(t);
   }, [showLocationFound]);
 
+  // Vollbild-Funktionalität
+  const toggleFullscreen = useCallback(() => {
+    setIsFullscreen(prev => !prev);
+    // Warte kurz, damit der DOM aktualisiert ist, dann invalidateSize
+    setTimeout(() => {
+      if (mapRef.current) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (mapRef.current as any).invalidateSize();
+      }
+    }, 100);
+  }, []);
+
+  // Prüfe ob Zeitfilter aktiv sind
+  const hasActiveTimeFilters = dateFrom || dateTo || timeFrom || timeTo;
+  const timeFilterRef = useRef<HTMLDivElement>(null);
+
+  // Schließe Zeitfilter-Dropdown beim Klicken außerhalb
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (timeFilterRef.current && !timeFilterRef.current.contains(event.target as Node)) {
+        setShowTimeFiltersDropdown(false);
+      }
+    };
+
+    if (showTimeFiltersDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showTimeFiltersDropdown]);
+
   if (!isClient) {
     return (
       <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -969,7 +1074,7 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
   }
 
   return (
-    <div className="relative">
+    <div className={`relative ${isFullscreen ? 'fixed inset-0 z-[9999] bg-white' : ''}`}>
       {/* Mobile: Alle Bedienelemente in einer Karte */}
       <div className="block sm:hidden mb-3 mx-4">
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-md space-y-4">
@@ -989,6 +1094,94 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
                 <option value="Vereinsveranstaltung">{t('eventTypes.Vereinsveranstaltung')}</option>
                 <option value="Sonstiges">{t('eventTypes.Sonstiges')}</option>
               </select>
+            </div>
+          )}
+
+          {/* Mobile: Zeitfilter unter Event-Typen - nur wenn showTimeFilters=true */}
+          {showTimeFilters && onDateFromChange && (
+            <div>
+              <button
+                onClick={() => setShowTimeFiltersDropdown(!showTimeFiltersDropdown)}
+                className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
+                  hasActiveTimeFilters
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <Filter className="h-4 w-4" />
+                <span>{t('timeFilter')}</span>
+                {hasActiveTimeFilters && (
+                  <span className="ml-1 bg-white text-blue-600 rounded-full px-2 py-0.5 text-xs font-semibold">
+                    {[dateFrom, dateTo, timeFrom, timeTo].filter(Boolean).length}
+                  </span>
+                )}
+              </button>
+
+              {showTimeFiltersDropdown && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <Calendar className="inline h-3 w-3 mr-1" />
+                        {t('fromDate')}
+                      </label>
+                      <input
+                        type="date"
+                        value={dateFrom || ''}
+                        onChange={(e) => onDateFromChange(e.target.value)}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <Calendar className="inline h-3 w-3 mr-1" />
+                        {t('toDate')}
+                      </label>
+                      <input
+                        type="date"
+                        value={dateTo || ''}
+                        onChange={(e) => onDateToChange?.(e.target.value)}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <Clock className="inline h-3 w-3 mr-1" />
+                        {t('fromTime')}
+                      </label>
+                      <input
+                        type="time"
+                        value={timeFrom || ''}
+                        onChange={(e) => onTimeFromChange?.(e.target.value)}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <Clock className="inline h-3 w-3 mr-1" />
+                        {t('toTime')}
+                      </label>
+                      <input
+                        type="time"
+                        value={timeTo || ''}
+                        onChange={(e) => onTimeToChange?.(e.target.value)}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                  {hasActiveTimeFilters && onClearTimeFilters && (
+                    <button
+                      onClick={onClearTimeFilters}
+                      className="w-full flex items-center justify-center space-x-1 px-3 py-1.5 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                      <span>{t('clearAllFilters')}</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -1071,6 +1264,117 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
           </div>
         )}
       </div>
+
+      {/* Desktop: Event-Typen und Zeitfilter - oben links */}
+      {onEventTypeChange && (
+        <div className="hidden sm:flex absolute top-4 left-4 z-[1000] gap-2">
+          <select
+            value={eventType}
+            onChange={(e) => onEventTypeChange(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white/95 backdrop-blur shadow-md"
+          >
+            <option value="">{t('allEventTypes')}</option>
+            <option value="Flugtag">{t('eventTypes.Flugtag')}</option>
+            <option value="Messe">{t('eventTypes.Messe')}</option>
+            <option value="Fly-In">{t('eventTypes.Fly-In')}</option>
+            <option value="Workshop">{t('eventTypes.Workshop')}</option>
+            <option value="Vereinsveranstaltung">{t('eventTypes.Vereinsveranstaltung')}</option>
+            <option value="Sonstiges">{t('eventTypes.Sonstiges')}</option>
+          </select>
+          
+          {/* Desktop: Zeitfilter-Button links neben Event-Typen - nur wenn showTimeFilters=true */}
+          {showTimeFilters && onDateFromChange && (
+            <div className="relative" ref={timeFilterRef}>
+              <button
+                onClick={() => setShowTimeFiltersDropdown(!showTimeFiltersDropdown)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg border shadow-md transition-colors ${
+                  hasActiveTimeFilters
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white/95 backdrop-blur text-gray-700 border-gray-300 hover:bg-white'
+                }`}
+              >
+                <Filter className="h-4 w-4" />
+                <span>{t('timeFilter')}</span>
+                {hasActiveTimeFilters && (
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    hasActiveTimeFilters ? 'bg-white text-blue-600' : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {[dateFrom, dateTo, timeFrom, timeTo].filter(Boolean).length}
+                  </span>
+                )}
+              </button>
+
+              {showTimeFiltersDropdown && (
+                <div className="absolute top-full left-0 mt-2 w-80 bg-white/95 backdrop-blur rounded-lg border border-gray-200 shadow-lg p-4 z-[1001]">
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          <Calendar className="inline h-3 w-3 mr-1" />
+                          {t('fromDate')}
+                        </label>
+                        <input
+                          type="date"
+                          value={dateFrom || ''}
+                          onChange={(e) => onDateFromChange(e.target.value)}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          <Calendar className="inline h-3 w-3 mr-1" />
+                          {t('toDate')}
+                        </label>
+                        <input
+                          type="date"
+                          value={dateTo || ''}
+                          onChange={(e) => onDateToChange?.(e.target.value)}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          <Clock className="inline h-3 w-3 mr-1" />
+                          {t('fromTime')}
+                        </label>
+                        <input
+                          type="time"
+                          value={timeFrom || ''}
+                          onChange={(e) => onTimeFromChange?.(e.target.value)}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          <Clock className="inline h-3 w-3 mr-1" />
+                          {t('toTime')}
+                        </label>
+                        <input
+                          type="time"
+                          value={timeTo || ''}
+                          onChange={(e) => onTimeToChange?.(e.target.value)}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+                    {hasActiveTimeFilters && onClearTimeFilters && (
+                      <button
+                        onClick={onClearTimeFilters}
+                        className="w-full flex items-center justify-center space-x-1 px-3 py-1.5 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200 transition-colors"
+                      >
+                        <X className="h-3 w-3" />
+                        <span>{t('clearAllFilters')}</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Desktop: Standort / Suche - absolut positioniert */}
       <div className="hidden sm:block absolute top-4 right-4 w-full max-w-sm md:max-w-xs z-[1000] flex flex-col gap-3">
@@ -1157,8 +1461,23 @@ export default function EventsMap({ events, selectedEventType = '', eventType = 
         </div> */}
       </div>
 
+      {/* Desktop: Vollbild-Button unten links */}
+      {showFullscreen && !isSmallScreen && (
+        <button
+          onClick={toggleFullscreen}
+          className="hidden sm:flex absolute bottom-4 left-4 z-[1000] items-center justify-center w-12 h-12 bg-white/95 backdrop-blur rounded-lg border border-gray-200 shadow-md hover:bg-white transition-colors"
+          title={isFullscreen ? 'Vollbild beenden' : 'Vollbild'}
+        >
+          {isFullscreen ? (
+            <Minimize2 className="h-5 w-5 text-gray-700" />
+          ) : (
+            <Maximize2 className="h-5 w-5 text-gray-700" />
+          )}
+        </button>
+      )}
+
       {/* Karte */}
-      <div className="h-[calc(100vh-16rem)] sm:h-[calc(100vh-12rem)] w-full rounded-none sm:rounded-lg overflow-hidden border border-gray-200 relative">
+      <div className={`${isFullscreen ? 'h-screen' : 'h-[calc(100vh-16rem)] sm:h-[calc(100vh-12rem)]'} w-full rounded-none sm:rounded-lg overflow-hidden border border-gray-200 relative`}>
         <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }}></div>
         
         {/* Erfolgsmeldung in der Karte */}

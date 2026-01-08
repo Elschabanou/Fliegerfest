@@ -8,6 +8,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { Calendar, MapPin, Clock, Euro, User, Mail, Phone, Globe, Edit, Trash2, ArrowLeft, Share2 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations, useLocale } from 'next-intl';
+import EventLocationMap from '@/components/EventLocationMap';
 
 interface Event {
   _id: string;
@@ -302,10 +303,20 @@ export default function EventDetailPage() {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h3 className="font-semibold text-[#021234] mb-3">{t('location')}</h3>
                     <div className="space-y-3">
-                      <div className="flex items-center text-gray-700">
-                        <MapPin className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
-                        <span>{event.location || event.name}</span>
-                      </div>
+                      {event.lat && event.lon && event.lat.trim() !== '' && event.lon.trim() !== '' ? (
+                        <button
+                          onClick={() => router.push(`/events/map?eventId=${event._id}`)}
+                          className="flex items-center text-gray-700 hover:text-blue-600 transition-colors w-full text-left group"
+                        >
+                          <MapPin className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                          <span className="group-hover:underline">{event.location || event.name}</span>
+                        </button>
+                      ) : (
+                        <div className="flex items-center text-gray-700">
+                          <MapPin className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
+                          <span>{event.location || event.name}</span>
+                        </div>
+                      )}
                       {event.address && (
                         <p className="text-gray-600 text-sm ml-8">{event.address}</p>
                       )}
@@ -315,6 +326,17 @@ export default function EventDetailPage() {
                     </div>
                   </div>
                 </div>
+
+                {event.lat && event.lon && event.lat.trim() !== '' && event.lon.trim() !== '' && (
+                  <div className="mb-8">
+                    <EventLocationMap
+                      lat={event.lat}
+                      lon={event.lon}
+                      locationName={event.location || event.name}
+                      eventId={event._id}
+                    />
+                  </div>
+                )}
 
                 {event.tags && event.tags.length > 0 && (
                   <div className="mb-8">
