@@ -133,57 +133,111 @@ export default function EventsMap({
 
     setIsLoadingLocation(true);
     setLocationError(null);
+    setShowLocationFound(false);
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        try {
-          const newLocation = {
-            lat: position.coords.latitude,
-            lon: position.coords.longitude
-          };
-          setUserLocation(newLocation);
-          setIsLoadingLocation(false);
-          setShowLocationFound(true);
-          
-          // Karte zum Benutzerstandort bewegen
-          if (mapRef.current && leafletRef.current && isMapInitialized) {
-            try {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const currentZoom = (mapRef.current as any).getZoom ? (mapRef.current as any).getZoom() : 7;
-              // Verwende aktuellen Zoom oder mindestens 7 für besseren Überblick
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (mapRef.current as any).setView([newLocation.lat, newLocation.lon], Math.max(currentZoom || 7, 7));
-              updateMarkers();
-            } catch (error) {
-              console.warn('Fehler beim Bewegen der Karte zum Standort:', error);
-            }
-          }
-        } catch (error) {
-          console.error('Fehler beim Setzen des Benutzerstandorts:', error);
-          setLocationError('Fehler beim Verarbeiten des Standorts');
-          setIsLoadingLocation(false);
-        }
-      },
-      (error) => {
-        let errorMessage = 'Standort konnte nicht abgerufen werden';
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Standortzugriff wurde verweigert';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Standortinformationen sind nicht verfügbar';
-            break;
-          case error.TIMEOUT:
-            errorMessage = 'Zeitüberschreitung beim Abrufen des Standorts';
-            break;
-        }
-        setLocationError(errorMessage);
+    // Eigener Timeout-Wrapper für bessere Kontrolle
+    let timeoutId: NodeJS.Timeout | null = null;
+    let hasResponded = false;
+
+    const cleanup = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+    };
+
+    const handleSuccess = (position: GeolocationPosition) => {
+      if (hasResponded) return;
+      hasResponded = true;
+      cleanup();
+
+      try {
+        const newLocation = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude
+        };
+        setUserLocation(newLocation);
         setIsLoadingLocation(false);
-      },
+        setShowLocationFound(true);
+        
+        // Karte zum Benutzerstandort bewegen
+        if (mapRef.current && leafletRef.current && isMapInitialized) {
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const currentZoom = (mapRef.current as any).getZoom ? (mapRef.current as any).getZoom() : 7;
+            // Verwende aktuellen Zoom oder mindestens 7 für besseren Überblick
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (mapRef.current as any).setView([newLocation.lat, newLocation.lon], Math.max(currentZoom || 7, 7));
+            updateMarkers();
+          } catch (error) {
+            console.warn('Fehler beim Bewegen der Karte zum Standort:', error);
+          }
+        }
+      } catch (error) {
+        console.error('Fehler beim Setzen des Benutzerstandorts:', error);
+        setLocationError('Fehler beim Verarbeiten des Standorts');
+        setIsLoadingLocation(false);
+      }
+    };
+
+    const handleError = (error: GeolocationPositionError, isRetry: boolean = false) => {
+      if (hasResponded) return;
+      
+      // Bei Timeout oder POSITION_UNAVAILABLE, versuche es mit niedrigerer Genauigkeit (nur beim ersten Versuch)
+      if (!isRetry && (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE)) {
+        // Starte zweiten Versuch mit niedrigerer Genauigkeit
+        navigator.geolocation.getCurrentPosition(
+          handleSuccess,
+          (retryError) => handleError(retryError, true),
+          {
+            enableHighAccuracy: false, // Niedrigere Genauigkeit für schnellere Antwort
+            timeout: 8000, // 8 Sekunden
+            maximumAge: 60000 // Erlaube Positionen bis zu 1 Minute alt
+          }
+        );
+        return; // Warte auf zweiten Versuch
+      }
+
+      // Finale Fehlerbehandlung
+      hasResponded = true;
+      cleanup();
+
+      let errorMessage = 'Standort konnte nicht abgerufen werden';
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage = 'Standortzugriff wurde verweigert. Bitte erlauben Sie den Zugriff in Ihren Browser-Einstellungen.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage = 'Standortinformationen sind nicht verfügbar. Bitte versuchen Sie es später erneut.';
+          break;
+        case error.TIMEOUT:
+          errorMessage = 'Zeitüberschreitung beim Abrufen des Standorts. Bitte versuchen Sie es erneut oder verwenden Sie die manuelle Standortsuche.';
+          break;
+        default:
+          errorMessage = 'Standort konnte nicht abgerufen werden';
+      }
+      setLocationError(errorMessage);
+      setIsLoadingLocation(false);
+    };
+
+    // Eigener Timeout als absoluter Fallback (15 Sekunden gesamt)
+    timeoutId = setTimeout(() => {
+      if (!hasResponded) {
+        hasResponded = true;
+        cleanup();
+        setLocationError('Zeitüberschreitung beim Abrufen des Standorts. Bitte versuchen Sie es erneut oder verwenden Sie die manuelle Standortsuche.');
+        setIsLoadingLocation(false);
+      }
+    }, 15000); // 15 Sekunden Gesamt-Timeout
+
+    // Zuerst mit hoher Genauigkeit versuchen (aber mit kürzerem Timeout)
+    navigator.geolocation.getCurrentPosition(
+      handleSuccess,
+      (error) => handleError(error, false),
       {
         enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 0 // keine Caches, genauere Position
+        timeout: 10000, // 10 Sekunden für ersten Versuch
+        maximumAge: 30000 // Erlaube Positionen bis zu 30 Sekunden alt als Fallback
       }
     );
   };
