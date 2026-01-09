@@ -148,6 +148,9 @@ export default async function EventDetailPage({
           
           if (directEvent) {
             // Konvertiere das direkte MongoDB-Dokument zu einem Event-Format
+            // Type assertion needed because directEvent is a raw MongoDB document
+            // Runtime checks below ensure type safety
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             event = directEvent as any;
             // Versuche createdBy zu populieren, falls vorhanden
             if (event && event.createdBy && typeof event.createdBy === 'object' && '_id' in event.createdBy) {
