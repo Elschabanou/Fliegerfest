@@ -65,9 +65,8 @@ export default function SignInPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <Link href="/" className="flex items-center justify-center space-x-2 mb-6">
+          <Link href="/" className="flex items-center justify-center mb-6">
             <Calendar className="h-10 w-10 text-blue-600" />
-            <span className="text-2xl font-bold text-[#021234]">Fliegerevents</span>
           </Link>
           <h2 className="text-3xl font-bold text-[#021234]">{t('title')}</h2>
           <p className="mt-2 text-gray-600">
