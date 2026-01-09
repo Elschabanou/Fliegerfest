@@ -158,7 +158,8 @@ export default async function EventDetailPage({
                 const userId = (event.createdBy as { _id: unknown })._id;
                 const user = await User.findById(userId).lean();
                 if (user) {
-                  (event as { createdBy: { _id: string; name: string; email: string } }).createdBy = {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (event as any).createdBy = {
                     _id: user._id.toString(),
                     name: (user as { name?: string }).name || '',
                     email: (user as { email?: string }).email || '',
@@ -167,7 +168,8 @@ export default async function EventDetailPage({
               } catch (userError) {
                 console.error('Fehler beim Laden des Users:', userError);
                 // Setze createdBy auf undefined, wenn User nicht geladen werden kann
-                (event as { createdBy?: unknown }).createdBy = undefined;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (event as any).createdBy = undefined;
               }
             }
           }
