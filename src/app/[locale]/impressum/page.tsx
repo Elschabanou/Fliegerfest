@@ -26,7 +26,7 @@ export default function ImpressumPage() {
             <section>
               <h2 className="text-xl font-semibold text-[#021234] mb-3">{t('contact')}</h2>
               <div className="space-y-2">
-                <p><strong>{t('phone')}:</strong> +49 (0) 170 23266609</p>
+                <p><strong>{t('phone')}:</strong> +49 (0) 170 2326609</p>
                 <p><strong>{t('email')}:</strong> felix@schabana.de</p>
               </div>
             </section>

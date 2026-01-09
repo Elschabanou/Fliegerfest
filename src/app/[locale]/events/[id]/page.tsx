@@ -4,6 +4,45 @@ import connectDB from '@/lib/mongodb';
 import Event from '@/models/Event';
 import EventDetailClient from './EventDetailClient';
 
+interface PopulatedCreatedBy {
+  _id: string | { toString(): string };
+  name?: string;
+  email?: string;
+}
+
+interface EventData {
+  _id: string;
+  name: string;
+  title?: string;
+  description: string;
+  location?: string;
+  address?: string;
+  lat: string;
+  lon: string;
+  icao: string;
+  imageurl: string;
+  date: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
+  allDay?: boolean;
+  multiDay?: boolean;
+  eventType?: string;
+  organizer?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  website?: string;
+  entryFee?: number;
+  maxParticipants?: number;
+  registrationRequired?: boolean;
+  tags?: string[];
+  createdBy?: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+}
+
 export async function generateMetadata({ 
   params 
 }: { 
@@ -100,23 +139,45 @@ export default async function EventDetailPage({
 
     // Event-Daten in JSON-Format für Client-Komponente
     // Konvertiere Date-Objekte zu Strings für Client-Side
-    const eventData = {
-      ...event,
+    const populatedCreatedBy = event.createdBy as PopulatedCreatedBy | null | undefined;
+    const eventData: EventData = {
       _id: event._id.toString(),
+      name: event.name || event.title || '',
+      title: event.title,
+      description: event.description || '',
+      location: event.location,
+      address: event.address,
+      lat: event.lat || '',
+      lon: event.lon || '',
+      icao: event.icao || '',
+      imageurl: event.imageurl || '',
       date: event.date ? new Date(event.date).toISOString() : '',
       endDate: event.endDate ? new Date(event.endDate).toISOString() : undefined,
-      createdAt: event.createdAt ? new Date(event.createdAt).toISOString() : undefined,
-      updatedAt: event.updatedAt ? new Date(event.updatedAt).toISOString() : undefined,
-      createdBy: event.createdBy && typeof event.createdBy === 'object' && '_id' in event.createdBy
+      startTime: event.startTime,
+      endTime: event.endTime,
+      allDay: event.allDay,
+      multiDay: event.multiDay,
+      eventType: event.eventType,
+      organizer: event.organizer,
+      contactEmail: event.contactEmail,
+      contactPhone: event.contactPhone,
+      website: event.website,
+      entryFee: event.entryFee,
+      maxParticipants: event.maxParticipants,
+      registrationRequired: event.registrationRequired,
+      tags: event.tags,
+      createdBy: populatedCreatedBy && typeof populatedCreatedBy === 'object' && '_id' in populatedCreatedBy
         ? {
-            _id: event.createdBy._id.toString(),
-            name: (event.createdBy as any).name || '',
-            email: (event.createdBy as any).email || '',
+            _id: typeof populatedCreatedBy._id === 'string' 
+              ? populatedCreatedBy._id 
+              : populatedCreatedBy._id.toString(),
+            name: populatedCreatedBy.name || '',
+            email: populatedCreatedBy.email || '',
           }
         : undefined,
     };
     
-    return <EventDetailClient eventData={eventData as any} />;
+    return <EventDetailClient eventData={eventData} />;
   } catch (error) {
     console.error('Fehler beim Laden des Events:', error);
     notFound();
