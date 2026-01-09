@@ -160,7 +160,7 @@ export default async function EventDetailPage({
                 if (user) {
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   (event as any).createdBy = {
-                    _id: user._id.toString(),
+                    _id: (user as { _id: { toString(): string } })._id.toString(),
                     name: (user as { name?: string }).name || '',
                     email: (user as { email?: string }).email || '',
                   };
