@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from '@/i18n/routing';
 import { Link } from '@/i18n/routing';
@@ -8,6 +8,7 @@ import { ArrowLeft, MapPin, Loader, Upload, X, Image as ImageIcon } from 'lucide
 import { geocodeLocation, isGeocodingSuccess } from '@/lib/geocoding';
 import { useTranslations, useLocale } from 'next-intl';
 import Lottie from 'lottie-react';
+import CoordinateMapPicker from '@/components/CoordinateMapPicker';
 
 export default function CreateEventPage() {
   const t = useTranslations('create');
@@ -48,8 +49,11 @@ export default function CreateEventPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [geocoding, setGeocoding] = useState(false);
   const [geocodingSuccess, setGeocodingSuccess] = useState<string | null>(null);
+  const [geocodingFailed, setGeocodingFailed] = useState(false);
   const [showAnimation, setShowAnimation] = useState(false);
   const [animationData, setAnimationData] = useState<object | null>(null);
+  const [showMapPicker, setShowMapPicker] = useState(false);
+  const geocodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -147,10 +151,24 @@ export default function CreateEventPage() {
       }
     }
     
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      };
+      
+      // Wenn lat oder lon manuell eingegeben werden und beide vorhanden sind, verstecke die Karte
+      if ((name === 'lat' || name === 'lon') && value.trim()) {
+        const latValue = name === 'lat' ? value : newData.lat;
+        const lonValue = name === 'lon' ? value : newData.lon;
+        if (latValue.trim() && lonValue.trim()) {
+          setGeocodingFailed(false);
+          setShowMapPicker(false);
+        }
+      }
+      
+      return newData;
+    });
   };
 
   const handleDailyTimeChange = (date: string, field: 'startTime' | 'endTime', value: string) => {
@@ -189,16 +207,18 @@ export default function CreateEventPage() {
     document.getElementById('image')?.click();
   };
 
-  const handleGeocode = async () => {
-    const locationQuery = formData.location || formData.address;
+  const performGeocode = useCallback(async (locationQuery: string) => {
     if (!locationQuery.trim()) {
-      setError(t('locationRequired'));
+      setGeocodingFailed(false);
+      setShowMapPicker(false);
       return;
     }
 
     setGeocoding(true);
     setError('');
     setGeocodingSuccess(null);
+    setGeocodingFailed(false);
+    setShowMapPicker(false);
 
     try {
       const result = await geocodeLocation(locationQuery);
@@ -210,14 +230,57 @@ export default function CreateEventPage() {
           lon: result.lon
         }));
         setGeocodingSuccess(t('geocodeSuccess', { name: result.display_name }));
+        setGeocodingFailed(false);
+        setShowMapPicker(false);
       } else {
+        setGeocodingFailed(true);
+        setShowMapPicker(true);
         setError(result.error);
       }
     } catch {
+      setGeocodingFailed(true);
+      setShowMapPicker(true);
       setError(t('geocodeError'));
     } finally {
       setGeocoding(false);
     }
+  }, [t]);
+
+  // Automatisches Geocoding beim Eingeben von Adresse/Location (mit Debouncing)
+  useEffect(() => {
+    // Clear previous timeout
+    if (geocodeTimeoutRef.current) {
+      clearTimeout(geocodeTimeoutRef.current);
+    }
+
+    const locationQuery = formData.location || formData.address;
+    
+    // Nur geocoden, wenn etwas eingegeben wurde und noch keine Koordinaten vorhanden sind
+    if (locationQuery.trim() && (!formData.lat || !formData.lon)) {
+      geocodeTimeoutRef.current = setTimeout(() => {
+        performGeocode(locationQuery);
+      }, 1000); // 1 Sekunde Debounce
+    } else if (!locationQuery.trim()) {
+      // Wenn Feld geleert wird, Koordinaten und Status zurücksetzen
+      setGeocodingFailed(false);
+      setShowMapPicker(false);
+      setGeocodingSuccess(null);
+    }
+
+    return () => {
+      if (geocodeTimeoutRef.current) {
+        clearTimeout(geocodeTimeoutRef.current);
+      }
+    };
+  }, [formData.location, formData.address, formData.lat, formData.lon, performGeocode]);
+
+  const handleGeocode = async () => {
+    const locationQuery = formData.location || formData.address;
+    if (!locationQuery.trim()) {
+      setError(t('locationRequired'));
+      return;
+    }
+    await performGeocode(locationQuery);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -540,64 +603,76 @@ export default function CreateEventPage() {
               </div>
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-blue-900">{t('geocodeTitle')}</h3>
-                <button
-                  type="button"
-                  onClick={handleGeocode}
-                  disabled={geocoding || (!formData.location && !formData.address)}
-                  className="flex items-center space-x-2 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {geocoding ? (
-                    <Loader className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <MapPin className="h-4 w-4" />
-                  )}
-                  <span>{geocoding ? t('geocoding') : t('geocode')}</span>
-                </button>
+            {(geocodingSuccess || geocodingFailed) && (
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="mb-3">
+                  <h3 className="text-sm font-medium text-blue-900">{t('geocodeTitle')}</h3>
+                </div>
+                
+                {geocoding && (
+                  <div className="mb-3 p-2 bg-blue-100 text-blue-800 rounded text-sm">
+                    <Loader className="h-4 w-4 animate-spin inline mr-2" />
+                    {t('geocoding')}...
+                  </div>
+                )}
+                
+                {geocodingSuccess && (
+                  <div className="mb-3 p-2 bg-green-100 text-green-800 rounded text-sm">
+                    ✅ {geocodingSuccess}
+                  </div>
+                )}
+                
+                {geocodingFailed && showMapPicker && (
+                  <div className="mb-4">
+                    <CoordinateMapPicker
+                      lat={formData.lat}
+                      lon={formData.lon}
+                      onCoordinateChange={(lat, lon) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          lat: lat.toString(),
+                          lon: lon.toString()
+                        }));
+                      }}
+                    />
+                  </div>
+                )}
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="lat" className="block text-xs font-medium text-gray-600 mb-1">
+                      {t('latitude')}
+                    </label>
+                    <input
+                      type="text"
+                      id="lat"
+                      name="lat"
+                      value={formData.lat}
+                      onChange={handleChange}
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                      placeholder={t('latitudePlaceholder')}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="lon" className="block text-xs font-medium text-gray-600 mb-1">
+                      {t('longitude')}
+                    </label>
+                    <input
+                      type="text"
+                      id="lon"
+                      name="lon"
+                      value={formData.lon}
+                      onChange={handleChange}
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                      placeholder={t('longitudePlaceholder')}
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600 mt-2">
+                  {t('geocodeHint')}
+                </p>
               </div>
-              
-              {geocodingSuccess && (
-                <div className="mb-3 p-2 bg-green-100 text-green-800 rounded text-sm">
-                  ✅ {geocodingSuccess}
-                </div>
-              )}
-              
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="lat" className="block text-xs font-medium text-gray-600 mb-1">
-                    {t('latitude')}
-                  </label>
-                  <input
-                    type="text"
-                    id="lat"
-                    name="lat"
-                    value={formData.lat}
-                    onChange={handleChange}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                    placeholder={t('latitudePlaceholder')}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="lon" className="block text-xs font-medium text-gray-600 mb-1">
-                    {t('longitude')}
-                  </label>
-                  <input
-                    type="text"
-                    id="lon"
-                    name="lon"
-                    value={formData.lon}
-                    onChange={handleChange}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                    placeholder={t('longitudePlaceholder')}
-                  />
-                </div>
-              </div>
-              <p className="text-xs text-gray-600 mt-2">
-                {t('geocodeHint')}
-              </p>
-            </div>
+            )}
 
             <div className="space-y-4">
               <div>

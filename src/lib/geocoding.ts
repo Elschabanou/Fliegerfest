@@ -17,13 +17,14 @@ export interface GeocodingError {
 
 /**
  * Geocode a location string to coordinates using Nominatim API
- * @param query - Location name or address (e.g., "Friedrichshafen", "Berlin, Germany")
- * @param countryCode - Optional country code to limit results (e.g., "de" for Germany)
+ * @param query - Location name or address (e.g., "Friedrichshafen", "Vienna, Austria")
+ * @param countryCode - Optional country code(s) to limit results. If not specified, searches in European countries.
+ *                      Can be a single code (e.g., "de") or multiple codes (e.g., "de,at,ch")
  * @returns Promise with coordinates or error
  */
 export async function geocodeLocation(
   query: string, 
-  countryCode: string = 'de'
+  countryCode?: string
 ): Promise<GeocodingResult | GeocodingError> {
   if (!query || query.trim().length === 0) {
     return { error: 'Bitte geben Sie einen Ort ein' };
@@ -31,9 +32,18 @@ export async function geocodeLocation(
 
   try {
     const encodedQuery = encodeURIComponent(query.trim());
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodedQuery}&format=json&limit=1&countrycodes=${countryCode}&addressdetails=1`;
     
-    const response = await fetch(url, {
+    // Wenn kein countryCode angegeben, zuerst mit europäischen Ländern suchen
+    // Länder: DE, AT, CH, FR, IT, ES, PL, CZ, DK, BE, NL, LU, SE, NO, FI, PT, GR, HU, RO, BG, HR, SI, SK, EE, LV, LT, IE, IS
+    const defaultEuropeanCountries = 'de,at,ch,fr,it,es,pl,cz,dk,be,nl,lu,se,no,fi,pt,gr,hu,ro,bg,hr,si,sk,ee,lv,lt,ie,is';
+    const countryParam = countryCode || defaultEuropeanCountries;
+    
+    // Erste Suche: Mit Länderbeschränkung (wenn kein expliziter countryCode angegeben)
+    let url = countryCode 
+      ? `https://nominatim.openstreetmap.org/search?q=${encodedQuery}&format=json&limit=1&countrycodes=${countryCode}&addressdetails=1`
+      : `https://nominatim.openstreetmap.org/search?q=${encodedQuery}&format=json&limit=1&countrycodes=${defaultEuropeanCountries}&addressdetails=1`;
+    
+    let response = await fetch(url, {
       headers: {
         'User-Agent': 'Fliegerevents App (contact: admin@fliegerevents.de)'
       }
@@ -43,7 +53,25 @@ export async function geocodeLocation(
       return { error: `API-Fehler: ${response.status}` };
     }
 
-    const data = await response.json();
+    let data = await response.json();
+    
+    // Wenn nichts gefunden wurde und kein expliziter countryCode angegeben war,
+    // versuche es ohne Länderbeschränkung (Fallback für spezifische Adressen)
+    if ((!data || data.length === 0) && !countryCode) {
+      url = `https://nominatim.openstreetmap.org/search?q=${encodedQuery}&format=json&limit=1&addressdetails=1`;
+      
+      response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Fliegerevents App (contact: admin@fliegerevents.de)'
+        }
+      });
+
+      if (!response.ok) {
+        return { error: `API-Fehler: ${response.status}` };
+      }
+
+      data = await response.json();
+    }
     
     if (!data || data.length === 0) {
       return { error: `Ort "${query}" nicht gefunden` };

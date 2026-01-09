@@ -792,7 +792,7 @@ export default function EventsMap({
     setIsGeocoding(true);
     setGeocodingError(null);
     try {
-      const result = await geocodeLocation(customQuery, 'de');
+      const result = await geocodeLocation(customQuery);
       if (isGeocodingSuccess(result)) {
         const loc = { lat: parseFloat(result.lat), lon: parseFloat(result.lon) };
         setCustomLocation(loc);

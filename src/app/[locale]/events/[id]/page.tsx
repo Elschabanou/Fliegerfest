@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import connectDB from '@/lib/mongodb';
 import Event from '@/models/Event';
+import User from '@/models/User';
 import EventDetailClient from './EventDetailClient';
 
 interface PopulatedCreatedBy {
@@ -131,41 +132,99 @@ export default async function EventDetailPage({
   
   try {
     await connectDB();
-    const event = await Event.findById(id).populate('createdBy', 'name email').lean();
     
+    // Versuche zuerst mit Mongoose
+    let event = await Event.findById(id).populate('createdBy', 'name email').lean();
+    
+    // Falls nicht gefunden, versuche mit direkter MongoDB Collection (wie in der API-Route)
     if (!event) {
+      const mongoose = await import('mongoose');
+      if (mongoose.connection.db) {
+        try {
+          const eventsCollection = mongoose.connection.db.collection('events');
+          const directEvent = await eventsCollection.findOne({ 
+            _id: new mongoose.Types.ObjectId(id) 
+          });
+          
+          if (directEvent) {
+            // Konvertiere das direkte MongoDB-Dokument zu einem Event-Format
+            event = directEvent as typeof event;
+            // Versuche createdBy zu populieren, falls vorhanden
+            if (event && event.createdBy && typeof event.createdBy === 'object' && '_id' in event.createdBy) {
+              try {
+                const userId = (event.createdBy as { _id: unknown })._id;
+                const user = await User.findById(userId).lean();
+                if (user) {
+                  (event as { createdBy: { _id: string; name: string; email: string } }).createdBy = {
+                    _id: user._id.toString(),
+                    name: (user as { name?: string }).name || '',
+                    email: (user as { email?: string }).email || '',
+                  };
+                }
+              } catch (userError) {
+                console.error('Fehler beim Laden des Users:', userError);
+                // Setze createdBy auf undefined, wenn User nicht geladen werden kann
+                (event as { createdBy?: unknown }).createdBy = undefined;
+              }
+            }
+          }
+        } catch (mongoError) {
+          console.error('Fehler beim direkten MongoDB-Zugriff:', mongoError);
+        }
+      }
+  }
+
+  if (!event) {
+      console.error('Event nicht gefunden für ID:', id);
       notFound();
     }
 
     // Event-Daten in JSON-Format für Client-Komponente
     // Konvertiere Date-Objekte zu Strings für Client-Side
     const populatedCreatedBy = event.createdBy as PopulatedCreatedBy | null | undefined;
+    
+    // Konvertiere Date sicher
+    const convertDate = (date: unknown): string => {
+      if (!date) return '';
+      try {
+        if (date instanceof Date) {
+          return date.toISOString();
+        }
+        if (typeof date === 'string') {
+          return new Date(date).toISOString();
+        }
+        return '';
+      } catch {
+        return '';
+      }
+    };
+    
     const eventData: EventData = {
-      _id: event._id.toString(),
-      name: event.name || event.title || '',
-      title: event.title,
-      description: event.description || '',
-      location: event.location,
-      address: event.address,
-      lat: event.lat || '',
-      lon: event.lon || '',
-      icao: event.icao || '',
-      imageurl: event.imageurl || '',
-      date: event.date ? new Date(event.date).toISOString() : '',
-      endDate: event.endDate ? new Date(event.endDate).toISOString() : undefined,
-      startTime: event.startTime,
-      endTime: event.endTime,
-      allDay: event.allDay,
-      multiDay: event.multiDay,
-      eventType: event.eventType,
-      organizer: event.organizer,
-      contactEmail: event.contactEmail,
-      contactPhone: event.contactPhone,
-      website: event.website,
-      entryFee: event.entryFee,
-      maxParticipants: event.maxParticipants,
-      registrationRequired: event.registrationRequired,
-      tags: event.tags,
+      _id: event._id ? event._id.toString() : '',
+      name: (event.name || event.title || '') as string,
+      title: event.title as string | undefined,
+      description: (event.description || '') as string,
+      location: event.location as string | undefined,
+      address: event.address as string | undefined,
+      lat: (event.lat || '') as string,
+      lon: (event.lon || '') as string,
+      icao: (event.icao || '') as string,
+      imageurl: (event.imageurl || '') as string,
+      date: convertDate(event.date),
+      endDate: event.endDate ? convertDate(event.endDate) : undefined,
+      startTime: event.startTime as string | undefined,
+      endTime: event.endTime as string | undefined,
+      allDay: event.allDay as boolean | undefined,
+      multiDay: event.multiDay as boolean | undefined,
+      eventType: event.eventType as string | undefined,
+      organizer: event.organizer as string | undefined,
+      contactEmail: event.contactEmail as string | undefined,
+      contactPhone: event.contactPhone as string | undefined,
+      website: event.website as string | undefined,
+      entryFee: event.entryFee as number | undefined,
+      maxParticipants: event.maxParticipants as number | undefined,
+      registrationRequired: event.registrationRequired as boolean | undefined,
+      tags: event.tags as string[] | undefined,
       createdBy: populatedCreatedBy && typeof populatedCreatedBy === 'object' && '_id' in populatedCreatedBy
         ? {
             _id: typeof populatedCreatedBy._id === 'string' 
@@ -180,6 +239,8 @@ export default async function EventDetailPage({
     return <EventDetailClient eventData={eventData} />;
   } catch (error) {
     console.error('Fehler beim Laden des Events:', error);
+    console.error('Event ID:', id);
+    console.error('Error details:', error instanceof Error ? error.message : String(error));
     notFound();
   }
 }
