@@ -148,7 +148,7 @@ export default async function EventDetailPage({
           
           if (directEvent) {
             // Konvertiere das direkte MongoDB-Dokument zu einem Event-Format
-            event = directEvent as unknown as typeof event;
+            event = directEvent as any;
             // Versuche createdBy zu populieren, falls vorhanden
             if (event && event.createdBy && typeof event.createdBy === 'object' && '_id' in event.createdBy) {
               try {
