@@ -488,6 +488,7 @@ export default function EditEventPage() {
                   <option value="Fly-In">{tEvents('eventTypes.Fly-In')}</option>
                   <option value="Workshop">{tEvents('eventTypes.Workshop')}</option>
                   <option value="Vereinsveranstaltung">{tEvents('eventTypes.Vereinsveranstaltung')}</option>
+                  <option value="Flugplatzfest">{tEvents('eventTypes.Flugplatzfest')}</option>
                   <option value="Sonstiges">{tEvents('eventTypes.Sonstiges')}</option>
                 </select>
               </div>

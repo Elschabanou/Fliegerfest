@@ -591,6 +591,9 @@ export default function CreateEventPage() {
                   <option value="Vereinsveranstaltung">
                     {tEvents("eventTypes.Vereinsveranstaltung")}
                   </option>
+                  <option value="Flugplatzfest">
+                    {tEvents("eventTypes.Flugplatzfest")}
+                  </option>
                   <option value="Sonstiges">
                     {tEvents("eventTypes.Sonstiges")}
                   </option>

@@ -1146,6 +1146,7 @@ export default function EventsMap({
                 <option value="Fly-In">{t('eventTypes.Fly-In')}</option>
                 <option value="Workshop">{t('eventTypes.Workshop')}</option>
                 <option value="Vereinsveranstaltung">{t('eventTypes.Vereinsveranstaltung')}</option>
+                <option value="Flugplatzfest">{t('eventTypes.Flugplatzfest')}</option>
                 <option value="Sonstiges">{t('eventTypes.Sonstiges')}</option>
               </select>
             </div>
@@ -1333,6 +1334,7 @@ export default function EventsMap({
             <option value="Fly-In">{t('eventTypes.Fly-In')}</option>
             <option value="Workshop">{t('eventTypes.Workshop')}</option>
             <option value="Vereinsveranstaltung">{t('eventTypes.Vereinsveranstaltung')}</option>
+            <option value="Flugplatzfest">{t('eventTypes.Flugplatzfest')}</option>
             <option value="Sonstiges">{t('eventTypes.Sonstiges')}</option>
           </select>
           

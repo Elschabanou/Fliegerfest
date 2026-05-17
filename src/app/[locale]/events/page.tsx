@@ -287,6 +287,7 @@ export default function EventsPage() {
                     <option value="Fly-In">{t('eventTypes.Fly-In')}</option>
                     <option value="Workshop">{t('eventTypes.Workshop')}</option>
                     <option value="Vereinsveranstaltung">{t('eventTypes.Vereinsveranstaltung')}</option>
+                    <option value="Flugplatzfest">{t('eventTypes.Flugplatzfest')}</option>
                     <option value="Sonstiges">{t('eventTypes.Sonstiges')}</option>
                   </select>
                   <div className="flex space-x-2 md:justify-end">
@@ -457,6 +458,7 @@ export default function EventsPage() {
                   <option value="Fly-In">{t('eventTypes.Fly-In')}</option>
                   <option value="Workshop">{t('eventTypes.Workshop')}</option>
                   <option value="Vereinsveranstaltung">{t('eventTypes.Vereinsveranstaltung')}</option>
+                  <option value="Flugplatzfest">{t('eventTypes.Flugplatzfest')}</option>
                   <option value="Sonstiges">{t('eventTypes.Sonstiges')}</option>
                 </select>
               </div>

@@ -23,7 +23,7 @@ export interface IEvent extends Document {
   differentTimesPerDay?: boolean;
   dailyTimes?: Array<{ date: string; startTime: string; endTime: string }>;
   endDate?: Date;
-  eventType?: 'Flugtag' | 'Messe' | 'Fly-In' | 'Workshop' | 'Vereinsveranstaltung' | 'Sonstiges';
+  eventType?: 'Flugtag' | 'Messe' | 'Fly-In' | 'Workshop' | 'Vereinsveranstaltung' | 'Flugplatzfest' | 'Sonstiges';
   organizer?: string;
   contactEmail?: string;
   contactPhone?: string;
@@ -134,7 +134,7 @@ const EventSchema = new Schema<IEvent>({
   },
   eventType: {
     type: String,
-    enum: ['Flugtag', 'Messe', 'Fly-In', 'Workshop', 'Vereinsveranstaltung', 'Sonstiges'],
+    enum: ['Flugtag', 'Messe', 'Fly-In', 'Workshop', 'Vereinsveranstaltung', 'Flugplatzfest', 'Sonstiges'],
     default: 'Sonstiges'
   },
   organizer: {

@@ -158,7 +158,7 @@ export default function EventDetailClient({ eventData: initialEventData }: Event
                   <>
                     <button
                       onClick={() => router.push(`/events/${event._id}/edit`)}
-                      className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-lg transition-colors"
+                      className="bg-white text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition-colors shadow-md"
                       title={t('edit')}
                     >
                       <Edit className="h-5 w-5" />
