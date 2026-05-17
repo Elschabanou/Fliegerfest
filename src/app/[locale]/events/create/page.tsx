@@ -1,52 +1,59 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useAuth } from '@/components/AuthProvider';
-import { useRouter } from '@/i18n/routing';
-import { Link } from '@/i18n/routing';
-import { ArrowLeft, MapPin, Loader, Upload, X, Image as ImageIcon } from 'lucide-react';
-import { geocodeLocation, isGeocodingSuccess } from '@/lib/geocoding';
-import { useTranslations, useLocale } from 'next-intl';
-import Lottie from 'lottie-react';
-import CoordinateMapPicker from '@/components/CoordinateMapPicker';
+import {useState, useEffect, useRef, useCallback} from "react";
+import {useAuth} from "@/components/AuthProvider";
+import {useRouter} from "@/i18n/routing";
+import {Link} from "@/i18n/routing";
+import {
+  ArrowLeft,
+  MapPin,
+  Loader,
+  Upload,
+  X,
+  Image as ImageIcon,
+} from "lucide-react";
+import {geocodeLocation, isGeocodingSuccess} from "@/lib/geocoding";
+import {useTranslations, useLocale} from "next-intl";
+import Lottie from "lottie-react";
+import CoordinateMapPicker from "@/components/CoordinateMapPicker";
 
 export default function CreateEventPage() {
-  const t = useTranslations('create');
-  const tCommon = useTranslations('common');
-  const tEvents = useTranslations('events');
+  const t = useTranslations("create");
+  const tCommon = useTranslations("common");
+  const tEvents = useTranslations("events");
   const locale = useLocale();
-  const { user, loading: authLoading } = useAuth();
+  const {user, loading: authLoading} = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    location: '',
-    street: '',
-    houseNumber: '',
-    postalCode: '',
-    city: '',
-    date: '',
-    endDate: '',
-    startTime: '',
-    endTime: '',
+    title: "",
+    description: "",
+    location: "",
+    street: "",
+    houseNumber: "",
+    postalCode: "",
+    city: "",
+    date: "",
+    endDate: "",
+    startTime: "",
+    endTime: "",
     allDay: false,
     multiDay: false,
     differentTimesPerDay: false,
-    dailyTimes: [] as Array<{ date: string; startTime: string; endTime: string }>,
-    eventType: '',
-    organizer: '',
-    contactEmail: '',
-    contactPhone: '',
-    maxParticipants: '',
+    dailyTimes: [] as Array<{date: string; startTime: string; endTime: string}>,
+    eventType: "",
+    organizer: "",
+    contactEmail: "",
+    contactPhone: "",
+    maxParticipants: "",
     registrationRequired: false,
-    entryFee: '',
-    website: '',
-    tags: '',
-    lat: '',
-    lon: ''
+    entryFee: "",
+    website: "",
+    tags: "",
+    lat: "",
+    lon: "",
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -57,135 +64,169 @@ export default function CreateEventPage() {
   const [animationData, setAnimationData] = useState<object | null>(null);
   const [showMapPicker, setShowMapPicker] = useState(false);
   const geocodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const fullAddress = [formData.street, formData.houseNumber, formData.postalCode, formData.city]
-    .map(part => part.trim())
+  const fullAddress = [
+    formData.street,
+    formData.houseNumber,
+    formData.postalCode,
+    formData.city,
+  ]
+    .map((part) => part.trim())
     .filter(Boolean)
-    .join(', ');
-  const hasCompleteAddress = [formData.street, formData.houseNumber, formData.postalCode, formData.city]
-    .every(part => part.trim().length > 0);
+    .join(", ");
+  const hasCompleteAddress = [
+    formData.street,
+    formData.houseNumber,
+    formData.postalCode,
+    formData.city,
+  ].every((part) => part.trim().length > 0);
 
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.replace('/auth/signin?redirect=/events/create');
+      router.replace("/auth/signin?redirect=/events/create");
     }
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    fetch('/Message Sent Successfully _ Plane.json')
-      .then(res => res.json())
-      .then(data => setAnimationData(data))
-      .catch(err => console.error('Fehler beim Laden der Animation:', err));
+    fetch("/Message Sent Successfully _ Plane.json")
+      .then((res) => res.json())
+      .then((data) => setAnimationData(data))
+      .catch((err) => console.error("Fehler beim Laden der Animation:", err));
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
+    const {name, value, type} = e.target;
+
     // Wenn multiDay deaktiviert wird, Enddatum und differentTimesPerDay zurücksetzen
-    if (name === 'multiDay' && !(e.target as HTMLInputElement).checked) {
-      setFormData(prev => ({
+    if (name === "multiDay" && !(e.target as HTMLInputElement).checked) {
+      setFormData((prev) => ({
         ...prev,
         multiDay: false,
-        endDate: '',
+        endDate: "",
         differentTimesPerDay: false,
-        dailyTimes: []
+        dailyTimes: [],
       }));
       return;
     }
 
     // Wenn differentTimesPerDay aktiviert wird, generiere dailyTimes Array
-    if (name === 'differentTimesPerDay' && (e.target as HTMLInputElement).checked) {
+    if (
+      name === "differentTimesPerDay" &&
+      (e.target as HTMLInputElement).checked
+    ) {
       if (formData.date) {
         const startDate = new Date(formData.date);
-        const endDate = formData.endDate ? new Date(formData.endDate) : new Date(formData.date);
-        const days: Array<{ date: string; startTime: string; endTime: string }> = [];
+        const endDate = formData.endDate
+          ? new Date(formData.endDate)
+          : new Date(formData.date);
+        const days: Array<{date: string; startTime: string; endTime: string}> =
+          [];
         const currentDate = new Date(startDate);
-        
+
         while (currentDate <= endDate) {
           days.push({
-            date: currentDate.toISOString().split('T')[0],
-            startTime: formData.startTime || '',
-            endTime: formData.endTime || ''
+            date: currentDate.toISOString().split("T")[0],
+            startTime: formData.startTime || "",
+            endTime: formData.endTime || "",
           });
           currentDate.setDate(currentDate.getDate() + 1);
         }
-        
-        setFormData(prev => ({
+
+        setFormData((prev) => ({
           ...prev,
           differentTimesPerDay: true,
-          dailyTimes: days
+          dailyTimes: days,
         }));
         return;
       }
     }
 
     // Wenn differentTimesPerDay deaktiviert wird, dailyTimes leeren
-    if (name === 'differentTimesPerDay' && !(e.target as HTMLInputElement).checked) {
-      setFormData(prev => ({
+    if (
+      name === "differentTimesPerDay" &&
+      !(e.target as HTMLInputElement).checked
+    ) {
+      setFormData((prev) => ({
         ...prev,
         differentTimesPerDay: false,
-        dailyTimes: []
+        dailyTimes: [],
       }));
       return;
     }
 
     // Wenn date oder endDate geändert wird und differentTimesPerDay aktiv ist, aktualisiere dailyTimes
-    if ((name === 'date' || name === 'endDate') && formData.differentTimesPerDay) {
-      const newDate = name === 'date' ? value : formData.date;
-      const newEndDate = name === 'endDate' ? value : (formData.endDate || formData.date);
-      
+    if (
+      (name === "date" || name === "endDate") &&
+      formData.differentTimesPerDay
+    ) {
+      const newDate = name === "date" ? value : formData.date;
+      const newEndDate =
+        name === "endDate" ? value : formData.endDate || formData.date;
+
       if (newDate) {
         const startDate = new Date(newDate);
         const endDate = newEndDate ? new Date(newEndDate) : new Date(newDate);
-        const days: Array<{ date: string; startTime: string; endTime: string }> = [];
+        const days: Array<{date: string; startTime: string; endTime: string}> =
+          [];
         const currentDate = new Date(startDate);
-        
+
         while (currentDate <= endDate) {
-          const dateStr = currentDate.toISOString().split('T')[0];
-          const existingDay = formData.dailyTimes.find(d => d.date === dateStr);
+          const dateStr = currentDate.toISOString().split("T")[0];
+          const existingDay = formData.dailyTimes.find(
+            (d) => d.date === dateStr,
+          );
           days.push({
             date: dateStr,
-            startTime: existingDay?.startTime || formData.startTime || '',
-            endTime: existingDay?.endTime || formData.endTime || ''
+            startTime: existingDay?.startTime || formData.startTime || "",
+            endTime: existingDay?.endTime || formData.endTime || "",
           });
           currentDate.setDate(currentDate.getDate() + 1);
         }
-        
-        setFormData(prev => ({
+
+        setFormData((prev) => ({
           ...prev,
           [name]: value,
-          dailyTimes: days
+          dailyTimes: days,
         }));
         return;
       }
     }
-    
-    setFormData(prev => {
+
+    setFormData((prev) => {
       const newData = {
         ...prev,
-        [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+        [name]:
+          type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
       };
-      
+
       // Wenn lat oder lon manuell eingegeben werden und beide vorhanden sind, verstecke die Karte
-      if ((name === 'lat' || name === 'lon') && value.trim()) {
-        const latValue = name === 'lat' ? value : newData.lat;
-        const lonValue = name === 'lon' ? value : newData.lon;
+      if ((name === "lat" || name === "lon") && value.trim()) {
+        const latValue = name === "lat" ? value : newData.lat;
+        const lonValue = name === "lon" ? value : newData.lon;
         if (latValue.trim() && lonValue.trim()) {
           setGeocodingFailed(false);
           setShowMapPicker(false);
         }
       }
-      
+
       return newData;
     });
   };
 
-  const handleDailyTimeChange = (date: string, field: 'startTime' | 'endTime', value: string) => {
-    setFormData(prev => ({
+  const handleDailyTimeChange = (
+    date: string,
+    field: "startTime" | "endTime",
+    value: string,
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      dailyTimes: prev.dailyTimes.map(day => 
-        day.date === date ? { ...day, [field]: value } : day
-      )
+      dailyTimes: prev.dailyTimes.map((day) =>
+        day.date === date ? {...day, [field]: value} : day,
+      ),
     }));
   };
 
@@ -206,54 +247,57 @@ export default function CreateEventPage() {
     setImageFile(null);
     setImagePreview(null);
     // Reset file input
-    const fileInput = document.getElementById('image') as HTMLInputElement;
+    const fileInput = document.getElementById("image") as HTMLInputElement;
     if (fileInput) {
-      fileInput.value = '';
+      fileInput.value = "";
     }
   };
 
   const handleImageButtonClick = () => {
-    document.getElementById('image')?.click();
+    document.getElementById("image")?.click();
   };
 
-  const performGeocode = useCallback(async (locationQuery: string) => {
-    if (!locationQuery.trim()) {
-      setGeocodingFailed(false);
-      setShowMapPicker(false);
-      return;
-    }
-
-    setGeocoding(true);
-    setError('');
-    setGeocodingSuccess(null);
-    setGeocodingFailed(false);
-    setShowMapPicker(false);
-
-    try {
-      const result = await geocodeLocation(locationQuery);
-      
-      if (isGeocodingSuccess(result)) {
-        setFormData(prev => ({
-          ...prev,
-          lat: result.lat,
-          lon: result.lon
-        }));
-        setGeocodingSuccess(t('geocodeSuccess', { name: result.display_name }));
+  const performGeocode = useCallback(
+    async (locationQuery: string) => {
+      if (!locationQuery.trim()) {
         setGeocodingFailed(false);
         setShowMapPicker(false);
-      } else {
+        return;
+      }
+
+      setGeocoding(true);
+      setError("");
+      setGeocodingSuccess(null);
+      setGeocodingFailed(false);
+      setShowMapPicker(false);
+
+      try {
+        const result = await geocodeLocation(locationQuery);
+
+        if (isGeocodingSuccess(result)) {
+          setFormData((prev) => ({
+            ...prev,
+            lat: result.lat,
+            lon: result.lon,
+          }));
+          setGeocodingSuccess(t("geocodeSuccess", {name: result.display_name}));
+          setGeocodingFailed(false);
+          setShowMapPicker(false);
+        } else {
+          setGeocodingFailed(true);
+          setShowMapPicker(true);
+          setError(result.error);
+        }
+      } catch {
         setGeocodingFailed(true);
         setShowMapPicker(true);
-        setError(result.error);
+        setError(t("geocodeError"));
+      } finally {
+        setGeocoding(false);
       }
-    } catch {
-      setGeocodingFailed(true);
-      setShowMapPicker(true);
-      setError(t('geocodeError'));
-    } finally {
-      setGeocoding(false);
-    }
-  }, [t]);
+    },
+    [t],
+  );
 
   // Automatisches Geocoding beim Eingeben von Adresse/Location (mit Debouncing)
   useEffect(() => {
@@ -262,8 +306,9 @@ export default function CreateEventPage() {
       clearTimeout(geocodeTimeoutRef.current);
     }
 
-    const locationQuery = formData.location || (hasCompleteAddress ? fullAddress : '');
-    
+    const locationQuery =
+      formData.location || (hasCompleteAddress ? fullAddress : "");
+
     // Nur geocoden, wenn etwas eingegeben wurde und noch keine Koordinaten vorhanden sind
     if (locationQuery.trim() && (!formData.lat || !formData.lon)) {
       geocodeTimeoutRef.current = setTimeout(() => {
@@ -281,12 +326,20 @@ export default function CreateEventPage() {
         clearTimeout(geocodeTimeoutRef.current);
       }
     };
-  }, [formData.location, fullAddress, hasCompleteAddress, formData.lat, formData.lon, performGeocode]);
+  }, [
+    formData.location,
+    fullAddress,
+    hasCompleteAddress,
+    formData.lat,
+    formData.lon,
+    performGeocode,
+  ]);
 
   const handleGeocode = async () => {
-    const locationQuery = formData.location || (hasCompleteAddress ? fullAddress : '');
+    const locationQuery =
+      formData.location || (hasCompleteAddress ? fullAddress : "");
     if (!locationQuery.trim()) {
-      setError(t('locationRequired'));
+      setError(t("locationRequired"));
       return;
     }
     await performGeocode(locationQuery);
@@ -295,57 +348,70 @@ export default function CreateEventPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const tagsArray = formData.tags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
 
       const form = new FormData();
-      form.append('title', formData.title);
-      form.append('description', formData.description);
-      form.append('location', formData.location);
-      form.append('street', formData.street);
-      form.append('houseNumber', formData.houseNumber);
-      form.append('postalCode', formData.postalCode);
-      form.append('city', formData.city);
-      form.append('address', fullAddress);
-      form.append('date', formData.date);
+      form.append("title", formData.title);
+      form.append("description", formData.description);
+      form.append("location", formData.location);
+      form.append("street", formData.street);
+      form.append("houseNumber", formData.houseNumber);
+      form.append("postalCode", formData.postalCode);
+      form.append("city", formData.city);
+      form.append("address", fullAddress);
+      form.append("date", formData.date);
       if (formData.endDate) {
-        form.append('endDate', formData.endDate);
+        form.append("endDate", formData.endDate);
       }
       if (formData.differentTimesPerDay && formData.dailyTimes.length > 0) {
-        form.append('dailyTimes', JSON.stringify(formData.dailyTimes));
+        form.append("dailyTimes", JSON.stringify(formData.dailyTimes));
       } else {
         if (formData.startTime) {
-          form.append('startTime', formData.startTime);
+          form.append("startTime", formData.startTime);
         }
         if (formData.endTime) {
-          form.append('endTime', formData.endTime);
+          form.append("endTime", formData.endTime);
         }
       }
-      form.append('allDay', String(formData.allDay));
-      form.append('multiDay', String(formData.multiDay));
-      form.append('differentTimesPerDay', String(formData.differentTimesPerDay));
-      form.append('eventType', formData.eventType);
-      form.append('organizer', formData.organizer);
-      form.append('contactEmail', formData.contactEmail || (user?.email ?? ''));
-      if (formData.contactPhone) form.append('contactPhone', formData.contactPhone);
-      if (formData.maxParticipants) form.append('maxParticipants', String(formData.maxParticipants));
-      form.append('registrationRequired', String(formData.registrationRequired));
-      if (formData.entryFee) form.append('entryFee', String(formData.entryFee));
-      if (formData.website) form.append('website', formData.website);
-      if (tagsArray.length) form.append('tags', tagsArray.join(','));
-      if (formData.lat) form.append('lat', formData.lat);
-      if (formData.lon) form.append('lon', formData.lon);
-      if (imageFile) form.append('image', imageFile);
+      form.append("allDay", String(formData.allDay));
+      form.append("multiDay", String(formData.multiDay));
+      form.append(
+        "differentTimesPerDay",
+        String(formData.differentTimesPerDay),
+      );
+      form.append("eventType", formData.eventType);
+      form.append("organizer", formData.organizer);
+      form.append("contactEmail", formData.contactEmail || (user?.email ?? ""));
+      if (formData.contactPhone)
+        form.append("contactPhone", formData.contactPhone);
+      if (formData.maxParticipants)
+        form.append("maxParticipants", String(formData.maxParticipants));
+      form.append(
+        "registrationRequired",
+        String(formData.registrationRequired),
+      );
+      if (formData.entryFee) form.append("entryFee", String(formData.entryFee));
+      if (formData.website) form.append("website", formData.website);
+      if (tagsArray.length) form.append("tags", tagsArray.join(","));
+      if (formData.lat) form.append("lat", formData.lat);
+      if (formData.lon) form.append("lon", formData.lon);
+      if (imageFile) form.append("image", imageFile);
 
-      const response = await fetch('/api/events', {
-        method: 'POST',
+      const response = await fetch("/api/events", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]}`,
+          Authorization: `Bearer ${
+            document.cookie
+              .split("; ")
+              .find((row) => row.startsWith("auth-token="))
+              ?.split("=")[1]
+          }`,
         },
         body: form,
       });
@@ -357,14 +423,14 @@ export default function CreateEventPage() {
         setImageFile(null);
         setImagePreview(null);
         setTimeout(() => {
-          router.push('/events');
+          router.push("/events");
         }, 2500);
       } else {
         const errorData = await response.json();
-        setError(errorData.error || tCommon('error'));
+        setError(errorData.error || tCommon("error"));
       }
     } catch {
-      setError(tCommon('error'));
+      setError(tCommon("error"));
     } finally {
       setLoading(false);
     }
@@ -375,7 +441,7 @@ export default function CreateEventPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('loading')}</p>
+          <p className="text-gray-600">{t("loading")}</p>
         </div>
       </div>
     );
@@ -387,8 +453,8 @@ export default function CreateEventPage() {
         <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 flex flex-col items-center">
           {animationData ? (
             <div className="w-64 h-64">
-              <Lottie 
-                animationData={animationData} 
+              <Lottie
+                animationData={animationData}
                 loop={false}
                 autoplay={true}
               />
@@ -398,8 +464,10 @@ export default function CreateEventPage() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
           )}
-          <h2 className="text-2xl font-bold text-[#021234] mt-4">{t('success')}</h2>
-          <p className="text-gray-600 mt-2">{t('successMessage')}</p>
+          <h2 className="text-2xl font-bold text-[#021234] mt-4">
+            {t("success")}
+          </h2>
+          <p className="text-gray-600 mt-2">{t("successMessage")}</p>
         </div>
       </div>
     );
@@ -414,10 +482,10 @@ export default function CreateEventPage() {
             className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 mb-4"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span>{t('backToEvents')}</span>
+            <span>{t("backToEvents")}</span>
           </Link>
-          <h1 className="text-3xl font-bold text-[#021234]">{t('title')}</h1>
-          <p className="text-gray-600 mt-2">{t('subtitle')}</p>
+          <h1 className="text-3xl font-bold text-[#021234]">{t("title")}</h1>
+          <p className="text-gray-600 mt-2">{t("subtitle")}</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-8">
@@ -430,7 +498,7 @@ export default function CreateEventPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('image')}
+                {t("image")}
               </label>
               {imagePreview ? (
                 <div className="relative inline-block">
@@ -467,7 +535,7 @@ export default function CreateEventPage() {
                   >
                     <Upload className="h-8 w-8 text-gray-400 mb-2" />
                     <span className="text-sm text-gray-600 font-medium">
-                      {t('image') || 'Bild hochladen'}
+                      {t("image") || "Bild hochladen"}
                     </span>
                     <span className="text-xs text-gray-500 mt-1">
                       Klicken Sie hier, um ein Bild auszuwählen
@@ -478,8 +546,11 @@ export default function CreateEventPage() {
             </div>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('titleLabel')} *
+                <label
+                  htmlFor="title"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("titleLabel")} *
                 </label>
                 <input
                   type="text"
@@ -489,13 +560,16 @@ export default function CreateEventPage() {
                   value={formData.title}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder={t('titlePlaceholder')}
+                  placeholder={t("titlePlaceholder")}
                 />
               </div>
 
               <div>
-                <label htmlFor="eventType" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('eventType')} *
+                <label
+                  htmlFor="eventType"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("eventType")} *
                 </label>
                 <select
                   id="eventType"
@@ -505,19 +579,30 @@ export default function CreateEventPage() {
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                 >
-                  <option value="">{t('eventTypeSelect')}</option>
-                  <option value="Flugtag">{tEvents('eventTypes.Flugtag')}</option>
-                  <option value="Messe">{tEvents('eventTypes.Messe')}</option>
-                  <option value="Fly-In">{tEvents('eventTypes.Fly-In')}</option>
-                  <option value="Workshop">{tEvents('eventTypes.Workshop')}</option>
-                  <option value="Vereinsveranstaltung">{tEvents('eventTypes.Vereinsveranstaltung')}</option>
-                  <option value="Sonstiges">{tEvents('eventTypes.Sonstiges')}</option>
+                  <option value="">{t("eventTypeSelect")}</option>
+                  <option value="Flugtag">
+                    {tEvents("eventTypes.Flugtag")}
+                  </option>
+                  <option value="Messe">{tEvents("eventTypes.Messe")}</option>
+                  <option value="Fly-In">{tEvents("eventTypes.Fly-In")}</option>
+                  <option value="Workshop">
+                    {tEvents("eventTypes.Workshop")}
+                  </option>
+                  <option value="Vereinsveranstaltung">
+                    {tEvents("eventTypes.Vereinsveranstaltung")}
+                  </option>
+                  <option value="Sonstiges">
+                    {tEvents("eventTypes.Sonstiges")}
+                  </option>
                 </select>
               </div>
 
               <div>
-                <label htmlFor="entryFee" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('entryFee')} *
+                <label
+                  htmlFor="entryFee"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("entryFee")} *
                 </label>
                 <input
                   type="number"
@@ -529,13 +614,16 @@ export default function CreateEventPage() {
                   value={formData.entryFee}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder={t('entryFeePlaceholder')}
+                  placeholder={t("entryFeePlaceholder")}
                 />
               </div>
 
               <div>
-                <label htmlFor="organizer" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('organizer')} *
+                <label
+                  htmlFor="organizer"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("organizer")} *
                 </label>
                 <input
                   type="text"
@@ -545,13 +633,16 @@ export default function CreateEventPage() {
                   value={formData.organizer}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder={t('organizerPlaceholder')}
+                  placeholder={t("organizerPlaceholder")}
                 />
               </div>
 
               <div>
-                <label htmlFor="maxParticipants" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('maxParticipants')}
+                <label
+                  htmlFor="maxParticipants"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("maxParticipants")}
                 </label>
                 <input
                   type="number"
@@ -561,14 +652,17 @@ export default function CreateEventPage() {
                   value={formData.maxParticipants}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder={t('maxParticipantsPlaceholder')}
+                  placeholder={t("maxParticipantsPlaceholder")}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('description')} *
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                {t("description")} *
               </label>
               <textarea
                 id="description"
@@ -578,14 +672,17 @@ export default function CreateEventPage() {
                 value={formData.description}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                placeholder={t('descriptionPlaceholder')}
+                placeholder={t("descriptionPlaceholder")}
               />
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('location')} *
+                <label
+                  htmlFor="location"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("location")} *
                 </label>
                 <input
                   type="text"
@@ -595,15 +692,18 @@ export default function CreateEventPage() {
                   value={formData.location}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder={t('locationPlaceholder')}
+                  placeholder={t("locationPlaceholder")}
                 />
               </div>
 
               <div className="md:col-span-2">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('street')} *
+                    <label
+                      htmlFor="street"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      {t("street")} *
                     </label>
                     <input
                       type="text"
@@ -613,13 +713,16 @@ export default function CreateEventPage() {
                       value={formData.street}
                       onChange={handleChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                      placeholder={t('streetPlaceholder')}
+                      placeholder={t("streetPlaceholder")}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="houseNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('houseNumber')} *
+                    <label
+                      htmlFor="houseNumber"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      {t("houseNumber")} *
                     </label>
                     <input
                       type="text"
@@ -629,13 +732,16 @@ export default function CreateEventPage() {
                       value={formData.houseNumber}
                       onChange={handleChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                      placeholder={t('houseNumberPlaceholder')}
+                      placeholder={t("houseNumberPlaceholder")}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('postalCode')} *
+                    <label
+                      htmlFor="postalCode"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      {t("postalCode")} *
                     </label>
                     <input
                       type="text"
@@ -645,13 +751,16 @@ export default function CreateEventPage() {
                       value={formData.postalCode}
                       onChange={handleChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                      placeholder={t('postalCodePlaceholder')}
+                      placeholder={t("postalCodePlaceholder")}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('city')} *
+                    <label
+                      htmlFor="city"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      {t("city")} *
                     </label>
                     <input
                       type="text"
@@ -661,7 +770,7 @@ export default function CreateEventPage() {
                       value={formData.city}
                       onChange={handleChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                      placeholder={t('cityPlaceholder')}
+                      placeholder={t("cityPlaceholder")}
                     />
                   </div>
                 </div>
@@ -671,42 +780,47 @@ export default function CreateEventPage() {
             {(geocodingSuccess || geocodingFailed) && (
               <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="mb-3">
-                  <h3 className="text-sm font-medium text-blue-900">{t('geocodeTitle')}</h3>
+                  <h3 className="text-sm font-medium text-blue-900">
+                    {t("geocodeTitle")}
+                  </h3>
                 </div>
-                
+
                 {geocoding && (
                   <div className="mb-3 p-2 bg-blue-100 text-blue-800 rounded text-sm">
                     <Loader className="h-4 w-4 animate-spin inline mr-2" />
-                    {t('geocoding')}...
+                    {t("geocoding")}...
                   </div>
                 )}
-                
+
                 {geocodingSuccess && (
                   <div className="mb-3 p-2 bg-green-100 text-green-800 rounded text-sm">
                     ✅ {geocodingSuccess}
                   </div>
                 )}
-                
+
                 {geocodingFailed && showMapPicker && (
                   <div className="mb-4">
                     <CoordinateMapPicker
                       lat={formData.lat}
                       lon={formData.lon}
                       onCoordinateChange={(lat, lon) => {
-                        setFormData(prev => ({
+                        setFormData((prev) => ({
                           ...prev,
                           lat: lat.toString(),
-                          lon: lon.toString()
+                          lon: lon.toString(),
                         }));
                       }}
                     />
                   </div>
                 )}
-                
+
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="lat" className="block text-xs font-medium text-gray-600 mb-1">
-                      {t('latitude')}
+                    <label
+                      htmlFor="lat"
+                      className="block text-xs font-medium text-gray-600 mb-1"
+                    >
+                      {t("latitude")}
                     </label>
                     <input
                       type="text"
@@ -715,12 +829,15 @@ export default function CreateEventPage() {
                       value={formData.lat}
                       onChange={handleChange}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                      placeholder={t('latitudePlaceholder')}
+                      placeholder={t("latitudePlaceholder")}
                     />
                   </div>
                   <div>
-                    <label htmlFor="lon" className="block text-xs font-medium text-gray-600 mb-1">
-                      {t('longitude')}
+                    <label
+                      htmlFor="lon"
+                      className="block text-xs font-medium text-gray-600 mb-1"
+                    >
+                      {t("longitude")}
                     </label>
                     <input
                       type="text"
@@ -729,20 +846,21 @@ export default function CreateEventPage() {
                       value={formData.lon}
                       onChange={handleChange}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                      placeholder={t('longitudePlaceholder')}
+                      placeholder={t("longitudePlaceholder")}
                     />
                   </div>
                 </div>
-                <p className="text-xs text-gray-600 mt-2">
-                  {t('geocodeHint')}
-                </p>
+                <p className="text-xs text-gray-600 mt-2">{t("geocodeHint")}</p>
               </div>
             )}
 
             <div className="space-y-4">
               <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('date')} *
+                <label
+                  htmlFor="date"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("date")} *
                 </label>
                 <input
                   type="date"
@@ -766,11 +884,14 @@ export default function CreateEventPage() {
                       onChange={handleChange}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="allDay" className="ml-2 block text-sm font-medium text-gray-700">
-                      {t('allDay')}
+                    <label
+                      htmlFor="allDay"
+                      className="ml-2 block text-sm font-medium text-gray-700"
+                    >
+                      {t("allDay")}
                     </label>
                   </div>
-                  
+
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -780,16 +901,22 @@ export default function CreateEventPage() {
                       onChange={handleChange}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="multiDay" className="ml-2 block text-sm font-medium text-gray-700">
-                      {t('multiDay')}
+                    <label
+                      htmlFor="multiDay"
+                      className="ml-2 block text-sm font-medium text-gray-700"
+                    >
+                      {t("multiDay")}
                     </label>
                   </div>
                 </div>
 
                 {formData.multiDay && (
                   <div>
-                    <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('endDate')} *
+                    <label
+                      htmlFor="endDate"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      {t("endDate")} *
                     </label>
                     <input
                       type="date"
@@ -817,44 +944,74 @@ export default function CreateEventPage() {
                         onChange={handleChange}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                      <label htmlFor="differentTimesPerDay" className="ml-2 block text-sm font-medium text-gray-700">
-                        {t('differentTimesPerDay') || 'Unterschiedliche Zeiten pro Tag'}
+                      <label
+                        htmlFor="differentTimesPerDay"
+                        className="ml-2 block text-sm font-medium text-gray-700"
+                      >
+                        {t("differentTimesPerDay") ||
+                          "Unterschiedliche Zeiten pro Tag"}
                       </label>
                     </div>
                   )}
 
-                  {formData.multiDay && formData.differentTimesPerDay && formData.dailyTimes.length > 0 ? (
+                  {formData.multiDay &&
+                  formData.differentTimesPerDay &&
+                  formData.dailyTimes.length > 0 ? (
                     <div className="space-y-4">
                       {formData.dailyTimes.map((day, index) => {
                         const dayDate = new Date(day.date);
-                        const dayName = dayDate.toLocaleDateString(locale === 'de' ? 'de-DE' : locale === 'fr' ? 'fr-FR' : 'en-US', { 
-                          weekday: 'long',
-                          day: 'numeric',
-                          month: 'long'
-                        });
+                        const dayName = dayDate.toLocaleDateString(
+                          locale === "de"
+                            ? "de-DE"
+                            : locale === "fr"
+                              ? "fr-FR"
+                              : "en-US",
+                          {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                          },
+                        );
                         return (
-                          <div key={day.date} className="bg-gray-50 p-4 rounded-lg">
-                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{dayName}</h4>
+                          <div
+                            key={day.date}
+                            className="bg-gray-50 p-4 rounded-lg"
+                          >
+                            <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                              {dayName}
+                            </h4>
                             <div className="grid md:grid-cols-2 gap-4">
                               <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">
-                                  {t('startTime')}
+                                  {t("startTime")}
                                 </label>
                                 <input
                                   type="time"
                                   value={day.startTime}
-                                  onChange={(e) => handleDailyTimeChange(day.date, 'startTime', e.target.value)}
+                                  onChange={(e) =>
+                                    handleDailyTimeChange(
+                                      day.date,
+                                      "startTime",
+                                      e.target.value,
+                                    )
+                                  }
                                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                                 />
                               </div>
                               <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">
-                                  {t('endTime')}
+                                  {t("endTime")}
                                 </label>
                                 <input
                                   type="time"
                                   value={day.endTime}
-                                  onChange={(e) => handleDailyTimeChange(day.date, 'endTime', e.target.value)}
+                                  onChange={(e) =>
+                                    handleDailyTimeChange(
+                                      day.date,
+                                      "endTime",
+                                      e.target.value,
+                                    )
+                                  }
                                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
                                 />
                               </div>
@@ -866,8 +1023,11 @@ export default function CreateEventPage() {
                   ) : (
                     <div className="grid md:grid-cols-2 gap-6">
                       <div>
-                        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
-                          {t('startTime')}
+                        <label
+                          htmlFor="startTime"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          {t("startTime")}
                         </label>
                         <input
                           type="time"
@@ -880,8 +1040,11 @@ export default function CreateEventPage() {
                       </div>
 
                       <div>
-                        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
-                          {t('endTime')}
+                        <label
+                          htmlFor="endTime"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          {t("endTime")}
                         </label>
                         <input
                           type="time"
@@ -900,8 +1063,11 @@ export default function CreateEventPage() {
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('contactEmail')} *
+                <label
+                  htmlFor="contactEmail"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("contactEmail")} *
                 </label>
                 <input
                   type="email"
@@ -911,13 +1077,16 @@ export default function CreateEventPage() {
                   value={formData.contactEmail}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder={t('contactEmailPlaceholder')}
+                  placeholder={t("contactEmailPlaceholder")}
                 />
               </div>
 
               <div>
-                <label htmlFor="contactPhone" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('contactPhone')}
+                <label
+                  htmlFor="contactPhone"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("contactPhone")}
                 </label>
                 <input
                   type="tel"
@@ -926,14 +1095,17 @@ export default function CreateEventPage() {
                   value={formData.contactPhone}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder={t('contactPhonePlaceholder')}
+                  placeholder={t("contactPhonePlaceholder")}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('website')}
+              <label
+                htmlFor="website"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                {t("website")}
               </label>
               <input
                 type="url"
@@ -942,13 +1114,16 @@ export default function CreateEventPage() {
                 value={formData.website}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                placeholder={t('websitePlaceholder')}
+                placeholder={t("websitePlaceholder")}
               />
             </div>
 
             <div>
-              <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('tags')}
+              <label
+                htmlFor="tags"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                {t("tags")}
               </label>
               <input
                 type="text"
@@ -957,7 +1132,7 @@ export default function CreateEventPage() {
                 value={formData.tags}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                placeholder={t('tagsPlaceholder')}
+                placeholder={t("tagsPlaceholder")}
               />
             </div>
 
@@ -970,25 +1145,28 @@ export default function CreateEventPage() {
                 onChange={handleChange}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label htmlFor="registrationRequired" className="ml-2 block text-sm text-gray-700">
-                {t('registrationRequired')}
+              <label
+                htmlFor="registrationRequired"
+                className="ml-2 block text-sm text-gray-700"
+              >
+                {t("registrationRequired")}
               </label>
             </div>
 
             <div className="flex justify-end space-x-4 pt-6">
               <button
                 type="button"
-                onClick={() => router.push('/events')}
+                onClick={() => router.push("/events")}
                 className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                {tCommon('cancel')}
+                {tCommon("cancel")}
               </button>
               <button
                 type="submit"
                 disabled={loading}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? t('submitting') : t('submit')}
+                {loading ? t("submitting") : t("submit")}
               </button>
             </div>
           </form>
@@ -997,4 +1175,3 @@ export default function CreateEventPage() {
     </div>
   );
 }
-
