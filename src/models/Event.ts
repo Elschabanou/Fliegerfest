@@ -12,6 +12,10 @@ export interface IEvent extends Document {
   title?: string;
   location?: string;
   address?: string;
+  street?: string;
+  houseNumber?: string;
+  postalCode?: string;
+  city?: string;
   startTime?: string;
   endTime?: string;
   allDay?: boolean;
@@ -80,6 +84,26 @@ const EventSchema = new Schema<IEvent>({
     trim: true,
     maxlength: [200, 'Adresse darf maximal 200 Zeichen haben']
   },
+  street: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Straße darf maximal 100 Zeichen haben']
+  },
+  houseNumber: {
+    type: String,
+    trim: true,
+    maxlength: [20, 'Hausnummer darf maximal 20 Zeichen haben']
+  },
+  postalCode: {
+    type: String,
+    trim: true,
+    maxlength: [20, 'PLZ darf maximal 20 Zeichen haben']
+  },
+  city: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Stadt darf maximal 100 Zeichen haben']
+  },
   startTime: {
     type: String,
     trim: true
@@ -122,7 +146,7 @@ const EventSchema = new Schema<IEvent>({
     type: String,
     lowercase: true,
     match: [
-      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.[A-Za-z]{2,63})+$/,
       'Bitte geben Sie eine gültige E-Mail-Adresse ein'
     ]
   },

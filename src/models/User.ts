@@ -22,7 +22,7 @@ const UserSchema = new Schema<IUser>({
     unique: true,
     lowercase: true,
     match: [
-      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.[A-Za-z]{2,63})+$/,
       'Bitte geben Sie eine gültige E-Mail-Adresse ein'
     ]
   },

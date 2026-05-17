@@ -241,6 +241,21 @@ export async function POST(request: NextRequest) {
       eventData = body ?? {};
     }
 
+    const street = typeof eventData.street === 'string' ? eventData.street.trim() : '';
+    const houseNumber = typeof eventData.houseNumber === 'string' ? eventData.houseNumber.trim() : '';
+    const postalCode = typeof eventData.postalCode === 'string' ? eventData.postalCode.trim() : '';
+    const city = typeof eventData.city === 'string' ? eventData.city.trim() : '';
+
+    if (street) eventData.street = street;
+    if (houseNumber) eventData.houseNumber = houseNumber;
+    if (postalCode) eventData.postalCode = postalCode;
+    if (city) eventData.city = city;
+
+    const addressParts = [street, houseNumber, postalCode, city].filter(Boolean);
+    if (addressParts.length > 0) {
+      eventData.address = addressParts.join(', ');
+    }
+
     // Sicherstellen, dass mindestens ein Titel oder Name vorhanden ist
     if (!eventData['title'] && !eventData['name']) {
       return NextResponse.json(

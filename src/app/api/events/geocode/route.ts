@@ -36,7 +36,10 @@ export async function POST(request: NextRequest) {
     const results = [];
 
     for (const event of eventsWithoutCoords) {
-      const locationQuery = event.location || event.address || event.name;
+      const structuredAddress = [event.street, event.houseNumber, event.postalCode, event.city]
+        .filter(Boolean)
+        .join(', ');
+      const locationQuery = event.location || event.address || structuredAddress || event.name;
       
       if (!locationQuery) {
         results.push({

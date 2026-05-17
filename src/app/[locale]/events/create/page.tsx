@@ -24,7 +24,10 @@ export default function CreateEventPage() {
     title: '',
     description: '',
     location: '',
-    address: '',
+    street: '',
+    houseNumber: '',
+    postalCode: '',
+    city: '',
     date: '',
     endDate: '',
     startTime: '',
@@ -54,6 +57,12 @@ export default function CreateEventPage() {
   const [animationData, setAnimationData] = useState<object | null>(null);
   const [showMapPicker, setShowMapPicker] = useState(false);
   const geocodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const fullAddress = [formData.street, formData.houseNumber, formData.postalCode, formData.city]
+    .map(part => part.trim())
+    .filter(Boolean)
+    .join(', ');
+  const hasCompleteAddress = [formData.street, formData.houseNumber, formData.postalCode, formData.city]
+    .every(part => part.trim().length > 0);
 
   useEffect(() => {
     if (authLoading) return;
@@ -253,7 +262,7 @@ export default function CreateEventPage() {
       clearTimeout(geocodeTimeoutRef.current);
     }
 
-    const locationQuery = formData.location || formData.address;
+    const locationQuery = formData.location || (hasCompleteAddress ? fullAddress : '');
     
     // Nur geocoden, wenn etwas eingegeben wurde und noch keine Koordinaten vorhanden sind
     if (locationQuery.trim() && (!formData.lat || !formData.lon)) {
@@ -272,10 +281,10 @@ export default function CreateEventPage() {
         clearTimeout(geocodeTimeoutRef.current);
       }
     };
-  }, [formData.location, formData.address, formData.lat, formData.lon, performGeocode]);
+  }, [formData.location, fullAddress, hasCompleteAddress, formData.lat, formData.lon, performGeocode]);
 
   const handleGeocode = async () => {
-    const locationQuery = formData.location || formData.address;
+    const locationQuery = formData.location || (hasCompleteAddress ? fullAddress : '');
     if (!locationQuery.trim()) {
       setError(t('locationRequired'));
       return;
@@ -298,7 +307,11 @@ export default function CreateEventPage() {
       form.append('title', formData.title);
       form.append('description', formData.description);
       form.append('location', formData.location);
-      form.append('address', formData.address);
+      form.append('street', formData.street);
+      form.append('houseNumber', formData.houseNumber);
+      form.append('postalCode', formData.postalCode);
+      form.append('city', formData.city);
+      form.append('address', fullAddress);
       form.append('date', formData.date);
       if (formData.endDate) {
         form.append('endDate', formData.endDate);
@@ -586,20 +599,72 @@ export default function CreateEventPage() {
                 />
               </div>
 
-              <div>
-                <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('address')} *
-                </label>
-                <input
-                  type="text"
-                  id="address"
-                  name="address"
-                  required
-                  value={formData.address}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder={t('addressPlaceholder')}
-                />
+              <div className="md:col-span-2">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
+                      {t('street')} *
+                    </label>
+                    <input
+                      type="text"
+                      id="street"
+                      name="street"
+                      required
+                      value={formData.street}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                      placeholder={t('streetPlaceholder')}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="houseNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                      {t('houseNumber')} *
+                    </label>
+                    <input
+                      type="text"
+                      id="houseNumber"
+                      name="houseNumber"
+                      required
+                      value={formData.houseNumber}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                      placeholder={t('houseNumberPlaceholder')}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
+                      {t('postalCode')} *
+                    </label>
+                    <input
+                      type="text"
+                      id="postalCode"
+                      name="postalCode"
+                      required
+                      value={formData.postalCode}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                      placeholder={t('postalCodePlaceholder')}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                      {t('city')} *
+                    </label>
+                    <input
+                      type="text"
+                      id="city"
+                      name="city"
+                      required
+                      value={formData.city}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                      placeholder={t('cityPlaceholder')}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
