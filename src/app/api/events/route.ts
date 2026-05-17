@@ -251,6 +251,13 @@ export async function POST(request: NextRequest) {
     if (postalCode) eventData.postalCode = postalCode;
     if (city) eventData.city = city;
 
+    const location = typeof eventData.location === 'string' ? eventData.location.trim() : '';
+    if (location) {
+      eventData.location = location;
+    } else if (city) {
+      eventData.location = city;
+    }
+
     const addressParts = [street, houseNumber, postalCode, city].filter(Boolean);
     if (addressParts.length > 0) {
       eventData.address = addressParts.join(', ');

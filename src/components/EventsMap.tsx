@@ -52,6 +52,16 @@ interface EventsMapProps {
   showTimeFilters?: boolean;
 }
 
+type LeafletModule = typeof import("leaflet");
+type LeafletMap = import("leaflet").Map & {
+  _loaded?: boolean;
+  _container?: HTMLElement | null;
+};
+type LeafletMarker = import("leaflet").Marker & {
+  _map?: LeafletMap | null;
+};
+type LeafletCircle = import("leaflet").Circle;
+
 export default function EventsMap({
   events,
   selectedEventType = "",
@@ -81,13 +91,13 @@ export default function EventsMap({
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [isMapInitialized, setIsMapInitialized] = useState(false);
 
-  const mapRef = useRef<unknown>(null);
-  const leafletRef = useRef<unknown>(null);
-  const markersRef = useRef<unknown[]>([]);
-  const eventMarkersMapRef = useRef<Map<string, unknown>>(new Map());
+  const mapRef = useRef<LeafletMap | null>(null);
+  const leafletRef = useRef<LeafletModule | null>(null);
+  const markersRef = useRef<LeafletMarker[]>([]);
+  const eventMarkersMapRef = useRef<Map<string, LeafletMarker>>(new Map());
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const isUpdatingMarkersRef = useRef<boolean>(false);
-  const circleRef = useRef<unknown>(null);
+  const circleRef = useRef<LeafletCircle | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [radiusKm, setRadiusKm] = useState<number>(50);
   const [locationMode, setLocationMode] = useState<"device" | "custom">(
@@ -118,7 +128,7 @@ export default function EventsMap({
     }>
   >([]);
   const [isLoadingAirports, setIsLoadingAirports] = useState<boolean>(false);
-  const airportMarkersRef = useRef<unknown[]>([]);
+  const airportMarkersRef = useRef<LeafletMarker[]>([]);
   const lastBoundsRef = useRef<{
     minLat: number;
     maxLat: number;
@@ -205,13 +215,11 @@ export default function EventsMap({
         // Karte zum Benutzerstandort bewegen
         if (mapRef.current && leafletRef.current && isMapInitialized) {
           try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const currentZoom = (mapRef.current as any).getZoom
-              ? (mapRef.current as any).getZoom()
+            const currentZoom = mapRef.current.getZoom
+              ? mapRef.current.getZoom()
               : 7;
             // Verwende aktuellen Zoom oder mindestens 7 für besseren Überblick
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (mapRef.current as any).setView(
+            mapRef.current.setView(
               [newLocation.lat, newLocation.lon],
               Math.max(currentZoom || 7, 7),
             );
@@ -303,41 +311,24 @@ export default function EventsMap({
 
   // Marker aktualisieren (ohne Dependencies um Re-Renders zu vermeiden)
   const updateMarkers = useCallback(() => {
-    if (
-      !mapRef.current ||
-      !leafletRef.current ||
-      isUpdatingMarkersRef.current ||
-      !isMapInitialized
-    )
-      return;
+    const map = mapRef.current;
+    const L = leafletRef.current;
+
+    if (!map || !L || isUpdatingMarkersRef.current || !isMapInitialized) return;
 
     // Prüfe ob Karte noch existiert und bereit ist
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (
-      !(mapRef.current as any)._loaded ||
-      !(mapRef.current as any)._container
-    ) {
+    if (!map._loaded || !map._container) {
       console.warn("Karte ist nicht bereit für Marker-Updates");
       return;
     }
 
     isUpdatingMarkersRef.current = true;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const L = leafletRef.current as any;
 
     // Alte Marker sicher entfernen
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (markersRef.current as any[]).forEach((marker) => {
+    markersRef.current.forEach((marker) => {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (
-          marker &&
-          mapRef.current &&
-          (mapRef.current as any).removeLayer &&
-          marker._map
-        ) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (mapRef.current as any).removeLayer(marker as any);
+        if (marker && marker._map) {
+          map.removeLayer(marker);
         }
       } catch (error) {
         console.warn("Fehler beim Entfernen eines Markers:", error);
@@ -349,14 +340,8 @@ export default function EventsMap({
 
     // Radius-Kreis aktualisieren
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (
-        circleRef.current &&
-        (mapRef.current as any) &&
-        (mapRef.current as any).removeLayer
-      ) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (mapRef.current as any).removeLayer(circleRef.current as any);
+      if (circleRef.current) {
+        map.removeLayer(circleRef.current);
         circleRef.current = null;
       }
       const baseLocation =
@@ -371,7 +356,7 @@ export default function EventsMap({
           weight: 1,
           fillColor: "#3b82f6",
           fillOpacity: 0.1,
-        }).addTo(mapRef.current);
+        }).addTo(map);
       }
     } catch (error) {
       console.warn("Fehler beim Aktualisieren des Radius-Kreises:", error);
@@ -415,8 +400,8 @@ export default function EventsMap({
 
         const userMarker = L.marker([userLocation.lat, userLocation.lon], {
           icon: userIcon,
-        });
-        userMarker.addTo(mapRef.current);
+        }) as LeafletMarker;
+        userMarker.addTo(map);
         userMarker.bindPopup(
           '<div style="padding: 8px;"><strong>📍 Ihr Standort</strong></div>',
         );
@@ -460,8 +445,8 @@ export default function EventsMap({
         const customMarker = L.marker(
           [customLocation.lat, customLocation.lon],
           {icon: customIcon},
-        );
-        customMarker.addTo(mapRef.current);
+        ) as LeafletMarker;
+        customMarker.addTo(map);
         customMarker.bindPopup(
           '<div style="padding: 8px;"><strong>📍 Gewählter Ort</strong></div>',
         );
@@ -515,8 +500,8 @@ export default function EventsMap({
           popupAnchor: [0, -48],
         });
 
-        const marker = L.marker([lat, lon], {icon: eventIcon});
-        marker.addTo(mapRef.current);
+        const marker = L.marker([lat, lon], {icon: eventIcon}) as LeafletMarker;
+        marker.addTo(map);
         const popupMaxWidth = isSmallScreen ? 220 : 320;
         const titleFontSize = isSmallScreen ? 14 : 16;
         const textFontSize = isSmallScreen ? 12 : 14;
@@ -626,8 +611,7 @@ export default function EventsMap({
       if (isNaN(lat) || isNaN(lon)) return;
 
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const map = mapRef.current as any;
+        const map = mapRef.current;
 
         // Stelle sicher, dass die Karte die richtige Größe hat
         map.invalidateSize();
@@ -644,8 +628,7 @@ export default function EventsMap({
             setTimeout(() => {
               const marker = eventMarkersMapRef.current.get(eventId);
               if (marker) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (marker as any).openPopup();
+                marker.openPopup();
                 // Stelle sicher, dass die Karte das Popup richtig anzeigt und zentriert bleibt
                 map.invalidateSize();
                 // Zentriere nochmal nach Popup-Öffnung, falls nötig
@@ -691,8 +674,7 @@ export default function EventsMap({
       return;
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const map = mapRef.current as any;
+      const map = mapRef.current;
       const bounds = map.getBounds();
 
       if (!bounds) return;
@@ -752,26 +734,19 @@ export default function EventsMap({
 
   // Airport-Marker aktualisieren
   const updateAirportMarkers = useCallback(() => {
-    if (
-      !mapRef.current ||
-      !leafletRef.current ||
-      !isMapInitialized ||
-      !showAirports
-    ) {
-      // Entferne alle Airport-Marker wenn nicht angezeigt werden sollen
-      if (!showAirports && airportMarkersRef.current.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (airportMarkersRef.current as any[]).forEach((marker) => {
+    const map = mapRef.current;
+    const L = leafletRef.current;
+
+    if (!map || !L || !isMapInitialized) {
+      return;
+    }
+
+    if (!showAirports) {
+      if (airportMarkersRef.current.length > 0) {
+        airportMarkersRef.current.forEach((marker) => {
           try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            if (
-              marker &&
-              mapRef.current &&
-              (mapRef.current as any).removeLayer &&
-              (marker as any)._map
-            ) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (mapRef.current as any).removeLayer(marker as any);
+            if (marker && marker._map) {
+              map.removeLayer(marker);
             }
           } catch (error) {
             console.warn("Fehler beim Entfernen eines Airport-Markers:", error);
@@ -783,18 +758,10 @@ export default function EventsMap({
     }
 
     // Alte Airport-Marker entfernen
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (airportMarkersRef.current as any[]).forEach((marker) => {
+    airportMarkersRef.current.forEach((marker) => {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (
-          marker &&
-          mapRef.current &&
-          (mapRef.current as any).removeLayer &&
-          (marker as any)._map
-        ) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (mapRef.current as any).removeLayer(marker as any);
+        if (marker && marker._map) {
+          map.removeLayer(marker);
         }
       } catch (error) {
         console.warn("Fehler beim Entfernen eines Airport-Markers:", error);
@@ -803,14 +770,8 @@ export default function EventsMap({
     airportMarkersRef.current = [];
 
     // Neue Airport-Marker hinzufügen
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const L = leafletRef.current as any;
-
     // Aktuellen Zoom-Level abfragen für dynamische Icon-Größe
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const currentZoom = (mapRef.current as any)?.getZoom
-      ? (mapRef.current as any).getZoom()
-      : 6;
+    const currentZoom = map.getZoom ? map.getZoom() : 6;
 
     // Icon-Größe basierend auf Zoom-Level (kleiner bei niedrigem Zoom, größer bei hohem Zoom)
     // Zoom 3-5: 12px, Zoom 6-8: 16px, Zoom 9-11: 20px, Zoom 12+: 24px
@@ -858,9 +819,9 @@ export default function EventsMap({
           icon: airportIcon,
           opacity: 0.6,
           zIndexOffset: -100, // Hinter den Event-Markern
-        });
+        }) as LeafletMarker;
 
-        airportMarker.addTo(mapRef.current);
+        airportMarker.addTo(map);
 
         const popupContent = `
           <div style="padding: 8px; font-family: system-ui; max-width: 200px;">
@@ -893,8 +854,7 @@ export default function EventsMap({
   useEffect(() => {
     if (!isMapInitialized || !mapRef.current) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const map = mapRef.current as any;
+    const map = mapRef.current;
 
     const handleZoomChange = () => {
       const zoom = map.getZoom();
@@ -943,12 +903,10 @@ export default function EventsMap({
         setLocationMode("custom");
         if (mapRef.current) {
           try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const currentZoom = (mapRef.current as any).getZoom
-              ? (mapRef.current as any).getZoom()
+            const currentZoom = mapRef.current.getZoom
+              ? mapRef.current.getZoom()
               : 7;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (mapRef.current as any).setView(
+            mapRef.current.setView(
               [loc.lat, loc.lon],
               Math.max(currentZoom || 7, 7),
             );
@@ -991,8 +949,11 @@ export default function EventsMap({
         leafletRef.current = L;
 
         // Marker-Icons korrigieren
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (L.Icon.Default.prototype as any)._getIconUrl;
+        const defaultIconPrototype = L.Icon.Default
+          .prototype as typeof L.Icon.Default.prototype & {
+          _getIconUrl?: () => string;
+        };
+        delete defaultIconPrototype._getIconUrl;
         L.Icon.Default.mergeOptions({
           iconRetinaUrl:
             "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
@@ -1111,18 +1072,10 @@ export default function EventsMap({
 
       try {
         // Marker sicher entfernen
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (markersRef.current as any[]).forEach((marker) => {
+        markersRef.current.forEach((marker) => {
           try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            if (
-              marker &&
-              marker._map &&
-              mapRef.current &&
-              (mapRef.current as any).removeLayer
-            ) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (mapRef.current as any).removeLayer(marker);
+            if (marker && marker._map && mapRef.current) {
+              mapRef.current.removeLayer(marker);
             }
           } catch (error) {
             console.warn(
@@ -1135,14 +1088,11 @@ export default function EventsMap({
         // Karte sicher entfernen
         try {
           // Alle Event-Listener entfernen
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (mapRef.current as any).off();
+          mapRef.current.off();
 
           // Karte entfernen
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if ((mapRef.current as any).remove) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (mapRef.current as any).remove();
+          if (mapRef.current.remove) {
+            mapRef.current.remove();
           }
         } catch (error) {
           console.warn("Fehler beim Entfernen der Karte:", error);
@@ -1203,8 +1153,7 @@ export default function EventsMap({
   useEffect(() => {
     if (!isMapInitialized || !mapRef.current) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const map = mapRef.current as any;
+    const map = mapRef.current;
     let moveTimeout: NodeJS.Timeout | null = null;
 
     const handleMapMove = () => {
@@ -1240,12 +1189,10 @@ export default function EventsMap({
           ? customLocation
           : userLocation;
       if (baseLocation) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const currentZoom = (mapRef.current as any).getZoom
-          ? (mapRef.current as any).getZoom()
+        const currentZoom = mapRef.current.getZoom
+          ? mapRef.current.getZoom()
           : 7;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (mapRef.current as any).setView(
+        mapRef.current.setView(
           [baseLocation.lat, baseLocation.lon],
           Math.max(currentZoom || 7, 7),
         );
@@ -1276,8 +1223,7 @@ export default function EventsMap({
     // Warte kurz, damit der DOM aktualisiert ist, dann invalidateSize
     setTimeout(() => {
       if (mapRef.current) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (mapRef.current as any).invalidateSize();
+        mapRef.current.invalidateSize();
       }
     }, 100);
   }, []);

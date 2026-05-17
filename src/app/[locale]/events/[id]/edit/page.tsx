@@ -24,7 +24,6 @@ export default function EditEventPage() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    location: "",
     address: "",
     date: "",
     endDate: "",
@@ -125,7 +124,6 @@ export default function EditEventPage() {
           setFormData({
             title: event.title || event.name || "",
             description: event.description || "",
-            location: event.location || "",
             address: event.address || "",
             date: formatDateForInput(event.date || event.dateTime),
             endDate: formatDateForInput(event.endDate),
@@ -223,7 +221,7 @@ export default function EditEventPage() {
   };
 
   const handleGeocode = async () => {
-    const locationQuery = formData.location || formData.address;
+    const locationQuery = formData.address;
     if (!locationQuery.trim()) {
       setError(t("locationRequired"));
       return;
@@ -269,7 +267,6 @@ export default function EditEventPage() {
         const form = new FormData();
         form.append("title", formData.title);
         form.append("description", formData.description);
-        form.append("location", formData.location);
         form.append("address", formData.address);
         form.append("date", formData.date);
         if (formData.endDate) {
@@ -311,7 +308,6 @@ export default function EditEventPage() {
       const updateData: Record<string, unknown> = {
         title: formData.title,
         description: formData.description,
-        location: formData.location,
         address: formData.address,
         date: formData.date ? new Date(formData.date) : undefined,
         endDate: formData.endDate ? new Date(formData.endDate) : undefined,
@@ -624,25 +620,6 @@ export default function EditEventPage() {
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label
-                  htmlFor="location"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  {t("location")} *
-                </label>
-                <input
-                  type="text"
-                  id="location"
-                  name="location"
-                  required
-                  value={formData.location}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder={t("locationPlaceholder")}
-                />
-              </div>
-
-              <div>
-                <label
                   htmlFor="address"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
@@ -669,9 +646,7 @@ export default function EditEventPage() {
                 <button
                   type="button"
                   onClick={handleGeocode}
-                  disabled={
-                    geocoding || (!formData.location && !formData.address)
-                  }
+                  disabled={geocoding || !formData.address}
                   className="flex items-center space-x-2 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {geocoding ? (

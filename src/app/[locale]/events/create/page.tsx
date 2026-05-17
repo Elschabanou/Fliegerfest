@@ -30,7 +30,6 @@ export default function CreateEventPage() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    location: "",
     street: "",
     houseNumber: "",
     postalCode: "",
@@ -299,15 +298,14 @@ export default function CreateEventPage() {
     [t],
   );
 
-  // Automatisches Geocoding beim Eingeben von Adresse/Location (mit Debouncing)
+  // Automatisches Geocoding nur bei vollständiger Adresse (mit Debouncing)
   useEffect(() => {
     // Clear previous timeout
     if (geocodeTimeoutRef.current) {
       clearTimeout(geocodeTimeoutRef.current);
     }
 
-    const locationQuery =
-      formData.location || (hasCompleteAddress ? fullAddress : "");
+    const locationQuery = hasCompleteAddress ? fullAddress : "";
 
     // Nur geocoden, wenn etwas eingegeben wurde und noch keine Koordinaten vorhanden sind
     if (locationQuery.trim() && (!formData.lat || !formData.lon)) {
@@ -327,7 +325,6 @@ export default function CreateEventPage() {
       }
     };
   }, [
-    formData.location,
     fullAddress,
     hasCompleteAddress,
     formData.lat,
@@ -336,8 +333,7 @@ export default function CreateEventPage() {
   ]);
 
   const handleGeocode = async () => {
-    const locationQuery =
-      formData.location || (hasCompleteAddress ? fullAddress : "");
+    const locationQuery = hasCompleteAddress ? fullAddress : "";
     if (!locationQuery.trim()) {
       setError(t("locationRequired"));
       return;
@@ -359,7 +355,6 @@ export default function CreateEventPage() {
       const form = new FormData();
       form.append("title", formData.title);
       form.append("description", formData.description);
-      form.append("location", formData.location);
       form.append("street", formData.street);
       form.append("houseNumber", formData.houseNumber);
       form.append("postalCode", formData.postalCode);
@@ -475,6 +470,26 @@ export default function CreateEventPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      {error && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-xl">
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="bg-red-50 border border-red-200 text-red-800 shadow-lg rounded-lg px-4 py-3 flex items-start gap-3"
+          >
+            <div className="flex-1 text-sm font-medium leading-5">{error}</div>
+            <button
+              type="button"
+              onClick={() => setError("")}
+              className="text-red-500 hover:text-red-700 transition-colors"
+              aria-label="Fehlermeldung schließen"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <Link
@@ -489,12 +504,6 @@ export default function CreateEventPage() {
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-8">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
-              {error}
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -612,7 +621,7 @@ export default function CreateEventPage() {
                   id="entryFee"
                   name="entryFee"
                   min="0"
-                  step="0.01"
+                  step="1"
                   required
                   value={formData.entryFee}
                   onChange={handleChange}
@@ -680,25 +689,6 @@ export default function CreateEventPage() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label
-                  htmlFor="location"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  {t("location")} *
-                </label>
-                <input
-                  type="text"
-                  id="location"
-                  name="location"
-                  required
-                  value={formData.location}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                  placeholder={t("locationPlaceholder")}
-                />
-              </div>
-
               <div className="md:col-span-2">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
