@@ -4,14 +4,7 @@ import {useState, useEffect, useCallback} from "react";
 import {useAuth} from "@/components/AuthProvider";
 import {useRouter} from "@/i18n/routing";
 import {Link} from "@/i18n/routing";
-import {
-  ArrowLeft,
-  Search,
-  MapPin,
-  Loader,
-  Upload,
-  X,
-} from "lucide-react";
+import {ArrowLeft, Search, MapPin, Loader, Upload, X} from "lucide-react";
 import {geocodeLocation, isGeocodingSuccess} from "@/lib/geocoding";
 import {useTranslations, useLocale} from "next-intl";
 import Lottie from "lottie-react";
@@ -102,9 +95,12 @@ export default function CreateEventPage() {
     >,
   ) => {
     const {name, value, type} = e.target;
-    const isAddressField = ["street", "houseNumber", "postalCode", "city"].includes(
-      name,
-    );
+    const isAddressField = [
+      "street",
+      "houseNumber",
+      "postalCode",
+      "city",
+    ].includes(name);
 
     if (isAddressField) {
       setGeocodingSuccess(null);
@@ -361,7 +357,10 @@ export default function CreateEventPage() {
         return;
       }
 
-      if (!Number.isFinite(Number(formData.lat)) || !Number.isFinite(Number(formData.lon))) {
+      if (
+        !Number.isFinite(Number(formData.lat)) ||
+        !Number.isFinite(Number(formData.lon))
+      ) {
         setError(t("coordinatesInvalid"));
         setLoading(false);
         return;
@@ -890,7 +889,9 @@ export default function CreateEventPage() {
                       </div>
                     </div>
 
-                    <p className="text-xs text-gray-600">{t("coordinateHint")}</p>
+                    <p className="text-xs text-gray-600">
+                      {t("coordinateHint")}
+                    </p>
                   </div>
                 )}
               </div>
