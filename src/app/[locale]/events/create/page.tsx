@@ -1,16 +1,16 @@
 "use client";
 
-import {useState, useEffect, useRef, useCallback} from "react";
+import {useState, useEffect, useCallback} from "react";
 import {useAuth} from "@/components/AuthProvider";
 import {useRouter} from "@/i18n/routing";
 import {Link} from "@/i18n/routing";
 import {
   ArrowLeft,
+  Search,
   MapPin,
   Loader,
   Upload,
   X,
-  Image as ImageIcon,
 } from "lucide-react";
 import {geocodeLocation, isGeocodingSuccess} from "@/lib/geocoding";
 import {useTranslations, useLocale} from "next-intl";
@@ -26,6 +26,9 @@ export default function CreateEventPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [locationTab, setLocationTab] = useState<"address" | "coordinates">(
+    "address",
+  );
 
   const [formData, setFormData] = useState({
     title: "",
@@ -61,8 +64,6 @@ export default function CreateEventPage() {
   const [geocodingFailed, setGeocodingFailed] = useState(false);
   const [showAnimation, setShowAnimation] = useState(false);
   const [animationData, setAnimationData] = useState<object | null>(null);
-  const [showMapPicker, setShowMapPicker] = useState(false);
-  const geocodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const fullAddress = [
     formData.street,
     formData.houseNumber,
@@ -78,6 +79,8 @@ export default function CreateEventPage() {
     formData.postalCode,
     formData.city,
   ].every((part) => part.trim().length > 0);
+  const hasCoordinates =
+    formData.lat.trim().length > 0 && formData.lon.trim().length > 0;
 
   useEffect(() => {
     if (authLoading) return;
@@ -99,6 +102,24 @@ export default function CreateEventPage() {
     >,
   ) => {
     const {name, value, type} = e.target;
+    const isAddressField = ["street", "houseNumber", "postalCode", "city"].includes(
+      name,
+    );
+
+    if (isAddressField) {
+      setGeocodingSuccess(null);
+      setGeocodingFailed(false);
+
+      if (locationTab === "address") {
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          lat: "",
+          lon: "",
+        }));
+        return;
+      }
+    }
 
     // Wenn multiDay deaktiviert wird, Enddatum und differentTimesPerDay zurücksetzen
     if (name === "multiDay" && !(e.target as HTMLInputElement).checked) {
@@ -208,13 +229,23 @@ export default function CreateEventPage() {
         const lonValue = name === "lon" ? value : newData.lon;
         if (latValue.trim() && lonValue.trim()) {
           setGeocodingFailed(false);
-          setShowMapPicker(false);
+          setGeocodingSuccess(null);
         }
       }
 
       return newData;
     });
   };
+
+  const handleCoordinateChange = useCallback((lat: number, lon: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      lat: lat.toString(),
+      lon: lon.toString(),
+    }));
+    setGeocodingSuccess(null);
+    setGeocodingFailed(false);
+  }, []);
 
   const handleDailyTimeChange = (
     date: string,
@@ -260,7 +291,6 @@ export default function CreateEventPage() {
     async (locationQuery: string) => {
       if (!locationQuery.trim()) {
         setGeocodingFailed(false);
-        setShowMapPicker(false);
         return;
       }
 
@@ -268,7 +298,6 @@ export default function CreateEventPage() {
       setError("");
       setGeocodingSuccess(null);
       setGeocodingFailed(false);
-      setShowMapPicker(false);
 
       try {
         const result = await geocodeLocation(locationQuery);
@@ -281,15 +310,15 @@ export default function CreateEventPage() {
           }));
           setGeocodingSuccess(t("geocodeSuccess", {name: result.display_name}));
           setGeocodingFailed(false);
-          setShowMapPicker(false);
+          setLocationTab("address");
         } else {
           setGeocodingFailed(true);
-          setShowMapPicker(true);
+          setLocationTab("coordinates");
           setError(result.error);
         }
       } catch {
         setGeocodingFailed(true);
-        setShowMapPicker(true);
+        setLocationTab("coordinates");
         setError(t("geocodeError"));
       } finally {
         setGeocoding(false);
@@ -298,47 +327,14 @@ export default function CreateEventPage() {
     [t],
   );
 
-  // Automatisches Geocoding nur bei vollständiger Adresse (mit Debouncing)
-  useEffect(() => {
-    // Clear previous timeout
-    if (geocodeTimeoutRef.current) {
-      clearTimeout(geocodeTimeoutRef.current);
-    }
-
-    const locationQuery = hasCompleteAddress ? fullAddress : "";
-
-    // Nur geocoden, wenn etwas eingegeben wurde und noch keine Koordinaten vorhanden sind
-    if (locationQuery.trim() && (!formData.lat || !formData.lon)) {
-      geocodeTimeoutRef.current = setTimeout(() => {
-        performGeocode(locationQuery);
-      }, 1000); // 1 Sekunde Debounce
-    } else if (!locationQuery.trim()) {
-      // Wenn Feld geleert wird, Koordinaten und Status zurücksetzen
-      setGeocodingFailed(false);
-      setShowMapPicker(false);
-      setGeocodingSuccess(null);
-    }
-
-    return () => {
-      if (geocodeTimeoutRef.current) {
-        clearTimeout(geocodeTimeoutRef.current);
-      }
-    };
-  }, [
-    fullAddress,
-    hasCompleteAddress,
-    formData.lat,
-    formData.lon,
-    performGeocode,
-  ]);
-
   const handleGeocode = async () => {
-    const locationQuery = hasCompleteAddress ? fullAddress : "";
-    if (!locationQuery.trim()) {
+    if (!hasCompleteAddress) {
       setError(t("locationRequired"));
       return;
     }
-    await performGeocode(locationQuery);
+
+    setLocationTab("address");
+    await performGeocode(fullAddress);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -347,6 +343,30 @@ export default function CreateEventPage() {
     setError("");
 
     try {
+      if (locationTab === "address") {
+        if (!hasCompleteAddress) {
+          setError(t("locationRequired"));
+          setLoading(false);
+          return;
+        }
+
+        if (!geocodingSuccess || !hasCoordinates) {
+          setError(t("addressSearchRequired"));
+          setLoading(false);
+          return;
+        }
+      } else if (!hasCoordinates) {
+        setError(t("coordinatesRequired"));
+        setLoading(false);
+        return;
+      }
+
+      if (!Number.isFinite(Number(formData.lat)) || !Number.isFinite(Number(formData.lon))) {
+        setError(t("coordinatesInvalid"));
+        setLoading(false);
+        return;
+      }
+
       const tagsArray = formData.tags
         .split(",")
         .map((tag) => tag.trim())
@@ -689,163 +709,192 @@ export default function CreateEventPage() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <label
-                      htmlFor="street"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      {t("street")} *
-                    </label>
-                    <input
-                      type="text"
-                      id="street"
-                      name="street"
-                      required
-                      value={formData.street}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                      placeholder={t("streetPlaceholder")}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="houseNumber"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      {t("houseNumber")} *
-                    </label>
-                    <input
-                      type="text"
-                      id="houseNumber"
-                      name="houseNumber"
-                      required
-                      value={formData.houseNumber}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                      placeholder={t("houseNumberPlaceholder")}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="postalCode"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      {t("postalCode")} *
-                    </label>
-                    <input
-                      type="text"
-                      id="postalCode"
-                      name="postalCode"
-                      required
-                      value={formData.postalCode}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                      placeholder={t("postalCodePlaceholder")}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="city"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      {t("city")} *
-                    </label>
-                    <input
-                      type="text"
-                      id="city"
-                      name="city"
-                      required
-                      value={formData.city}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                      placeholder={t("cityPlaceholder")}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {(geocodingSuccess || geocodingFailed) && (
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="mb-3">
-                  <h3 className="text-sm font-medium text-blue-900">
-                    {t("geocodeTitle")}
-                  </h3>
+              <div className="md:col-span-2 space-y-4">
+                <div className="flex items-center rounded-xl bg-gray-100 p-1 text-sm font-medium">
+                  <button
+                    type="button"
+                    onClick={() => setLocationTab("address")}
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 transition-colors ${
+                      locationTab === "address"
+                        ? "bg-white text-[#021234] shadow-sm"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    <Search className="h-4 w-4" />
+                    {t("addressTab")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLocationTab("coordinates")}
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 transition-colors ${
+                      locationTab === "coordinates"
+                        ? "bg-white text-[#021234] shadow-sm"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    <MapPin className="h-4 w-4" />
+                    {t("coordinateTab")}
+                  </button>
                 </div>
 
-                {geocoding && (
-                  <div className="mb-3 p-2 bg-blue-100 text-blue-800 rounded text-sm">
-                    <Loader className="h-4 w-4 animate-spin inline mr-2" />
-                    {t("geocoding")}...
-                  </div>
-                )}
+                {locationTab === "address" ? (
+                  <div className="space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <label
+                          htmlFor="street"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          {t("street")} *
+                        </label>
+                        <input
+                          type="text"
+                          id="street"
+                          name="street"
+                          required
+                          value={formData.street}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                          placeholder={t("streetPlaceholder")}
+                        />
+                      </div>
 
-                {geocodingSuccess && (
-                  <div className="mb-3 p-2 bg-green-100 text-green-800 rounded text-sm">
-                    ✅ {geocodingSuccess}
-                  </div>
-                )}
+                      <div>
+                        <label
+                          htmlFor="houseNumber"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          {t("houseNumber")} *
+                        </label>
+                        <input
+                          type="text"
+                          id="houseNumber"
+                          name="houseNumber"
+                          required
+                          value={formData.houseNumber}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                          placeholder={t("houseNumberPlaceholder")}
+                        />
+                      </div>
 
-                {geocodingFailed && showMapPicker && (
-                  <div className="mb-4">
+                      <div>
+                        <label
+                          htmlFor="postalCode"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          {t("postalCode")} *
+                        </label>
+                        <input
+                          type="text"
+                          id="postalCode"
+                          name="postalCode"
+                          required
+                          value={formData.postalCode}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                          placeholder={t("postalCodePlaceholder")}
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="city"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          {t("city")} *
+                        </label>
+                        <input
+                          type="text"
+                          id="city"
+                          name="city"
+                          required
+                          value={formData.city}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                          placeholder={t("cityPlaceholder")}
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleGeocode}
+                      disabled={geocoding}
+                      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white font-medium transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+                    >
+                      {geocoding ? (
+                        <Loader className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Search className="h-4 w-4" />
+                      )}
+                      {t("geocode")}
+                    </button>
+
+                    {geocodingSuccess && (
+                      <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+                        {geocodingSuccess}
+                      </div>
+                    )}
+
+                    <p className="text-xs text-gray-600">{t("geocodeHint")}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    {geocodingFailed && (
+                      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                        {t("geocodeFailedHint")}
+                      </div>
+                    )}
+
                     <CoordinateMapPicker
                       lat={formData.lat}
                       lon={formData.lon}
-                      onCoordinateChange={(lat, lon) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          lat: lat.toString(),
-                          lon: lon.toString(),
-                        }));
-                      }}
+                      onCoordinateChange={handleCoordinateChange}
                     />
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label
+                          htmlFor="lat"
+                          className="block text-xs font-medium text-gray-600 mb-1"
+                        >
+                          {t("latitude")}
+                        </label>
+                        <input
+                          type="text"
+                          id="lat"
+                          name="lat"
+                          value={formData.lat}
+                          onChange={handleChange}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                          placeholder={t("latitudePlaceholder")}
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="lon"
+                          className="block text-xs font-medium text-gray-600 mb-1"
+                        >
+                          {t("longitude")}
+                        </label>
+                        <input
+                          type="text"
+                          id="lon"
+                          name="lon"
+                          value={formData.lon}
+                          onChange={handleChange}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
+                          placeholder={t("longitudePlaceholder")}
+                        />
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-gray-600">{t("coordinateHint")}</p>
                   </div>
                 )}
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="lat"
-                      className="block text-xs font-medium text-gray-600 mb-1"
-                    >
-                      {t("latitude")}
-                    </label>
-                    <input
-                      type="text"
-                      id="lat"
-                      name="lat"
-                      value={formData.lat}
-                      onChange={handleChange}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                      placeholder={t("latitudePlaceholder")}
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="lon"
-                      className="block text-xs font-medium text-gray-600 mb-1"
-                    >
-                      {t("longitude")}
-                    </label>
-                    <input
-                      type="text"
-                      id="lon"
-                      name="lon"
-                      value={formData.lon}
-                      onChange={handleChange}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent text-[#021234] bg-white"
-                      placeholder={t("longitudePlaceholder")}
-                    />
-                  </div>
-                </div>
-                <p className="text-xs text-gray-600 mt-2">{t("geocodeHint")}</p>
               </div>
-            )}
+            </div>
 
             <div className="space-y-4">
               <div>
@@ -951,7 +1000,7 @@ export default function CreateEventPage() {
                   formData.differentTimesPerDay &&
                   formData.dailyTimes.length > 0 ? (
                     <div className="space-y-4">
-                      {formData.dailyTimes.map((day, index) => {
+                      {formData.dailyTimes.map((day) => {
                         const dayDate = new Date(day.date);
                         const dayName = dayDate.toLocaleDateString(
                           locale === "de"
