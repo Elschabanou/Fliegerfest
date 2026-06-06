@@ -224,6 +224,7 @@ export default function CreateEventPage() {
         const latValue = name === "lat" ? value : newData.lat;
         const lonValue = name === "lon" ? value : newData.lon;
         if (latValue.trim() && lonValue.trim()) {
+          setLocationTab("coordinates");
           setGeocodingFailed(false);
           setGeocodingSuccess(null);
         }
@@ -239,6 +240,7 @@ export default function CreateEventPage() {
       lat: lat.toString(),
       lon: lon.toString(),
     }));
+    setLocationTab("coordinates");
     setGeocodingSuccess(null);
     setGeocodingFailed(false);
   }, []);
@@ -339,20 +341,16 @@ export default function CreateEventPage() {
     setError("");
 
     try {
-      if (locationTab === "address") {
-        if (!hasCompleteAddress) {
-          setError(t("locationRequired"));
-          setLoading(false);
-          return;
+      if (!hasCoordinates) {
+        if (locationTab === "address") {
+          setError(
+            hasCompleteAddress
+              ? t("addressSearchRequired")
+              : t("locationRequired"),
+          );
+        } else {
+          setError(t("coordinatesRequired"));
         }
-
-        if (!geocodingSuccess || !hasCoordinates) {
-          setError(t("addressSearchRequired"));
-          setLoading(false);
-          return;
-        }
-      } else if (!hasCoordinates) {
-        setError(t("coordinatesRequired"));
         setLoading(false);
         return;
       }
